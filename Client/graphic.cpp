@@ -4,10 +4,13 @@
 #include "graphic.h"
 #include "interface.h"
 #include "protocol.h"
+#include "blocking_queue.h"
+#include "Bullet.h"
 
 using namespace std;
 
-char frame[25][170];
+char frame[FRAME_Y][FRAME_X];
+BlockingQueue<Bullet> fire_queue(50);
 
 void gotoxy(int x, int y)
 {
@@ -23,7 +26,7 @@ void print_frame()
 	{
 		gotoxy(0, 0);
 
-		for (uint32_t i = 0; i < 25; i++)
+		for (uint32_t i = 0; i < FRAME_Y; i++)
 			cout << frame[i] << endl;
 
 		Sleep(20);
@@ -34,11 +37,12 @@ void print_frame()
 
 void clear_frame()
 {
-	for (uint32_t i = 0; i < 40; i++)
+	for (uint32_t i = 0; i < FRAME_Y; i++)
 	{
-		for (uint32_t j = 0; j < 96; j++)
-			frame[i][j] = L' ';
-		frame[i][96 - 1] = NULL;
+		for (uint32_t j = 0; j < field.right + 2; j++)
+			frame[i][j] = ' ';
+
+		frame[i][field.right + 2 - 1] = NULL;
 	}
 }
 
@@ -46,43 +50,45 @@ void clear_frame()
 
 void draw_field()
 {
-	// 멀티바이트 문제로 인하여 무조건 짝수여야함
+	uint32_t field_width = field.right - field.left;
 
 	/* 윗변 그리기 */
 
 	for (uint32_t i = 0; i < field_width * 2 - 4; i++)
-		frame[field_y][field_x + i] = (i % 2) ? '\xa1' : '\xa6';
+		frame[field.top][field.left + i] = (i % 2) ? '\xa1' : '\xa6';
 
-	frame[field_y][field_x] = '\xa6';	frame[field_y][field_x + 1] = '\xa3';
-	frame[field_y][field_x + field_width * 2 - 6] = '\xa6';
-	frame[field_y][field_x + field_width * 2 - 5] = '\xa4';
+	frame[field.top][field.left] = '\xa6';	frame[field.top][field.left + 1] = '\xa3';
+	frame[field.top][field.left + field_width * 2 - 6] = '\xa6';
+	frame[field.top][field.left + field_width * 2 - 5] = '\xa4';
+	frame[field.top][field.left + field_width * 2 - 4] = NULL;
 
 	/* 왼쪽, 오른쪽 변 그리기 */
 
-	for (uint32_t i = 1; i < field_height; i++)
+	for (uint32_t i = field.top + 1; i < field.bottom; i++)
 	{
-		frame[field_y + i][field_x] = '\xa6';
-		frame[field_y + i][field_x + 1] = '\xa2';
+		frame[i][field.left] = '\xa6';
+		frame[i][field.left + 1] = '\xa2';
 
-		frame[field_y + i][field_x + field_width - 2] = '\xa6';
-		frame[field_y + i][field_x + field_width - 1] = '\xa2';
+		frame[i][field.right - 2] = '\xa6';
+		frame[i][field.right - 1] = '\xa2';
 	}
 
 	/* 아랫변 그리기 */
 	
 	for (uint32_t i = 0; i < field_width * 2 - 4; i++)
-		frame[field_y + field_height - 1][field_x + i] = (i % 2) ? '\xa1' : '\xa6';
-	frame[field_y + field_height - 1][field_x] = '\xa6';
-	frame[field_y + field_height - 1][field_x + 1] = '\xa6';
-	frame[field_y + field_height - 1][field_x + field_width * 2 - 6] = '\xa6';
-	frame[field_y + field_height - 1][field_x + field_width * 2 - 5] = '\xa5';
+		frame[field.bottom - 1][field.left + i] = (i % 2) ? '\xa1' : '\xa6';
+	frame[field.bottom - 1][field.left] = '\xa6';
+	frame[field.bottom - 1][field.left + 1] = '\xa6';
+	frame[field.bottom - 1][field.left + field_width * 2 - 6] = '\xa6';
+	frame[field.bottom - 1][field.left + field_width * 2 - 5] = '\xa5';
+	frame[field.bottom - 1][field.left + field_width * 2 - 4] = NULL;
 }
 
 /* 유저 접속 이벤트 */
 
 void welcome_user(uint32_t x, uint32_t y, char chracter)
 {
-	frame[field_y + 1 + y][field_x + 1 + x] = chracter;
+	frame[field.top + y][field.left + 1 + x] = chracter;
 	return;
 }
 
@@ -90,21 +96,36 @@ void welcome_user(uint32_t x, uint32_t y, char chracter)
 
 void move_user(uint32_t x, uint32_t y, DIRECTION dir, char chracter)
 {
-	frame[field_y + 1 + y][field_x + 1 + x] = ' ';
+	frame[field.top + y][field.left + 1 + x] = ' ';
 
 	switch (dir)
 	{
 	case UP :
-		frame[field_y + y][field_x + 1 + x] = chracter;
+		frame[field.top - 1 + y][field.left + 1 + x] = chracter;
 		break;
 	case DOWN :
-		frame[field_y + 2 + y][field_x + 1 + x] = chracter;
+		frame[field.top + 1 + y][field.left + 1 + x] = chracter;
 		break;
 	case LEFT :
-		frame[field_y + 1 + y][field_x + x] = chracter;
+		frame[field.top + y][field.left + x] = chracter;
 		break;
 	case RIGHT :
-		frame[field_y + 1 + y][field_x + 2 + x] = chracter;
+		frame[field.top + y][field.left + 2 + x] = chracter;
 		break;
+	}
+}
+
+void fire(Bullet bullet)
+{
+	fire_queue.Enqueue(bullet);
+	return;
+}
+
+void render_bullet()
+{
+	while (1)
+	{
+		Bullet bullet = fire_queue.Dequeue();
+		bullet.fire(field, frame);
 	}
 }

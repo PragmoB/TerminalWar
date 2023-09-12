@@ -15,10 +15,12 @@ using namespace std;
 int main()
 {
 	system("title Terminal War");
-	system("mode con cols=100 lines=40");
 
 	thread frame_loader(print_frame);
-	
+	thread bullet_renderer[10];
+	for (uint32_t i = 0; i < 10; i++)
+		bullet_renderer[i] = thread(render_bullet);
+
 	clear_frame();
 	draw_field();
 	frame_loader.detach();
@@ -29,7 +31,8 @@ int main()
 
 	while (1)
 	{
-		switch (toupper(_getch()))
+		unsigned char input = _getch();
+		switch (toupper(input))
 		{
 		case 'W':
 			move_user(x, y--, UP, chracter);
@@ -43,6 +46,40 @@ int main()
 		case 'D':
 			move_user(x++, y, RIGHT, chracter);
 			break;
+		}
+		if (input == 224)
+		{
+			input = _getch();
+			switch (input)
+			{
+			case 72 :
+				{
+					Bullet bullet(x, y, UP);
+					fire(bullet);
+					break;
+				}
+
+			case 80 :
+				{
+					Bullet bullet(x, y, DOWN);
+					fire(bullet);
+					break;
+				}
+
+			case 75 :
+				{
+					Bullet bullet(x, y, LEFT);
+					fire(bullet);
+					break;
+				}
+
+			case 77 :
+				{
+					Bullet bullet(x, y, RIGHT);
+					fire(bullet);
+					break;
+				}
+			}
 		}
 	}
 }

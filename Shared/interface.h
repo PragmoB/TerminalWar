@@ -1,4 +1,6 @@
 #pragma once
 
-const unsigned int field_x = 10, field_y = 4;
-const unsigned int field_width = 80, field_height = 21;
+#define FRAME_X 120
+#define FRAME_Y 37
+
+const RECT field = { 10, 4, 60, 37 };
