@@ -21,18 +21,12 @@
     <ClCompile Include="graphic.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="blocking_queue.hpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="..\Shared\Bullet.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="graphic.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="blocking_queue.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="..\Shared\Bullet.h">

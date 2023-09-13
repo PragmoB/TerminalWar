@@ -1,10 +1,11 @@
 #include <iostream>
 #include <windows.h>
 
+#include "blocking_queue.h"
+
 #include "graphic.h"
 #include "interface.h"
 #include "protocol.h"
-#include "blocking_queue.h"
 #include "Bullet.h"
 
 using namespace std;
