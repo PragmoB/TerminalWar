@@ -3,15 +3,14 @@
 
 #include "blocking_queue.h"
 
-#include "graphic.h"
+#include "Graphic.h"
 #include "interface.h"
 #include "protocol.h"
 #include "Bullet.h"
 
 using namespace std;
 
-char frame[FRAME_Y][FRAME_X];
-BlockingQueue<Bullet> fire_queue(50);
+Graphic graphic;
 
 void gotoxy(int x, int y)
 {
@@ -19,9 +18,27 @@ void gotoxy(int x, int y)
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
 }
 
-/* 프레임 업데이트 */
+Graphic::Graphic() : fire_queue(50)
+{	}
 
-void print_frame()
+/* 그래픽 가동 시작 */
+void Graphic::start()
+{
+	frame_loader = std::thread(&Graphic::print_frame, this);
+	for (uint32_t i = 0; i < 10; i++)
+		bullet_renderers[i] = std::thread(&Graphic::render_bullet, this);
+}
+
+/* 그래픽 가동 중지 */
+void Graphic::stop()
+{
+	frame_loader.~thread();
+	for (uint32_t i = 0; i < 10; i++)
+		bullet_renderers[i].~thread();
+}
+
+/* 프레임 업데이트 */
+void Graphic::print_frame()
 {
 	while (1)
 	{
@@ -34,9 +51,15 @@ void print_frame()
 	}
 }
 
-/* 경기장 화면 초기화 */
+/* 사용 대기 스킬 출력 처리 */
+void Graphic::render_bullet()
+{
+	while (1)
+		fire_queue.Dequeue().fire();
+}
 
-void clear_frame()
+/* 경기장 화면 초기화 */
+void Graphic::clear_frame()
 {
 	for (uint32_t i = 0; i < FRAME_Y; i++)
 	{
@@ -48,8 +71,7 @@ void clear_frame()
 }
 
 /* 경기장 그리기 */
-
-void draw_field()
+void Graphic::draw_field()
 {
 	uint32_t field_width = field.right - field.left;
 
@@ -83,50 +105,4 @@ void draw_field()
 	frame[field.bottom - 1][field.left + field_width * 2 - 6] = '\xa6';
 	frame[field.bottom - 1][field.left + field_width * 2 - 5] = '\xa5';
 	frame[field.bottom - 1][field.left + field_width * 2 - 4] = NULL;
-}
-
-/* 유저 접속 이벤트 */
-
-void welcome_user(uint32_t x, uint32_t y, char chracter)
-{
-	frame[field.top + y][field.left + 1 + x] = chracter;
-	return;
-}
-
-/* 유저 무빙 이벤트 */
-
-void move_user(uint32_t x, uint32_t y, DIRECTION dir, char chracter)
-{
-	frame[field.top + y][field.left + 1 + x] = ' ';
-
-	switch (dir)
-	{
-	case UP :
-		frame[field.top - 1 + y][field.left + 1 + x] = chracter;
-		break;
-	case DOWN :
-		frame[field.top + 1 + y][field.left + 1 + x] = chracter;
-		break;
-	case LEFT :
-		frame[field.top + y][field.left + x] = chracter;
-		break;
-	case RIGHT :
-		frame[field.top + y][field.left + 2 + x] = chracter;
-		break;
-	}
-}
-
-void fire(Bullet bullet)
-{
-	fire_queue.Enqueue(bullet);
-	return;
-}
-
-void render_bullet()
-{
-	while (1)
-	{
-		Bullet bullet = fire_queue.Dequeue();
-		bullet.fire(field, frame);
-	}
 }

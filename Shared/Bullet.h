@@ -20,5 +20,5 @@ public:
 	Bullet(uint32_t x, uint32_t y, DIRECTION dir) : 
 		bps(25), shape_horizontal('-'), shape_vertical('|'), distance(10), 
 		x(x), y(y), dir(dir) { }
-	void fire(RECT field, char frame[FRAME_Y][FRAME_X] = NULL);
+	void fire();
 };

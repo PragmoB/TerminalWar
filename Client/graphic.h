@@ -1,12 +1,38 @@
 #pragma once
 
 #include "protocol.h"
+#include "blocking_queue.h"
 #include "Bullet.h"
 
-void print_frame();
-void clear_frame();
-void draw_field();
-void welcome_user(uint32_t x, uint32_t y, char chracter);
-void move_user(uint32_t x, uint32_t y, DIRECTION dir, char chracter);
-void fire(Bullet bullet);
-void render_bullet();
+#include <thread>
+
+class Graphic
+{
+private:
+	std::thread frame_loader;
+	std::thread bullet_renderers[10];
+
+	/* 프레임 업데이트 */
+	void print_frame();
+
+	/* 사용 대기 스킬 출력 처리 */
+	void render_bullet();
+	
+public:
+	char frame[FRAME_Y][FRAME_X];
+	BlockingQueue<Bullet> fire_queue;
+	
+	Graphic();
+
+	/* 그래픽 가동 시작 */
+	void start();
+
+	/* 그래픽 가동 중지 */
+	void stop();
+
+	/* 경기장 화면 초기화 */
+	void clear_frame();
+
+	/* 경기장 그리기 */
+	void draw_field();
+};

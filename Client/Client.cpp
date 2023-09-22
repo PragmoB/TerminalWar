@@ -7,27 +7,23 @@
 #include <cctype>
 #include <conio.h>
 
-#include "graphic.h"
+#include "Graphic.h"
 #include "protocol.h"
+#include "Player.h"
 
 using namespace std;
+
+extern Graphic graphic;
 
 int main()
 {
 	system("title Terminal War");
 
-	thread frame_loader(print_frame);
-	thread bullet_renderer[10];
-	for (uint32_t i = 0; i < 10; i++)
-		bullet_renderer[i] = thread(render_bullet);
-
-	clear_frame();
-	draw_field();
-	frame_loader.detach();
+	graphic.clear_frame();
+	graphic.draw_field();
+	graphic.start();
 	
-	char chracter = _getch();
-	int x = 5, y = 5;
-	welcome_user(x, y, chracter);
+	Player player(POINT{ 5, 5 }, _getch());
 
 	while (1)
 	{
@@ -35,16 +31,16 @@ int main()
 		switch (toupper(input))
 		{
 		case 'W':
-			move_user(x, y--, UP, chracter);
+			player.move(UP);
 			break;
 		case 'A':
-			move_user(x--, y, LEFT, chracter);
+			player.move(LEFT);
 			break;
 		case 'S':
-			move_user(x, y++, DOWN, chracter);
+			player.move(DOWN);
 			break;
 		case 'D':
-			move_user(x++, y, RIGHT, chracter);
+			player.move(RIGHT);
 			break;
 		}
 		if (input == 224)
@@ -53,32 +49,20 @@ int main()
 			switch (input)
 			{
 			case 72 :
-				{
-					Bullet bullet(x, y, UP);
-					fire(bullet);
-					break;
-				}
+				player.shoot(UP);
+				break;
 
 			case 80 :
-				{
-					Bullet bullet(x, y, DOWN);
-					fire(bullet);
-					break;
-				}
+				player.shoot(DOWN);
+				break;
 
 			case 75 :
-				{
-					Bullet bullet(x, y, LEFT);
-					fire(bullet);
-					break;
-				}
+				player.shoot(LEFT);
+				break;
 
 			case 77 :
-				{
-					Bullet bullet(x, y, RIGHT);
-					fire(bullet);
-					break;
-				}
+				player.shoot(RIGHT);
+				break;
 			}
 		}
 	}
