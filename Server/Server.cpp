@@ -32,6 +32,7 @@ void worker(HANDLE completion_port)
 		{
 			cout << " Client " << client->context.socket << " died" << endl;
 			client->die();
+			Client::pop(client);
 			continue;
 		}
 

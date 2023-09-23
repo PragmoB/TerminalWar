@@ -61,7 +61,4 @@ public:
 	void hello(char chracter);
 	void hit();
 	void die();
-
-	// WSASend ´ë¿ë
-	void send(const char* buff, uint32_t len);
 };

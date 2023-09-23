@@ -22,37 +22,12 @@ extern Graphic graphic;
 
 void receive(SOCKET sock)
 {
-	/*
-	WSAEVENT event = WSACreateEvent();
-	WSAOVERLAPPED overlapped;
-	memset(&overlapped, 0, sizeof(overlapped));
-	overlapped.hEvent = event;
-	WSABUF data_buf;
-	int recv_bytes = 0;
-	int flags = 0;
-	char buff[1000];
-	data_buf.buf = buff;
-	data_buf.len = sizeof(buff);*/
 	char buff[1000] = "";
-	
 
 	static map<uint32_t, Player*> players;
 
 	while (1)
 	{
-		/*
-		if (WSARecv(sock, &data_buf, 1, (LPDWORD)&recv_bytes, (LPDWORD)&flags, &overlapped, NULL) == SOCKET_ERROR)
-		{
-			if (WSAGetLastError() != WSA_IO_PENDING)
-			{
-				graphic.stop();
-				system("cls");
-				cerr << endl;
-				cerr << " 연결에 오류가 생겼습니다" << endl;
-				_getch();
-				exit(1);
-			}
-		}*/
 		if (recv(sock, buff, 1000, NULL) == SOCKET_ERROR)
 		{
 			graphic.stop();
@@ -148,11 +123,15 @@ int main()
 			cerr << " connect error : " << WSAGetLastError() << endl;
 			_getch();
 			system("cls");
+			cout << endl;
 		}
 	} while (bRet);
 
 	PDUHello pdu_hello;
-	cout << " 캐릭터 선택 : ";	pdu_hello.chracter = _getch();
+	pdu_hello.chracter = NULL;
+	cout << " 영어 알파벳 문자로 캐릭터 선택 : ";	
+	while (pdu_hello.chracter < 0x41 || (0x5a < pdu_hello.chracter && pdu_hello.chracter < 0x61) || 0x7a < pdu_hello.chracter)
+		pdu_hello.chracter = _getch();
 
 	thread(receive, sock).detach();
 
@@ -160,29 +139,17 @@ int main()
 	graphic.draw_field();
 	graphic.start();
 
-	/*
-	WSAEVENT event = WSACreateEvent();
-	WSAOVERLAPPED overlapped;
-	memset(&overlapped, 0, sizeof(overlapped));
-	overlapped.hEvent = event;
-	WSABUF data_buf;
-	data_buf.len = sizeof(PDUHello);
-	data_buf.buf = reinterpret_cast<char*>(&pdu_hello);
-	int send_bytes = 0;
-
-	WSASend(sock, &data_buf, 1, (LPDWORD)&send_bytes, 0, &overlapped, NULL);*/
-
 	send(sock, reinterpret_cast<const char*>(&pdu_hello), sizeof(PDUHello), NULL);
 	
+	// 입력 전 버퍼 비우기
+	while (_kbhit())
+		_getch();
+
 	while (1)
 	{
 		PDUMov pdu_mov;
 		PDUShoot pdu_shoot;
 
-		/*
-		data_buf.len = 0;
-		data_buf.buf = NULL;
-		*/
 		char* buff = NULL;
 		int len = 0;
 
@@ -241,7 +208,6 @@ int main()
 		if (len)
 		{
 			// 전송
-			//WSASend(sock, &data_buf, 1, (LPDWORD)&send_bytes, 0, &overlapped, NULL);
 			send(sock, buff, len, NULL);
 		}
 	}

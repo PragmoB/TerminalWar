@@ -9,7 +9,7 @@
 class Bullet
 {
 private:
-	uint32_t x, y; // 현재 위치
+	int x, y; // 현재 위치
 	DIRECTION dir; // 방향
 	uint32_t bps; // the valocity of the bullet. blocks per second
 	uint32_t distance; // 날아갈 거리

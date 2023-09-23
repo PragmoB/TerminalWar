@@ -73,17 +73,17 @@ void Graphic::clear_frame()
 /* 경기장 그리기 */
 void Graphic::draw_field()
 {
-	uint32_t field_width = field.right - field.left;
+	//uint32_t field_width = field.right - field.left;
 
 	/* 윗변 그리기 */
 
-	for (uint32_t i = 0; i < field_width * 2 - 4; i++)
-		frame[field.top][field.left + i] = (i % 2) ? '\xa1' : '\xa6';
+	for (uint32_t i = 0; i < field_width * 2; i++)
+		frame[field.top][field.left + 2 + i] = (i % 2) ? '\xa1' : '\xa6';
 
 	frame[field.top][field.left] = '\xa6';	frame[field.top][field.left + 1] = '\xa3';
-	frame[field.top][field.left + field_width * 2 - 6] = '\xa6';
-	frame[field.top][field.left + field_width * 2 - 5] = '\xa4';
-	frame[field.top][field.left + field_width * 2 - 4] = NULL;
+	frame[field.top][field.left + 2 + field_width * 2] = '\xa6';
+	frame[field.top][field.left + 2 + field_width * 2 + 1] = '\xa4';
+	frame[field.top][field.left + 2 + field_width * 2 + 2] = NULL;
 
 	/* 왼쪽, 오른쪽 변 그리기 */
 
@@ -92,17 +92,17 @@ void Graphic::draw_field()
 		frame[i][field.left] = '\xa6';
 		frame[i][field.left + 1] = '\xa2';
 
-		frame[i][field.right - 2] = '\xa6';
-		frame[i][field.right - 1] = '\xa2';
+		frame[i][field.right] = '\xa6';
+		frame[i][field.right + 1] = '\xa2';
 	}
 
 	/* 아랫변 그리기 */
 	
-	for (uint32_t i = 0; i < field_width * 2 - 4; i++)
-		frame[field.bottom - 1][field.left + i] = (i % 2) ? '\xa1' : '\xa6';
-	frame[field.bottom - 1][field.left] = '\xa6';
-	frame[field.bottom - 1][field.left + 1] = '\xa6';
-	frame[field.bottom - 1][field.left + field_width * 2 - 6] = '\xa6';
-	frame[field.bottom - 1][field.left + field_width * 2 - 5] = '\xa5';
-	frame[field.bottom - 1][field.left + field_width * 2 - 4] = NULL;
+	for (uint32_t i = 0; i < field_width * 2; i++)
+		frame[field.bottom][field.left + 2 + i] = (i % 2) ? '\xa1' : '\xa6';
+	frame[field.bottom][field.left] = '\xa6';
+	frame[field.bottom][field.left + 1] = '\xa6';
+	frame[field.bottom][field.left + 2 + field_width * 2] = '\xa6';
+	frame[field.bottom][field.left + 2 + field_width * 2 + 1] = '\xa5';
+	frame[field.bottom][field.left + 2 + field_width * 2 + 2] = NULL;
 }
