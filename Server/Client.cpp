@@ -9,8 +9,8 @@
 
 std::list<Client*> Client::clients;
 
-Client::Client(POINT pos, char chracter)
-: pos(pos), last_mov(0), last_shoot(0), chracter(chracter)
+Client::Client(POINT pos)
+: pos(pos), last_mov(0), last_shoot(0), chracter(NULL)
 { }
 
 void Client::push(Client* client)
@@ -40,14 +40,23 @@ POINT Client::getPos() const
 	return pos;
 }
 
-void Client::send(const BYTE* buff, uint32_t len)
+void Client::send(const char* buff, uint32_t len)
 {
+	/*
 	WSABUF data;
 	data.buf = (CHAR*)&buff;
-	data.len = sizeof(PDUMov);
+	data.len = len;
 
 	DWORD send_bytes, flag = 0;
-	WSASend(context.socket, &data, 1, &send_bytes, flag, NULL, NULL);
+	if (WSASend(context.socket, &data, 1, &send_bytes, flag, NULL, NULL) == SOCKET_ERROR)
+	{
+		if (WSAGetLastError() != WSA_IO_PENDING)
+		{
+			cerr << " Failed to send : " << WSAGetLastError() << endl;
+		}
+	}*/
+
+	::send(context.socket, buff, len, NULL);
 }
 void Client::apply_movement_of(Client* client, DIRECTION dir)
 {
@@ -55,7 +64,7 @@ void Client::apply_movement_of(Client* client, DIRECTION dir)
 	pdu.id = (DWORD)client;
 	pdu.dir = dir;
 	
-	send(reinterpret_cast<const BYTE*>(&pdu), sizeof(PDUMov));
+	send(reinterpret_cast<const char*>(&pdu), sizeof(PDUMov));
 }
 void Client::apply_shoot_of(Client* client, DIRECTION dir)
 {
@@ -63,7 +72,7 @@ void Client::apply_shoot_of(Client* client, DIRECTION dir)
 	pdu.id = (DWORD)client;
 	pdu.dir = dir;
 
-	send(reinterpret_cast<const BYTE*>(&pdu), sizeof(PDUShoot));
+	send(reinterpret_cast<const char*>(&pdu), sizeof(PDUShoot));
 }
 void Client::apply_hello_of(Client* client)
 {
@@ -72,14 +81,38 @@ void Client::apply_hello_of(Client* client)
 	pdu.chracter = client->getChracter();
 	pdu.pos = client->getPos();
 
-	send(reinterpret_cast<const BYTE*>(&pdu), sizeof(PDUHello));
+	send(reinterpret_cast<const char*>(&pdu), sizeof(PDUHello));
+}
+void Client::apply_die_of(Client* client)
+{
+	PDUDie pdu;
+	pdu.id = (DWORD)client;
+	
+	send(reinterpret_cast<const char*>(&pdu), sizeof(PDUDie));
+}
+
+void Client::hello(char chracter)
+{
+	// hello는 접속 후 한 번만 허용함
+	if (this->chracter)
+		return;
+
+	this->chracter = chracter;
+
+	for (std::list<Client*>::iterator iter = clients.begin();
+		iter != clients.end(); iter++)
+	{
+		(*iter)->apply_hello_of(this);
+		if (this != *iter)
+			apply_hello_of(*iter);
+	}
 }
 
 uint32_t Client::move(DIRECTION dir)
 {
 	const uint32_t now = clock();
 	
-	if (now - last_mov < 200) // 움직임을 200ms마다 한 번으로 제한
+	if (now - last_mov < 80) // 움직임을 80ms마다 한 번으로 제한
 		return FALSE;
 
 	static std::mutex m;
@@ -97,7 +130,7 @@ uint32_t Client::shoot(DIRECTION dir)
 {
 	const uint32_t now = clock();
 	
-	if (now - last_shoot < 200) // 사격을 200ms마다 한 번으로 제한
+	if (now - last_shoot < 170) // 사격을 170ms마다 한 번으로 제한
 		return FALSE;
 
 	static std::mutex m;
@@ -107,14 +140,14 @@ uint32_t Client::shoot(DIRECTION dir)
 
 	for (std::list<Client*>::iterator iter = clients.begin();
 		iter != clients.end(); iter++)
-		(*iter)->apply_movement_of(this, dir);
+		(*iter)->apply_shoot_of(this, dir);
 
 	return TRUE;
 }
 
-void Client::hello()
+void Client::die()
 {
 	for (std::list<Client*>::iterator iter = clients.begin();
 		iter != clients.end(); iter++)
-		(*iter)->apply_hello_of(this);
+		(*iter)->apply_die_of(this);
 }

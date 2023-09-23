@@ -28,16 +28,18 @@ public:
 	ClientContext context;
 private:
 	static std::list<Client*> clients;
-	const char chracter;
+	char chracter;
 	POINT pos;
 	clock_t last_mov;
 	clock_t last_shoot;
 
 public:
-	static void push(Client*);
+	// 클라이언트 리스트에 push
+	static void push(Client* client);
+	// 클라이언트 리스트에서 pop
 	static uint32_t pop(Client* client);
 public:
-	Client(POINT pos, char chracter);
+	Client(POINT pos);
 
 	char getChracter() const;
 	POINT getPos() const;
@@ -48,14 +50,18 @@ public:
 	void apply_shoot_of(Client* client, DIRECTION dir);
 	// client가 접속했음을 반영함
 	void apply_hello_of(Client* client);
+	// client가 죽었음을 반영함
+	void apply_die_of(Client* client);
 
 	// 움직임
 	uint32_t move(DIRECTION dir);
 	// 총 쏘기
 	uint32_t shoot(DIRECTION dir);
 	// 다른 클라이언트들에게 전입신고함
-	void hello();
+	void hello(char chracter);
+	void hit();
+	void die();
 
 	// WSASend 대용
-	void send(const BYTE* buff, uint32_t len);
+	void send(const char* buff, uint32_t len);
 };

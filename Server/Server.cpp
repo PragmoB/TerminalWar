@@ -4,9 +4,11 @@
 #include <WinSock2.h>
 #include <iostream>
 #include <ctime>
+#include <conio.h>
 
 #include <vector>
 #include <thread>
+#include <exception>
 
 #include "Client.h"
 #include "protocol.h"
@@ -15,41 +17,44 @@ using namespace std;
 
 void worker(HANDLE completion_port)
 {
-	while (true) {
+	while (1)
+	{
 		DWORD bytesTransferred;
 		ULONG_PTR key;
 		LPOVERLAPPED overlapped;
 
 		BOOL result = GetQueuedCompletionStatus(completion_port, &bytesTransferred, &key, &overlapped, INFINITE);
 
-		if (!result || bytesTransferred == 0)
-		{
-			// 오류 처리
-			cerr << "recv error" << endl;
-			continue;
-		}
-
 		// 클라이언트 데이터 처리
 		Client* client = reinterpret_cast<Client*>(overlapped);
 
+		if (bytesTransferred == 0)
+		{
+			cout << " Client " << client->context.socket << " died" << endl;
+			client->die();
+			continue;
+		}
+
+		PDUHello* pdu_hello;
+		PDUMov* pdu_mov;
+		PDUShoot* pdu_shoot;
+
 		switch (client->context.dataBuffer.buf[0])
 		{
+		case HELLO:
+			pdu_hello = reinterpret_cast<PDUHello*>(client->context.dataBuffer.buf);
+			client->hello(pdu_hello->chracter);
+			break;
+
 		case MOV:
-			{
-				PDUMov* pdu = 
-					reinterpret_cast<PDUMov*>(client->context.dataBuffer.buf);
-				client->move(pdu->dir);
-				break;
-			}
+			pdu_mov = reinterpret_cast<PDUMov*>(client->context.dataBuffer.buf);
+			client->move(pdu_mov->dir);
+			break;
 
 		case SHOOT:
-			{
-				PDUShoot* pdu = 
-					reinterpret_cast<PDUShoot*>(client->context.dataBuffer.buf);
-				client->shoot(pdu->dir);
-				break;
-
-			}
+			pdu_shoot = reinterpret_cast<PDUShoot*>(client->context.dataBuffer.buf);
+			client->shoot(pdu_shoot->dir);
+			break;
 		}
 
 		// 다음 IO 작업을 시작
@@ -60,18 +65,24 @@ void worker(HANDLE completion_port)
 }
 int main()
 {
+	cout << endl;
+
 	WSADATA wsaData;
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-		std::cerr << "Failed to initialize Winsock." << std::endl;
+		std::cerr << " Failed to initialize Winsock." << std::endl;
+		_getch();
 		return 1;
 	}
+	cout << " Succeed to initialize Winsock." << endl;
 
 	SOCKET listenSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (listenSocket == INVALID_SOCKET) {
-		std::cerr << "Failed to create listen socket." << std::endl;
+		std::cerr << " Failed to create listen socket." << std::endl;
 		WSACleanup();
+		_getch();
 		return 1;
 	}
+	cout << " Succeed to create listen socket." << endl;
 
 	sockaddr_in serverAddress;
 	serverAddress.sin_family = AF_INET;
@@ -79,48 +90,56 @@ int main()
 	serverAddress.sin_port = htons(PORT);
 
 	if (::bind(listenSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR) {
-		std::cerr << "Failed to bind the socket." << std::endl;
+		std::cerr << " Failed to bind the socket." << std::endl;
 		closesocket(listenSocket);
 		WSACleanup();
+		_getch();
 		return 1;
 	}
+	cout << " Succeed to bind the socket.." << endl;
 
 	if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
-		std::cerr << "Failed to listen on the socket." << std::endl;
+		std::cerr << " Failed to listen on the socket." << std::endl;
 		closesocket(listenSocket);
 		WSACleanup();
+		_getch();
 		return 1;
 	}
+	cout << " Succeed to listen on the socket.." << endl;
+
 	HANDLE completionPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
 	if (completionPort == NULL) {
-		std::cerr << "Failed to create completion port." << std::endl;
+		std::cerr << " Failed to create completion port." << std::endl;
 		closesocket(listenSocket);
 		WSACleanup();
+		_getch();
 		return 1;
 	}
+	cout << " Succeed to create completion port." << endl;
 
 	// IOCP 작업자 스레드를 생성
+	
 	for (int i = 0; i < std::thread::hardware_concurrency(); ++i) {
-		thread(worker, completionPort);
+		thread(worker, completionPort).detach();
 	}
 
-	std::cout << "IOCP server is running..." << std::endl;
+	std::cout << " IOCP server is running..." << std::endl;
 
 	while (true) {
 		SOCKET clientSocket = accept(listenSocket, NULL, NULL);
 		if (clientSocket == INVALID_SOCKET) {
-			std::cerr << "Failed to accept client connection." << std::endl;
+			std::cerr << " Failed to accept client connection." << std::endl;
 			continue;
 		}
+		cout << " Client " << clientSocket << " accepted" << endl;
 
-		Client* client = new Client(POINT{ 5, 5 }, 'O');
+		Client* client = new Client(POINT{ 5, 5 });
 		Client::push(client);
 
 		client->context.socket = clientSocket;
 		client->context.dataBuffer.buf = client->context.buffer;
 		client->context.dataBuffer.len = 1024;
-
-		client->hello();
+		client->context.overlapped.hEvent = NULL;
 
 		// 클라이언트 소켓을 완료 포트에 연결
 		CreateIoCompletionPort(reinterpret_cast<HANDLE>(clientSocket), completionPort, reinterpret_cast<ULONG_PTR>(client), 0);
@@ -130,6 +149,7 @@ int main()
 		if (WSARecv(clientSocket, &client->context.dataBuffer, 1, NULL, &flags, &client->context.overlapped, NULL) == SOCKET_ERROR) {
 			if (WSAGetLastError() != ERROR_IO_PENDING) {
 				// 오류 처리
+				std::cerr << " Failed to recv client : " << WSAGetLastError() << std::endl;
 			}
 		}
 	}

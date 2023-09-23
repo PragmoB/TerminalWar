@@ -3,30 +3,10 @@
 const int PORT = 44400;
 
 enum DIRECTION
-{	UP, DOWN, LEFT, RIGHT };
+{	UP = 1, DOWN, LEFT, RIGHT };
 enum TYPE_PDU
-{	MOV, SHOOT, HIT, HELLO, DIE	};
+{	HELLO, MOV, SHOOT, HIT, DIE	};
 
-// 캐릭터 무빙, 클라 <=> 서버
-typedef struct PDUMov
-{
-	const BYTE type = MOV;
-	DWORD id;
-	DIRECTION dir;
-};
-// 총알 발사, 클라 <=> 서버
-typedef struct PDUShoot
-{
-	const BYTE type = SHOOT;
-	DWORD id;
-	DIRECTION dir;
-};
-// 총알 명중, 클라 <= 서버
-typedef struct PDUHit
-{
-	const BYTE type = HIT;
-	POINT pos;
-};
 // 유저접속, 클라 <= 서버
 typedef struct PDUHello
 {
@@ -34,4 +14,30 @@ typedef struct PDUHello
 	DWORD id;
 	char chracter;
 	POINT pos;
-};
+} PDUHello;
+// 캐릭터 무빙, 클라 <=> 서버
+typedef struct PDUMov
+{
+	const BYTE type = MOV;
+	DWORD id;
+	DIRECTION dir;
+} PDUMov;
+// 총알 발사, 클라 <=> 서버
+typedef struct PDUShoot
+{
+	const BYTE type = SHOOT;
+	DWORD id;
+	DIRECTION dir;
+} PDUShoot;
+// 총알 명중, 클라 <= 서버
+typedef struct PDUHit
+{
+	const BYTE type = HIT;
+	DWORD id;
+} PDUHit;
+// 접속 끊어짐 또는 죽음, 클라 <= 서버
+typedef struct PDUDie
+{
+	const BYTE type = DIE;
+	DWORD id;
+} PDUDie;

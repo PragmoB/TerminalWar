@@ -12,7 +12,7 @@ using namespace std;
 
 Graphic graphic;
 
-void gotoxy(int x, int y)
+void gotoxy(SHORT x, SHORT y)
 {
 	COORD pos = { x,y };
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
@@ -63,7 +63,7 @@ void Graphic::clear_frame()
 {
 	for (uint32_t i = 0; i < FRAME_Y; i++)
 	{
-		for (uint32_t j = 0; j < field.right + 2; j++)
+		for (LONG j = 0; j < field.right + 2; j++)
 			frame[i][j] = ' ';
 
 		frame[i][field.right + 2 - 1] = NULL;
@@ -87,7 +87,7 @@ void Graphic::draw_field()
 
 	/* 왼쪽, 오른쪽 변 그리기 */
 
-	for (uint32_t i = field.top + 1; i < field.bottom; i++)
+	for (LONG i = field.top + 1; i < field.bottom; i++)
 	{
 		frame[i][field.left] = '\xa6';
 		frame[i][field.left + 1] = '\xa2';
