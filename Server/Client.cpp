@@ -4,33 +4,17 @@
 #include <list>
 #include <mutex>
 
+#include "Background.h"
 #include "Client.h"
 #include "protocol.h"
 #include "interface.h"
 
-std::list<Client*> Client::clients;
+std::list<Client*> clients;
+extern Background background;
 
 Client::Client(POINT pos)
 : pos(pos), last_mov(0), last_shoot(0), chracter(NULL)
 { }
-
-void Client::push(Client* client)
-{
-	clients.push_back(client);
-}
-uint32_t Client::pop(Client* client)
-{
-	for (list<Client*>::iterator iter = clients.begin();
-		iter != clients.end(); iter++)
-		if (*iter == client)
-		{
-			delete client;
-			clients.erase(iter);
-			return 1;
-		}
-
-	return 0;
-}
 
 char Client::getChracter() const
 {
@@ -41,6 +25,15 @@ POINT Client::getPos() const
 	return pos;
 }
 
+void Client::apply_hello_of(Client* client)
+{
+	PDUHello pdu;
+	pdu.id = (DWORD)client->context.socket;
+	pdu.chracter = client->getChracter();
+	pdu.pos = client->getPos();
+
+	send(context.socket, reinterpret_cast<const char*>(&pdu), sizeof(PDUHello), NULL);
+}
 void Client::apply_movement_of(Client* client, DIRECTION dir)
 {
 	PDUMov pdu;
@@ -57,14 +50,12 @@ void Client::apply_shoot_of(Client* client, DIRECTION dir)
 
 	send(context.socket, reinterpret_cast<const char*>(&pdu), sizeof(PDUShoot), NULL);
 }
-void Client::apply_hello_of(Client* client)
+void Client::apply_hit_of(Client* client)
 {
-	PDUHello pdu;
+	PDUHit pdu;
 	pdu.id = (DWORD)client->context.socket;
-	pdu.chracter = client->getChracter();
-	pdu.pos = client->getPos();
-
-	send(context.socket, reinterpret_cast<const char*>(&pdu), sizeof(PDUHello), NULL);
+	
+	send(context.socket, reinterpret_cast<const char*>(&pdu), sizeof(PDUShoot), NULL);
 }
 void Client::apply_die_of(Client* client)
 {
@@ -147,6 +138,9 @@ uint32_t Client::shoot(DIRECTION dir)
 	last_shoot = now;
 	m.unlock();
 
+	// 백그라운드 스레드 풀에 피격판정 작업 위탁
+	background.fire_queue.Enqueue(Bullet(pos.x, pos.y, dir));
+
 	// 고객님들께 반영
 	for (std::list<Client*>::iterator iter = clients.begin();
 		iter != clients.end(); iter++)
@@ -154,7 +148,12 @@ uint32_t Client::shoot(DIRECTION dir)
 
 	return TRUE;
 }
-
+void Client::hit()
+{
+	for (std::list<Client*>::iterator iter = clients.begin();
+		iter != clients.end(); iter++)
+		(*iter)->apply_hit_of(this);
+}
 void Client::die()
 {
 	for (std::list<Client*>::iterator iter = clients.begin();

@@ -15,6 +15,8 @@
 
 using namespace std;
 
+extern list<Client*> clients;
+
 void worker(HANDLE completion_port)
 {
 	while (1)
@@ -32,7 +34,15 @@ void worker(HANDLE completion_port)
 		{
 			cout << " Client " << client->context.socket << " died" << endl;
 			client->die();
-			Client::pop(client);
+
+			// 클라이언트 리스트에서 client 삭제
+			for (list<Client*>::iterator iter = clients.begin();
+				iter != clients.end(); iter++)
+				if (*iter == client)
+				{
+					delete client;
+					clients.erase(iter);
+				}
 			continue;
 		}
 
@@ -135,7 +145,7 @@ int main()
 		cout << " Client " << clientSocket << " accepted" << endl;
 
 		Client* client = new Client(POINT{ 5, 5 });
-		Client::push(client);
+		clients.push_front(client);
 
 		client->context.socket = clientSocket;
 		client->context.dataBuffer.buf = client->context.buffer;
