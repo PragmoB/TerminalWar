@@ -6,6 +6,10 @@
 
 #include <thread>
 
+/*
+ * 전역에서 사용하는 그래픽 엔진 정의부.
+ * 게임 그래픽 관련 작업을 담당함
+ */
 class Graphic
 {
 private:

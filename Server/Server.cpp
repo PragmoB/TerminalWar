@@ -42,6 +42,7 @@ void worker(HANDLE completion_port)
 				{
 					delete client;
 					clients.erase(iter);
+					break;
 				}
 			continue;
 		}
@@ -134,7 +135,7 @@ int main()
 		thread(worker, completionPort).detach();
 	}
 
-	std::cout << " IOCP server is running..." << std::endl;
+	std::cout << " IOCP server is running..." << std::endl << std::endl;
 
 	while (true) {
 		SOCKET clientSocket = accept(listenSocket, NULL, NULL);

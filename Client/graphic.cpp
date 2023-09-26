@@ -10,6 +10,7 @@
 
 using namespace std;
 
+// 게임 그래픽 엔진
 Graphic graphic;
 
 void gotoxy(SHORT x, SHORT y)

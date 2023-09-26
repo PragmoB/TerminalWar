@@ -55,7 +55,7 @@ void Client::apply_hit_of(Client* client)
 	PDUHit pdu;
 	pdu.id = (DWORD)client->context.socket;
 	
-	send(context.socket, reinterpret_cast<const char*>(&pdu), sizeof(PDUShoot), NULL);
+	send(context.socket, reinterpret_cast<const char*>(&pdu), sizeof(PDUHit), NULL);
 }
 void Client::apply_die_of(Client* client)
 {

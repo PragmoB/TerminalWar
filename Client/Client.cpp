@@ -13,12 +13,14 @@
 #include <thread>
 
 #include "Graphic.h"
+#include "Sound.h"
 #include "protocol.h"
 #include "Player.h"
 
 using namespace std;
 
 extern Graphic graphic;
+extern Sound sound;
 
 void receive(SOCKET sock)
 {
@@ -28,7 +30,8 @@ void receive(SOCKET sock)
 
 	while (1)
 	{
-		if (recv(sock, buff, 1000, NULL) == SOCKET_ERROR)
+		int len = recv(sock, buff, 1000, NULL);
+		if (len <= 0)
 		{
 			graphic.stop();
 			system("cls");
@@ -44,33 +47,52 @@ void receive(SOCKET sock)
 		PDUHit* pdu_hit;
 		PDUDie* pdu_die;
 
-		switch (buff[0])
+		/*
+		 * 버그수정 : 간혹 타이밍이 안좋은 경우에
+		 * recv할 때 서버로부터 응답을 여러개씩 몰아받게 되는데,
+		 * 그럴때 마다 첫 응답만 처리하고 그 뒤의 응답은 그대로 무시해서
+		 * 화면이 깨지는 버그가 있었음.
+		 * 
+		 * 처리할 데이터 양(len - complete_len)이 0이 될 때까지
+		 * 데이터 처리를 반복하게 수정함.
+		 */
+		int complete_len = 0;
+		while (len - complete_len)
 		{
-		case HELLO:
-			pdu_hello = reinterpret_cast<PDUHello*>(buff);
-			players[pdu_hello->id] = new Player(pdu_hello->pos, pdu_hello->chracter);
-			break;
+			switch ((buff + complete_len)[0])
+			{
+			case HELLO:
+				// 버그수정 : <PDUHello*>(buff) => <PDUHello*>(buff + complete_len).
+				pdu_hello = reinterpret_cast<PDUHello*>(buff + complete_len);	// 이거 찾는데 얼마나 qudtls같이 헛고생을 많이 했는지 당사자 아닌사람은 모를거다ㅠㅠ 별거 아닌거 같이 보여도 실시간 온라인게임이라 디버깅하기가 진짜 어렵다.
+				players[pdu_hello->id] = new Player(pdu_hello->pos, pdu_hello->chracter);
+				complete_len += sizeof(PDUHello);
+				break;
 		
-		case MOV:
-			pdu_mov = reinterpret_cast<PDUMov*>(buff);
-			players[pdu_mov->id]->move(pdu_mov->dir);
-			break;
+			case MOV:
+				pdu_mov = reinterpret_cast<PDUMov*>(buff + complete_len);
+				players[pdu_mov->id]->move(pdu_mov->dir);
+				complete_len += sizeof(PDUMov);
+				break;
 
-		case SHOOT:
-			pdu_shoot = reinterpret_cast<PDUShoot*>(buff);
-			players[pdu_shoot->id]->shoot(pdu_shoot->dir);
-			break;
+			case SHOOT:
+				pdu_shoot = reinterpret_cast<PDUShoot*>(buff + complete_len);
+				players[pdu_shoot->id]->shoot(pdu_shoot->dir);
+				complete_len += sizeof(PDUShoot);
+				break;
 
-		case HIT:
-			pdu_hit = reinterpret_cast<PDUHit*>(buff);
-			players[pdu_hit->id]->hit();
-			break;
+			case HIT:
+				pdu_hit = reinterpret_cast<PDUHit*>(buff + complete_len);
+				players[pdu_hit->id]->hit();
+				complete_len += sizeof(PDUHit);
+				break;
 
-		case DIE:
-			pdu_die = reinterpret_cast<PDUDie*>(buff);
-			delete players[pdu_die->id];
-			players.erase(pdu_die->id);
-			break;
+			case DIE:
+				pdu_die = reinterpret_cast<PDUDie*>(buff + complete_len);
+				delete players[pdu_die->id];
+				players.erase(pdu_die->id);
+				complete_len += sizeof(PDUDie);
+				break;
+			}
 		}
 	}
 }
