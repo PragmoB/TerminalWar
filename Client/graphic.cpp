@@ -13,19 +13,31 @@ using namespace std;
 // 게임 그래픽 엔진
 Graphic graphic;
 
-void gotoxy(SHORT x, SHORT y)
-{
-	COORD pos = { x,y };
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
-}
-
 Graphic::Graphic() : fire_queue(50)
-{	}
+{
+	console_buffer = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE,
+		0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+
+	SMALL_RECT rect = { 0, 0, 1, 1 };
+	SetConsoleWindowInfo(console_buffer, TRUE, &rect);
+
+	COORD win_coords = { field.Right + 30, field.Bottom + 6 };
+	SetConsoleScreenBufferSize(console_buffer, win_coords);
+
+	rect.Right = win_coords.X - 1;
+	rect.Bottom = win_coords.Y - 1;
+	SetConsoleWindowInfo(console_buffer, TRUE, &rect);
+}
 
 /* 그래픽 가동 시작 */
 void Graphic::start()
 {
-	frame_loader = std::thread(&Graphic::print_frame, this);
+	CONSOLE_CURSOR_INFO cursorInfo = { 0, };
+	cursorInfo.dwSize = 1; //커서 굵기 (1 ~ 100)
+	cursorInfo.bVisible = FALSE; //커서 Visible TRUE(보임) FALSE(숨김)
+	SetConsoleCursorInfo(console_buffer, &cursorInfo);
+	SetConsoleActiveScreenBuffer(console_buffer);
+
 	for (uint32_t i = 0; i < 10; i++)
 		bullet_renderers[i] = std::thread(&Graphic::render_bullet, this);
 }
@@ -33,23 +45,35 @@ void Graphic::start()
 /* 그래픽 가동 중지 */
 void Graphic::stop()
 {
-	frame_loader.~thread();
+	SetConsoleActiveScreenBuffer(GetStdHandle(STD_OUTPUT_HANDLE));
 	for (uint32_t i = 0; i < 10; i++)
 		bullet_renderers[i].~thread();
 }
 
-/* 프레임 업데이트 */
-void Graphic::print_frame()
+void Graphic::draw(COORD pos, char value, COLOR color, COLOR bgcolor)
 {
-	while (1)
-	{
-		gotoxy(0, 0);
+	DWORD dw;
 
-		for (uint32_t i = 0; i < FRAME_Y; i++)
-			cout << frame[i] << endl;
+	mtx_console_buffer.lock();
 
-		Sleep(20);
-	}
+		SetConsoleTextAttribute(console_buffer, (bgcolor << 4) | color);
+		SetConsoleCursorPosition(console_buffer, pos);
+		WriteConsoleA(console_buffer, &value, 1, &dw, NULL);
+
+	mtx_console_buffer.unlock();
+}
+
+void Graphic::draw(COORD pos, const char* value, COLOR color, COLOR bgcolor)
+{
+	DWORD dw;
+
+	mtx_console_buffer.lock();
+
+		SetConsoleTextAttribute(console_buffer, (bgcolor << 4) | color);
+		SetConsoleCursorPosition(console_buffer, pos);
+		WriteConsoleA(console_buffer, value, strlen(value), &dw, NULL);
+
+	mtx_console_buffer.unlock();
 }
 
 /* 사용 대기 스킬 출력 처리 */
@@ -62,48 +86,34 @@ void Graphic::render_bullet()
 /* 경기장 화면 초기화 */
 void Graphic::clear_frame()
 {
-	for (uint32_t i = 0; i < FRAME_Y; i++)
-	{
-		for (LONG j = 0; j < field.right + 2; j++)
-			frame[i][j] = ' ';
-
-		frame[i][field.right + 2 - 1] = NULL;
-	}
+	
 }
 
 /* 경기장 그리기 */
 void Graphic::draw_field()
 {
-	//uint32_t field_width = field.right - field.left;
+	char buff[600] = "";
 
 	/* 윗변 그리기 */
 
-	for (uint32_t i = 0; i < field_width * 2; i++)
-		frame[field.top][field.left + 2 + i] = (i % 2) ? '\xa1' : '\xa6';
-
-	frame[field.top][field.left] = '\xa6';	frame[field.top][field.left + 1] = '\xa3';
-	frame[field.top][field.left + 2 + field_width * 2] = '\xa6';
-	frame[field.top][field.left + 2 + field_width * 2 + 1] = '\xa4';
-	frame[field.top][field.left + 2 + field_width * 2 + 2] = NULL;
+	for (int i = 0; i < field_width + 2; i++)
+		buff[i] = ' ';
+	buff[field_width + 2] = NULL;
+	draw(COORD{ (SHORT)field.Left, (SHORT)field.Top }, buff, GRAY, GREEN);
 
 	/* 왼쪽, 오른쪽 변 그리기 */
 
-	for (LONG i = field.top + 1; i < field.bottom; i++)
+	for (SHORT i = field.Top + 1; i < field.Bottom; i++)
 	{
-		frame[i][field.left] = '\xa6';
-		frame[i][field.left + 1] = '\xa2';
-
-		frame[i][field.right] = '\xa6';
-		frame[i][field.right + 1] = '\xa2';
+		draw(COORD{ (SHORT)field.Left, i }, ' ', GRAY, GREEN);
+		draw(COORD{ (SHORT)field.Right, i }, ' ', GRAY, GREEN);
 	}
 
 	/* 아랫변 그리기 */
 	
-	for (uint32_t i = 0; i < field_width * 2; i++)
-		frame[field.bottom][field.left + 2 + i] = (i % 2) ? '\xa1' : '\xa6';
-	frame[field.bottom][field.left] = '\xa6';
-	frame[field.bottom][field.left + 1] = '\xa6';
-	frame[field.bottom][field.left + 2 + field_width * 2] = '\xa6';
-	frame[field.bottom][field.left + 2 + field_width * 2 + 1] = '\xa5';
-	frame[field.bottom][field.left + 2 + field_width * 2 + 2] = NULL;
+	for (int i = 0; i < field_width + 2; i++)
+		buff[i] = ' ';
+	
+	buff[field_width + 2] = NULL;
+	draw(COORD{ (SHORT)field.Left, (SHORT)field.Bottom }, buff, GRAY, GREEN);
 }

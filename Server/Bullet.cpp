@@ -6,15 +6,15 @@
 extern std::list<Client*> clients;
 
 // pos 위치의 클라이언트를 하나만 찾아오기
-Client* get_client_at_pos(POINT pos)
+Client* get_client_at_pos(COORD pos)
 {
 	for (std::list<Client*>::iterator iter = clients.begin();
 		iter != clients.end(); iter++)
 	{
 		Client* cur = *iter;
-		POINT cur_pos = cur->getPos();
+		COORD cur_pos = cur->getPos();
 
-		if (cur_pos.x == pos.x && cur_pos.y == pos.y)
+		if (cur_pos.X == pos.X && cur_pos.Y == pos.Y)
 			return cur;
 	}
 	return NULL;
@@ -26,10 +26,10 @@ void Bullet::fire()
 	{
 	case UP:
 		// 벽에 닿거나 사정거리가 0이 될 때까지 계속 날아감
-		for (; 0 < distance && 1 < y; distance--)
+		for (; 0 < distance && 1 < pos.Y; distance--)
 		{
-			y--; // 총알이 위로 이동
-			Client* victim = get_client_at_pos(POINT{ x, y });
+			pos.Y--; // 총알이 위로 이동
+			Client* victim = get_client_at_pos(pos);
 			if (victim) // 맞은 놈이 있다면
 				victim->hit(); // 처맞는 동작함
 
@@ -37,10 +37,10 @@ void Bullet::fire()
 		}
 		break;
 	case DOWN:
-		for (; 0 < distance && y < field_height; distance--)
+		for (; 0 < distance && pos.Y < field_height; distance--)
 		{
-			y++;
-			Client* victim = get_client_at_pos(POINT{ x, y });
+			pos.Y++;
+			Client* victim = get_client_at_pos(pos);
 			if (victim) // 맞은 놈이 있다면
 				victim->hit(); // 처맞는 동작함
 
@@ -48,10 +48,10 @@ void Bullet::fire()
 		}
 		break;
 	case LEFT:
-		for (; 0 < distance && 1 < x; distance--)
+		for (; 0 < distance && 1 < pos.X; distance--)
 		{
-			x--;
-			Client* victim = get_client_at_pos(POINT{ x, y });
+			pos.X--;
+			Client* victim = get_client_at_pos(pos);
 			if (victim) // 맞은 놈이 있다면
 				victim->hit(); // 처맞는 동작함
 
@@ -59,10 +59,10 @@ void Bullet::fire()
 		}
 		break;
 	case RIGHT:
-		for (; 0 < distance && x < field_width; distance--)
+		for (; 0 < distance && pos.X < field_width; distance--)
 		{
-			x++;
-			Client* victim = get_client_at_pos(POINT{ x, y });
+			pos.X++;
+			Client* victim = get_client_at_pos(pos);
 			if (victim) // 맞은 놈이 있다면
 				victim->hit(); // 처맞는 동작함
 

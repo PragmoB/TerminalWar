@@ -3,6 +3,7 @@
 
 #include <WinSock2.h>
 #include <iostream>
+#include <cstdlib>
 #include <ctime>
 #include <conio.h>
 
@@ -12,6 +13,7 @@
 
 #include "Client.h"
 #include "protocol.h"
+#include "interface.h"
 
 using namespace std;
 
@@ -77,6 +79,7 @@ void worker(HANDLE completion_port)
 }
 int main()
 {
+	srand(time(NULL));
 	cout << endl;
 
 	WSADATA wsaData;
@@ -145,7 +148,7 @@ int main()
 		}
 		cout << " Client " << clientSocket << " accepted" << endl;
 
-		Client* client = new Client(POINT{ 5, 5 });
+		Client* client = new Client(COORD{ (SHORT)(rand() % field_width + 1), (SHORT)(rand() % field_height + 1) });
 		clients.push_front(client);
 
 		client->context.socket = clientSocket;

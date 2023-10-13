@@ -28,15 +28,15 @@ public:
 	ClientContext context;
 private:
 	char chracter;
-	POINT pos;
+	COORD pos;
 	clock_t last_mov;
 	clock_t last_shoot;
 
 public:
-	Client(POINT pos);
+	Client(COORD pos);
 
 	char getChracter() const;
-	POINT getPos() const;
+	COORD getPos() const;
 	
 	// client가 접속했음을 반영함
 	void apply_hello_of(Client* client);

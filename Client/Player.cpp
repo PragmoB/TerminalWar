@@ -11,51 +11,43 @@
 extern Graphic graphic;
 extern Sound sound;
 
-Player::Player(POINT pos, char chracter) : pos(pos), chracter(chracter)
+Player::Player(COORD pos, char chracter) : chracter(chracter)
 {
 	// 화면에 캐릭터 첫 표시
-	graphic.frame[field.top + pos.y][field.left + 1 + pos.x] = chracter;
+	pos.X += field.Left;
+	pos.Y += field.Top;
+	this->pos = pos;
+	graphic.draw(pos, chracter, GRAY);
 }
 
 void Player::move(DIRECTION dir)
 {
-	graphic.frame[field.top + pos.y][field.left + 1 + pos.x] = ' ';
+	graphic.draw(pos, ' ', GRAY);
 
 	switch (dir)
 	{
-	case UP:
-		graphic.frame[field.top - 1 + pos.y][field.left + 1 + pos.x] = chracter;
-		pos.y--;
-		break;
-	case DOWN:
-		graphic.frame[field.top + 1 + pos.y][field.left + 1 + pos.x] = chracter;
-		pos.y++;
-		break;
-	case LEFT:
-		graphic.frame[field.top + pos.y][field.left + pos.x] = chracter;
-		pos.x--;
-		break;
-	case RIGHT:
-		graphic.frame[field.top + pos.y][field.left + 2 + pos.x] = chracter;
-		pos.x++;
-		break;
+	case UP: pos.Y--; break;
+	case DOWN: pos.Y++; break;
+	case LEFT: pos.X--; break;
+	case RIGHT: pos.X++; break;
 	}
+	graphic.draw(pos, chracter, GRAY);
 }
 
 void Player::shoot(DIRECTION dir)
 {
-	graphic.fire_queue.Enqueue(Bullet(pos.x, pos.y, dir));
+	graphic.fire_queue.Enqueue(Bullet(pos, dir));
 	sound.shoot();
 	return;
 }
 
 void Player::hit()
 {
-	graphic.frame[field.top + pos.y][field.left + 1 + pos.x] = '*';
+	graphic.draw(pos, '*', RED);
 	sound.hit();
 }
 
 Player::~Player()
 {
-	graphic.frame[field.top + pos.y][field.left + 1 + pos.x] = ' ';
+	graphic.draw(pos, ' ', GRAY);
 }

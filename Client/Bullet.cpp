@@ -8,48 +8,47 @@ extern Graphic graphic;
 
 void Bullet::fire()
 {
-
 	switch (dir)
 	{
 	case UP:
 		// 벽에 닿거나 사정거리가 0이 될 때까지 계속 날아감
-		for (; 0 < distance && 1 < y; distance--)
+		for (; 0 < distance && field.Top + 1 < pos.Y; distance--)
 		{
-			y--; // 총알이 위로 이동
-			graphic.frame[field.top + y][field.left + 1 + x] = shape_vertical; // 프레임에 반영
+			pos.Y--; // 총알이 위로 이동
+			graphic.draw(pos, shape_vertical, SKY_BLUE); // 그래픽에 반영
 
 			Sleep(1000 / bps); // 발사 속도 조절
-			graphic.frame[field.top + y][field.left + 1 + x] = ' '; // 잔상 지우기
+			graphic.draw(pos, ' ', SKY_BLUE); // 잔상 지우기
 		}
 		break;
 	case DOWN:
-		for (; 0 < distance && y < field_height; distance--)
+		for (; 0 < distance && pos.Y < field.Bottom - 1; distance--)
 		{
-			y++;
-			graphic.frame[field.top + y][field.left + 1 + x] = shape_vertical;
+			pos.Y++;
+			graphic.draw(pos, shape_vertical, SKY_BLUE); // 그래픽에 반영
 
 			Sleep(1000 / bps);
-			graphic.frame[field.top + y][field.left + 1 + x] = ' '; // 잔상 지우기
+			graphic.draw(pos, ' ', SKY_BLUE); // 잔상 지우기
 		}
 		break;
 	case LEFT:
-		for (; 0 < distance && 1 < x; distance--)
+		for (; 0 < distance && field.Left + 2 < pos.X; distance--)
 		{
-			x--;
-			graphic.frame[field.top + y][field.left + 1 + x] = shape_horizontal;
+			pos.X--;
+			graphic.draw(pos, shape_horizontal, SKY_BLUE); // 그래픽에 반영
 
 			Sleep(1000 / bps);
-			graphic.frame[field.top + y][field.left + 1 + x] = ' '; // 잔상 지우기
+			graphic.draw(pos, ' ', SKY_BLUE); // 잔상 지우기
 		}
 		break;
 	case RIGHT:
-		for (; 0 < distance && x < field_width; distance--)
+		for (; 0 < distance && pos.X < field.Right - 1; distance--)
 		{
-			x++;
-			graphic.frame[field.top + y][field.left + 1 + x] = shape_horizontal;
+			pos.X++;
+			graphic.draw(pos, shape_horizontal, SKY_BLUE); // 그래픽에 반영
 
 			Sleep(1000 / bps);
-			graphic.frame[field.top + y][field.left + 1 + x] = ' '; // 잔상 지우기
+			graphic.draw(pos, ' ', SKY_BLUE); // 잔상 지우기
 		}
 		break;
 	}

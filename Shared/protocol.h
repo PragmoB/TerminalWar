@@ -13,7 +13,7 @@ typedef struct PDUHello
 	const BYTE type = HELLO;
 	DWORD id;
 	char chracter;
-	POINT pos;
+	COORD pos;
 } PDUHello;
 // 캐릭터 무빙, 클라 <=> 서버
 typedef struct PDUMov

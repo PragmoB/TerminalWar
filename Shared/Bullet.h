@@ -9,7 +9,7 @@
 class Bullet
 {
 private:
-	int x, y; // 현재 위치
+	COORD pos; // 현재 위치
 	DIRECTION dir; // 방향
 	uint32_t bps; // the valocity of the bullet. blocks per second
 	uint32_t distance; // 날아갈 거리
@@ -17,8 +17,8 @@ private:
 	char shape_vertical; // 세로로 날아갈 때 총알의 모양
 public:
 	Bullet() : bps(25), shape_horizontal('-'), shape_vertical('|'), distance(10) { }
-	Bullet(uint32_t x, uint32_t y, DIRECTION dir) : 
+	Bullet(COORD pos, DIRECTION dir) : 
 		bps(25), shape_horizontal('-'), shape_vertical('|'), distance(10), 
-		x(x), y(y), dir(dir) { }
+		pos(pos), dir(dir) { }
 	void fire();
 };

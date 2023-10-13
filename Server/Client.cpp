@@ -12,7 +12,7 @@
 std::list<Client*> clients;
 extern Background background;
 
-Client::Client(POINT pos)
+Client::Client(COORD pos)
 : pos(pos), last_mov(0), last_shoot(0), chracter(NULL)
 { }
 
@@ -20,7 +20,7 @@ char Client::getChracter() const
 {
 	return chracter;
 }
-POINT Client::getPos() const
+COORD Client::getPos() const
 {	
 	return pos;
 }
@@ -98,10 +98,10 @@ uint32_t Client::move(DIRECTION dir)
 	// 좌표 반영
 	switch (dir)
 	{
-	case UP: if (1 < pos.y) pos.y--; else return FALSE; break;
-	case DOWN: if (pos.y < field_height) pos.y++; else return FALSE; break;
-	case LEFT: if (1 < pos.x) pos.x--; else return FALSE; break;
-	case RIGHT: if (pos.x < field_width) pos.x++; else return FALSE; break;
+	case UP: if (1 < pos.Y) pos.Y--; else return FALSE; break;
+	case DOWN: if (pos.Y < field_height) pos.Y++; else return FALSE; break;
+	case LEFT: if (1 < pos.X) pos.X--; else return FALSE; break;
+	case RIGHT: if (pos.X < field_width) pos.X++; else return FALSE; break;
 	default: return FALSE; // 방향 값이 잘못된 경우 미승인
 	}
 
@@ -139,7 +139,7 @@ uint32_t Client::shoot(DIRECTION dir)
 	m.unlock();
 
 	// 백그라운드 스레드 풀에 피격판정 작업 위탁
-	background.fire_queue.Enqueue(Bullet(pos.x, pos.y, dir));
+	background.fire_queue.Enqueue(Bullet(pos, dir));
 
 	// 고객님들께 반영
 	for (std::list<Client*>::iterator iter = clients.begin();

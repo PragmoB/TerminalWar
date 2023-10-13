@@ -8,11 +8,11 @@
 class Player
 {
 private:
-	POINT pos;
+	COORD pos;
 	const char chracter;
 
 public:
-	Player(POINT pos, char chracter);
+	Player(COORD pos, char chracter);
 	void move(DIRECTION dir);
 	void shoot(DIRECTION dir);
 	void hit();

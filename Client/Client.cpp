@@ -33,7 +33,6 @@ void receive(SOCKET sock)
 		int len = recv(sock, buff, 1000, NULL);
 		if (len <= 0)
 		{
-			graphic.stop();
 			system("cls");
 			cerr << endl;
 			cerr << " 연결에 오류가 생겼습니다" << endl;
@@ -99,7 +98,7 @@ void receive(SOCKET sock)
 
 int main()
 {
-	system("title Terminal War");
+	SetConsoleTitleA("Terminal War");
 
 	cout << endl;
 
@@ -157,9 +156,9 @@ int main()
 
 	thread(receive, sock).detach();
 
+	graphic.start();
 	graphic.clear_frame();
 	graphic.draw_field();
-	graphic.start();
 
 	send(sock, reinterpret_cast<const char*>(&pdu_hello), sizeof(PDUHello), NULL);
 	
