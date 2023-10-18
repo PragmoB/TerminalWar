@@ -21,7 +21,7 @@ Graphic::Graphic() : fire_queue(50)
 	SMALL_RECT rect = { 0, 0, 1, 1 };
 	SetConsoleWindowInfo(console_buffer, TRUE, &rect);
 
-	COORD win_coords = { field.Right + 30, field.Bottom + 6 };
+	COORD win_coords = { field.Left + 2 * field_width + 30, field.Bottom + 6 };
 	SetConsoleScreenBufferSize(console_buffer, win_coords);
 
 	rect.Right = win_coords.X - 1;
@@ -96,24 +96,24 @@ void Graphic::draw_field()
 
 	/* 윗변 그리기 */
 
-	for (int i = 0; i < field_width + 2; i++)
-		buff[i] = ' ';
-	buff[field_width + 2] = NULL;
-	draw(COORD{ (SHORT)field.Left, (SHORT)field.Top }, buff, GRAY, GREEN);
+	for (int i = 0; i < 2 * field_width + 1; i++)
+		buff[i] = ':';
+	buff[2 * field_width + 2] = NULL;
+	draw(COORD{ field.Left, field.Top }, buff, GREEN, GREEN);
 
 	/* 왼쪽, 오른쪽 변 그리기 */
 
 	for (SHORT i = field.Top + 1; i < field.Bottom; i++)
 	{
-		draw(COORD{ (SHORT)field.Left, i }, ' ', GRAY, GREEN);
-		draw(COORD{ (SHORT)field.Right, i }, ' ', GRAY, GREEN);
+		draw(COORD{ field.Left, i }, ':', GREEN, GREEN);
+		draw(COORD{ field.Left + 2 * field_width, i }, ':', GREEN, GREEN);
 	}
 
 	/* 아랫변 그리기 */
 	
-	for (int i = 0; i < field_width + 2; i++)
-		buff[i] = ' ';
+	for (int i = 0; i < 2 * field_width + 1; i++)
+		buff[i] = ':';
 	
-	buff[field_width + 2] = NULL;
-	draw(COORD{ (SHORT)field.Left, (SHORT)field.Bottom }, buff, GRAY, GREEN);
+	buff[2 * field_width + 2] = NULL;
+	draw(COORD{ field.Left, field.Bottom }, buff, GREEN, GREEN);
 }

@@ -14,7 +14,8 @@ extern Sound sound;
 Player::Player(COORD pos, char chracter) : chracter(chracter)
 {
 	// 화면에 캐릭터 첫 표시
-	pos.X += field.Left;
+	pos.X *= 2; // 가로방향 이동은 2칸씩임을 고려함
+	pos.X += field.Left - 1;
 	pos.Y += field.Top;
 	this->pos = pos;
 	graphic.draw(pos, chracter, GRAY);
@@ -28,8 +29,10 @@ void Player::move(DIRECTION dir)
 	{
 	case UP: pos.Y--; break;
 	case DOWN: pos.Y++; break;
-	case LEFT: pos.X--; break;
-	case RIGHT: pos.X++; break;
+
+	// 가로방향 이동은 콘솔창의 커서 사각형의 가로 세로 길이 비율이 2:1임을 고려하여 움직임
+	case LEFT: pos.X -= 2; break;
+	case RIGHT: pos.X += 2; break;
 	}
 	graphic.draw(pos, chracter, GRAY);
 }

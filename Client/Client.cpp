@@ -161,76 +161,39 @@ int main()
 	graphic.draw_field();
 
 	send(sock, reinterpret_cast<const char*>(&pdu_hello), sizeof(PDUHello), NULL);
-	
-	// 입력 전 버퍼 비우기
-	while (_kbhit())
-		_getch();
 
+	unsigned char inputs[] = { 'W', 'A', 'S', 'D', VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, NULL };
+
+	// 움직임
 	while (1)
 	{
-		PDUMov pdu_mov;
-		PDUShoot pdu_shoot;
-
-		char* buff = NULL;
-		int len = 0;
-
-		unsigned char input = toupper(_getch());
-
-		// 움직임
-		{
-			switch (input)
+		for (int i = 0; inputs[i]; i++)
+			// 키가 눌려있는 상태라면
+			if (GetKeyState(inputs[i]) & 0x8000)
 			{
-			case 'W':
-				pdu_mov.dir = UP;
-				break;
-			case 'A':
-				pdu_mov.dir = LEFT;
-				break;
-			case 'S':
-				pdu_mov.dir = DOWN;
-				break;
-			case 'D':
-				pdu_mov.dir = RIGHT;
-				break;
+				PDUMov pdu_mov;
+				PDUShoot pdu_shoot;
+
+				char* buff = NULL;
+				int len = 0;
+
+				switch (inputs[i])
+				{
+				case 'W': pdu_mov.dir = UP;	len = sizeof(PDUMov); buff = (char*)&pdu_mov; break;
+				case 'A': pdu_mov.dir = LEFT; len = sizeof(PDUMov); buff = (char*)&pdu_mov; break;
+				case 'S': pdu_mov.dir = DOWN; len = sizeof(PDUMov); buff = (char*)&pdu_mov; break;
+				case 'D': pdu_mov.dir = RIGHT; len = sizeof(PDUMov); buff = (char*)&pdu_mov; break;
+
+				case VK_UP: pdu_shoot.dir = UP; len = sizeof(PDUShoot); buff = (char*)&pdu_shoot; break;
+				case VK_DOWN: pdu_shoot.dir = DOWN; len = sizeof(PDUShoot); buff = (char*)&pdu_shoot; break;
+				case VK_LEFT: pdu_shoot.dir = LEFT; len = sizeof(PDUShoot); buff = (char*)&pdu_shoot; break;
+				case VK_RIGHT: pdu_shoot.dir = RIGHT; len = sizeof(PDUShoot); buff = (char*)&pdu_shoot; break;
+				}
+				
+				send(sock, buff, len, NULL);
 			}
-			if (pdu_mov.dir)
-			{
-				len = sizeof(PDUMov);
-				buff = reinterpret_cast<char*>(&pdu_mov);
-			}
-		}
-		// 총 쏘기
-		if (input == 224)
-		{
-			input = _getch();
-			switch (input)
-			{
-			case 72 :
-				pdu_shoot.dir = UP;
-				break;
 
-			case 80 :
-				pdu_shoot.dir = DOWN;
-				break;
-
-			case 75 :
-				pdu_shoot.dir = LEFT;
-				break;
-
-			case 77 :
-				pdu_shoot.dir = RIGHT;
-				break;
-			}
-			len = sizeof(PDUShoot);
-			buff = reinterpret_cast<char*>(&pdu_shoot);
-		}
-
-		// 무엇이든 유의미한 이벤트가 있었다면
-		if (len)
-		{
-			// 전송
-			send(sock, buff, len, NULL);
-		}
+		Sleep(30);
 	}
 }
 

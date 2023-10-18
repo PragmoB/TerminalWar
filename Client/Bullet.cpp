@@ -12,7 +12,7 @@ void Bullet::fire()
 	{
 	case UP:
 		// 벽에 닿거나 사정거리가 0이 될 때까지 계속 날아감
-		for (; 0 < distance && field.Top + 1 < pos.Y; distance--)
+		for (; 0 < distance && field.Top < pos.Y - 1; distance--)
 		{
 			pos.Y--; // 총알이 위로 이동
 			graphic.draw(pos, shape_vertical, SKY_BLUE); // 그래픽에 반영
@@ -22,7 +22,7 @@ void Bullet::fire()
 		}
 		break;
 	case DOWN:
-		for (; 0 < distance && pos.Y < field.Bottom - 1; distance--)
+		for (; 0 < distance && pos.Y + 1 < field.Bottom; distance--)
 		{
 			pos.Y++;
 			graphic.draw(pos, shape_vertical, SKY_BLUE); // 그래픽에 반영
@@ -32,9 +32,9 @@ void Bullet::fire()
 		}
 		break;
 	case LEFT:
-		for (; 0 < distance && field.Left + 2 < pos.X; distance--)
+		for (; 0 < distance && field.Left < pos.X - 2; distance--)
 		{
-			pos.X--;
+			pos.X -= 2;
 			graphic.draw(pos, shape_horizontal, SKY_BLUE); // 그래픽에 반영
 
 			Sleep(1000 / bps);
@@ -42,9 +42,9 @@ void Bullet::fire()
 		}
 		break;
 	case RIGHT:
-		for (; 0 < distance && pos.X < field.Right - 1; distance--)
+		for (; 0 < distance && pos.X + 2 < field.Left + 2 * field_width; distance--)
 		{
-			pos.X++;
+			pos.X += 2;
 			graphic.draw(pos, shape_horizontal, SKY_BLUE); // 그래픽에 반영
 
 			Sleep(1000 / bps);
