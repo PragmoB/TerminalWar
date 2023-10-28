@@ -12,9 +12,21 @@
 std::list<Client*> clients;
 extern Background background;
 
-Client::Client(COORD pos)
-: pos(pos), HP(100), last_mov(0), last_shoot(0), chracter(NULL)
-{ }
+Client::Client(ClientContext context, COORD pos)
+: context(context), pos(pos), HP(100), last_mov(0), last_shoot(0), chracter(NULL)
+{
+	context.dataBuffer.buf = context.buffer;
+
+	// 자기자신을 인식함
+	apply_hello_of(this);
+
+	for (std::list<Client*>::iterator iter = clients.begin();
+		iter != clients.end(); iter++)
+	{
+		// 유저들에게 인사를 받음
+		apply_hello_of(*iter);
+	}
+}
 
 int Client::getHP() const
 {
@@ -85,10 +97,8 @@ void Client::hello(char chracter)
 	for (std::list<Client*>::iterator iter = clients.begin();
 		iter != clients.end(); iter++)
 	{
-		// 유저들에게 인사를 주고
+		// 유저들에게 인사함
 		(*iter)->apply_hello_of(this);
-		if (this != *iter)
-			apply_hello_of(*iter); // 받고
 	}
 }
 
@@ -144,7 +154,7 @@ uint32_t Client::shoot(DIRECTION dir)
 	last_shoot = now;
 	m.unlock();
 
-	// 백그라운드 스레드 풀에 피격판정 작업 위탁
+	// 백그라운드 스레드 풀에서 피격판정 작업 비동기 처리
 	background.fire_queue.Enqueue(Bullet(pos, dir));
 
 	// 고객님들께 반영
@@ -156,6 +166,10 @@ uint32_t Client::shoot(DIRECTION dir)
 }
 void Client::hit()
 {
+	// hello 하기 전이면 안맞음
+	if (!chracter)
+		return;
+
 	HP -= 10; // 맞아서 체력 감소
 	if (HP <= 0)
 	{

@@ -22,17 +22,23 @@ using namespace std;
 extern Graphic graphic;
 extern Sound sound;
 
+DWORD my_id = NULL;
+
 void receive(SOCKET sock)
 {
 	char buff[1000] = "";
 
-	static map<uint32_t, Player*> players;
+	map<DWORD, Player*> players;
 
 	while (1)
 	{
 		int len = recv(sock, buff, 1000, NULL);
 		if (len <= 0)
 		{
+			my_id = NULL;
+			for (map<DWORD, Player*>::iterator iter = players.begin(); iter != players.end(); iter++)
+				delete iter->second;
+
 			graphic.stop();
 			return;
 		}
@@ -42,6 +48,8 @@ void receive(SOCKET sock)
 		PDUShoot* pdu_shoot;
 		PDUHit* pdu_hit;
 		PDUDie* pdu_die;
+
+		Player* player;
 
 		/*
 		 * 버그수정 : 간혹 타이밍이 안좋은 경우에
@@ -60,31 +68,45 @@ void receive(SOCKET sock)
 			case HELLO:
 				// 버그수정 : <PDUHello*>(buff) => <PDUHello*>(buff + complete_len).
 				pdu_hello = reinterpret_cast<PDUHello*>(buff + complete_len);	// 이거 찾는데 얼마나 qudtls같이 헛고생을 많이 했는지 당사자 아닌사람은 모를거다ㅠㅠ 별거 아닌거 같이 보여도 실시간 온라인게임이라 디버깅하기가 진짜 어렵다.
-				players[pdu_hello->id] = new Player(pdu_hello->pos, pdu_hello->HP, pdu_hello->chracter);
+				
+				if (!my_id) // 첫빠다로 받은 hello 패킷이라면
+					my_id = pdu_hello->id; // 이 패킷의 id값은 나의 아이디
+				else // 그 외엔
+					// 다른사람거
+					players[pdu_hello->id] = new Player(pdu_hello->pos, pdu_hello->HP, pdu_hello->chracter);
 				complete_len += sizeof(PDUHello);
 				break;
 		
 			case MOV:
 				pdu_mov = reinterpret_cast<PDUMov*>(buff + complete_len);
-				players[pdu_mov->id]->move(pdu_mov->dir);
+				player = players[pdu_mov->id];
+				// 버그수정 : player 객체 유효성 검사
+				if (player)
+					player->move(pdu_mov->dir);
 				complete_len += sizeof(PDUMov);
 				break;
 
 			case SHOOT:
 				pdu_shoot = reinterpret_cast<PDUShoot*>(buff + complete_len);
-				players[pdu_shoot->id]->shoot(pdu_shoot->dir);
+				player = players[pdu_shoot->id];
+				if (player)
+					player->shoot(pdu_shoot->dir);
 				complete_len += sizeof(PDUShoot);
 				break;
 
 			case HIT:
 				pdu_hit = reinterpret_cast<PDUHit*>(buff + complete_len);
-				players[pdu_hit->id]->hit();
+				player = players[pdu_hit->id];
+				if (player)
+					player->hit();
 				complete_len += sizeof(PDUHit);
 				break;
 
 			case DIE:
 				pdu_die = reinterpret_cast<PDUDie*>(buff + complete_len);
-				delete players[pdu_die->id];
+				player = players[pdu_die->id];
+				if (player)
+					delete players[pdu_die->id];
 				players.erase(pdu_die->id);
 				complete_len += sizeof(PDUDie);
 				break;
@@ -165,17 +187,18 @@ int main()
 			}
 		} while (bRet);
 
-		PDUHello pdu_hello;
-		pdu_hello.chracter = NULL;
-		cout << " 영어 알파벳 문자로 캐릭터 선택 : ";	
-		while (pdu_hello.chracter < 0x41 || (0x5a < pdu_hello.chracter && pdu_hello.chracter < 0x61) || 0x7a < pdu_hello.chracter)
-			pdu_hello.chracter = _getch();
-
-		thread(receive, sock).detach();
-
 		graphic.clear_frame();
 		graphic.draw_field();
 		graphic.start();
+
+		thread(receive, sock).detach();
+
+		// 영문 문자로 캐릭터 선택
+		PDUHello pdu_hello;
+		pdu_hello.chracter = NULL;
+		while (pdu_hello.chracter < 0x41 || (0x5a < pdu_hello.chracter && pdu_hello.chracter < 0x61) || 0x7a < pdu_hello.chracter)
+			pdu_hello.chracter = _getch();
+
 
 		send(sock, reinterpret_cast<const char*>(&pdu_hello), sizeof(PDUHello), NULL);
 

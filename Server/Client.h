@@ -43,7 +43,7 @@ private:
 	clock_t last_shoot;
 
 public:
-	Client(COORD pos);
+	Client(ClientContext context, COORD pos);
 
 	int getHP() const;
 	char getChracter() const;

@@ -148,13 +148,14 @@ int main()
 		}
 		cout << " Client " << clientSocket << " accepted" << endl;
 
-		Client* client = new Client(COORD{ (SHORT)(rand() % field_width + 1), (SHORT)(rand() % field_height + 1) });
+		// 클라이언트 생성 후 리스트에 등록
+		ClientContext client_context;
+		client_context.socket = clientSocket;
+		client_context.dataBuffer.len = 1024;
+		client_context.overlapped.hEvent = NULL;
+		Client* client = new Client(client_context,
+									COORD{ (SHORT)(rand() % field_width + 1), (SHORT)(rand() % field_height + 1) });
 		clients.push_front(client);
-
-		client->context.socket = clientSocket;
-		client->context.dataBuffer.buf = client->context.buffer;
-		client->context.dataBuffer.len = 1024;
-		client->context.overlapped.hEvent = NULL;
 
 		// 클라이언트 소켓을 완료 포트에 연결
 		CreateIoCompletionPort(reinterpret_cast<HANDLE>(clientSocket), completionPort, reinterpret_cast<ULONG_PTR>(client), 0);
