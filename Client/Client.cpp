@@ -71,9 +71,12 @@ void receive(SOCKET sock)
 				
 				if (!my_id) // 첫빠다로 받은 hello 패킷이라면
 					my_id = pdu_hello->id; // 이 패킷의 id값은 나의 아이디
+				else if (my_id == pdu_hello->id) // 첫빠다는 아니지만 내 아이디의 hello 라면
+					// 내 캐릭터 정보
+					players[pdu_hello->id] = new Player(pdu_hello->pos, pdu_hello->HP, pdu_hello->chracter, true);
 				else // 그 외엔
 					// 다른사람거
-					players[pdu_hello->id] = new Player(pdu_hello->pos, pdu_hello->HP, pdu_hello->chracter);
+					players[pdu_hello->id] = new Player(pdu_hello->pos, pdu_hello->HP, pdu_hello->chracter, false);
 				complete_len += sizeof(PDUHello);
 				break;
 		

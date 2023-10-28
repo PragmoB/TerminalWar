@@ -11,7 +11,7 @@
 extern Graphic graphic;
 extern Sound sound;
 
-Player::Player(COORD pos, int HP, char chracter) : chracter(chracter), HP(HP)
+Player::Player(COORD pos, int HP, char chracter, bool me) : chracter(chracter), HP(HP), me(me)
 {
 	// 화면에 캐릭터 첫 표시
 	pos.X *= 2; // 가로방향 이동은 2칸씩임을 고려함
@@ -41,7 +41,11 @@ void Player::appear()
 
 	/* 출력 */
 
-	graphic.draw(pos, chracter, GREEN);
+	if (me)
+		graphic.draw(pos, chracter, GREEN);
+	else
+		graphic.draw(pos, chracter);
+
 	graphic.draw(pos_temp, "\u2665", DARK_RED); // 빨간색 하트
 	pos_temp.X += 2;
 	graphic.draw(pos_temp, HP_str, SKY_BLUE);
@@ -92,6 +96,11 @@ void Player::hit()
 	HP -= 10;
 	graphic.draw(pos, '*', RED);
 	sound.hit();
+}
+
+bool Player::is_me()
+{
+	return me;
 }
 
 Player::~Player()
