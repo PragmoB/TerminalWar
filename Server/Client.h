@@ -27,14 +27,25 @@ class Client
 public:
 	ClientContext context;
 private:
+	// 체력
+	int HP;
+
+	// 캐릭터(영문 알파벳 한 글자)
 	char chracter;
+
+	// 현재 위치
 	COORD pos;
+
+	// 마지막으로 움직인 시간
 	clock_t last_mov;
+
+	// 마지막으로 총 쏜 시간
 	clock_t last_shoot;
 
 public:
 	Client(COORD pos);
 
+	int getHP() const;
 	char getChracter() const;
 	COORD getPos() const;
 	

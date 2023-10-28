@@ -13,9 +13,13 @@ std::list<Client*> clients;
 extern Background background;
 
 Client::Client(COORD pos)
-: pos(pos), last_mov(0), last_shoot(0), chracter(NULL)
+: pos(pos), HP(100), last_mov(0), last_shoot(0), chracter(NULL)
 { }
 
+int Client::getHP() const
+{
+	return HP;
+}
 char Client::getChracter() const
 {
 	return chracter;
@@ -29,6 +33,7 @@ void Client::apply_hello_of(Client* client)
 {
 	PDUHello pdu;
 	pdu.id = (DWORD)client->context.socket;
+	pdu.HP = client->getHP();
 	pdu.chracter = client->getChracter();
 	pdu.pos = client->getPos();
 
@@ -54,6 +59,7 @@ void Client::apply_hit_of(Client* client)
 {
 	PDUHit pdu;
 	pdu.id = (DWORD)client->context.socket;
+	pdu.damage = 10;
 	
 	send(context.socket, reinterpret_cast<const char*>(&pdu), sizeof(PDUHit), NULL);
 }
@@ -150,6 +156,12 @@ uint32_t Client::shoot(DIRECTION dir)
 }
 void Client::hit()
 {
+	HP -= 10; // 맞아서 체력 감소
+	if (HP <= 0)
+	{
+		// 연결 끊기
+		closesocket(context.socket);
+	}
 	for (std::list<Client*>::iterator iter = clients.begin();
 		iter != clients.end(); iter++)
 		(*iter)->apply_hit_of(this);

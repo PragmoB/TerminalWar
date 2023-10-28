@@ -19,6 +19,8 @@ enum COLOR {
 class Graphic
 {
 private:
+	bool started;
+
 	// 그래픽 객체가 쓰는 콘솔 화면
 	HANDLE console_buffer;
 	// console_buffer 동기화 담당 뮤텍스
@@ -34,9 +36,11 @@ public:
 	
 	Graphic();
 	
+	bool is_started() const;
+
 	/* pos위치에 color색상으로 value출력 */
-	void draw(COORD pos, char value, COLOR color, COLOR bgcolor = BLACK);
-	void draw(COORD pos, const char* value, COLOR color, COLOR bgcolor = BLACK);
+	void draw(COORD pos, char value, COLOR color = GRAY, COLOR bgcolor = BLACK);
+	void draw(COORD pos, const char* value, COLOR color = GRAY, COLOR bgcolor = BLACK);
 
 	/* 그래픽 가동 시작 */
 	void start();

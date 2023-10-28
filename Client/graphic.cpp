@@ -13,7 +13,7 @@ using namespace std;
 // 게임 그래픽 엔진
 Graphic graphic;
 
-Graphic::Graphic() : fire_queue(50)
+Graphic::Graphic() : fire_queue(50), started(false)
 {
 	console_buffer = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE,
 		0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
@@ -27,6 +27,14 @@ Graphic::Graphic() : fire_queue(50)
 	rect.Right = win_coords.X - 1;
 	rect.Bottom = win_coords.Y - 1;
 	SetConsoleWindowInfo(console_buffer, TRUE, &rect);
+
+	for (uint32_t i = 0; i < 10; i++)
+		bullet_renderers[i] = std::thread(&Graphic::render_bullet, this);
+}
+
+bool Graphic::is_started() const
+{
+	return started;
 }
 
 /* 그래픽 가동 시작 */
@@ -38,29 +46,21 @@ void Graphic::start()
 	SetConsoleCursorInfo(console_buffer, &cursorInfo);
 	SetConsoleActiveScreenBuffer(console_buffer);
 
-	for (uint32_t i = 0; i < 10; i++)
-		bullet_renderers[i] = std::thread(&Graphic::render_bullet, this);
+	started = true;
 }
 
 /* 그래픽 가동 중지 */
 void Graphic::stop()
 {
 	SetConsoleActiveScreenBuffer(GetStdHandle(STD_OUTPUT_HANDLE));
-	for (uint32_t i = 0; i < 10; i++)
-		bullet_renderers[i].~thread();
+
+	started = false;
 }
 
 void Graphic::draw(COORD pos, char value, COLOR color, COLOR bgcolor)
 {
-	DWORD dw;
-
-	mtx_console_buffer.lock();
-
-		SetConsoleTextAttribute(console_buffer, (bgcolor << 4) | color);
-		SetConsoleCursorPosition(console_buffer, pos);
-		WriteConsoleA(console_buffer, &value, 1, &dw, NULL);
-
-	mtx_console_buffer.unlock();
+	char temp[2] = { value, NULL };
+	draw(pos, temp, color, bgcolor);
 }
 
 void Graphic::draw(COORD pos, const char* value, COLOR color, COLOR bgcolor)
@@ -86,7 +86,15 @@ void Graphic::render_bullet()
 /* 경기장 화면 초기화 */
 void Graphic::clear_frame()
 {
-	
+	COORD coordScreen = { 0, 0 };
+	DWORD cCharsWritten;
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	DWORD dwConSize;
+
+	GetConsoleScreenBufferInfo(console_buffer, &csbi);
+	dwConSize = csbi.dwSize.X * csbi.dwSize.Y;
+	FillConsoleOutputCharacter(console_buffer, ' ', dwConSize, coordScreen, &cCharsWritten);
+	SetConsoleCursorPosition(console_buffer, coordScreen);
 }
 
 /* 경기장 그리기 */
@@ -103,7 +111,7 @@ void Graphic::draw_field()
 
 	/* 왼쪽, 오른쪽 변 그리기 */
 
-	for (SHORT i = field.Top + 1; i < field.Bottom; i++)
+	for (SHORT i = field.Top + 1; i < field.Bottom + 1; i++)
 	{
 		draw(COORD{ field.Left, i }, ':', GREEN, GREEN);
 		draw(COORD{ field.Left + 2 * field_width, i }, ':', GREEN, GREEN);
@@ -115,5 +123,5 @@ void Graphic::draw_field()
 		buff[i] = ':';
 	
 	buff[2 * field_width + 2] = NULL;
-	draw(COORD{ field.Left, field.Bottom }, buff, GREEN, GREEN);
+	draw(COORD{ field.Left, field.Bottom + 1 }, buff, GREEN, GREEN); // field.Bottom + 1 => 체력 상태 표시줄을 고려
 }

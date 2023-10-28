@@ -12,6 +12,7 @@ typedef struct PDUHello
 {
 	const BYTE type = HELLO;
 	DWORD id;
+	int HP;
 	char chracter;
 	COORD pos;
 } PDUHello;
@@ -34,6 +35,7 @@ typedef struct PDUHit
 {
 	const BYTE type = HIT;
 	DWORD id;
+	int damage;
 } PDUHit;
 // Á¢¼Ó ²÷¾îÁü ¶Ç´Â Á×À½, Å¬¶ó <= ¼­¹ö
 typedef struct PDUDie

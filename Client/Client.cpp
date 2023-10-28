@@ -33,11 +33,8 @@ void receive(SOCKET sock)
 		int len = recv(sock, buff, 1000, NULL);
 		if (len <= 0)
 		{
-			system("cls");
-			cerr << endl;
-			cerr << " 연결에 오류가 생겼습니다" << endl;
-			_getch();
-			exit(1);
+			graphic.stop();
+			return;
 		}
 
 		PDUHello* pdu_hello;
@@ -63,7 +60,7 @@ void receive(SOCKET sock)
 			case HELLO:
 				// 버그수정 : <PDUHello*>(buff) => <PDUHello*>(buff + complete_len).
 				pdu_hello = reinterpret_cast<PDUHello*>(buff + complete_len);	// 이거 찾는데 얼마나 qudtls같이 헛고생을 많이 했는지 당사자 아닌사람은 모를거다ㅠㅠ 별거 아닌거 같이 보여도 실시간 온라인게임이라 디버깅하기가 진짜 어렵다.
-				players[pdu_hello->id] = new Player(pdu_hello->pos, pdu_hello->chracter);
+				players[pdu_hello->id] = new Player(pdu_hello->pos, pdu_hello->HP, pdu_hello->chracter);
 				complete_len += sizeof(PDUHello);
 				break;
 		
@@ -100,7 +97,6 @@ int main()
 {
 	SetConsoleTitleA("Terminal War");
 
-	cout << endl;
 
 	WSADATA wsaData;
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
@@ -110,90 +106,112 @@ int main()
 		return 1;
 	}
 
-	SOCKET sock = WSASocket(PF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
-	if (sock == INVALID_SOCKET)
-	{
-		cerr << " socket error : " << WSAGetLastError() << endl;
-		_getch();
-		return 1;
-	}
-	unsigned long mode = 0; // 0은 블로킹 모드, 1은 논블로킹 모드
-	int result = ioctlsocket(sock, FIONBIO, &mode);
-	if (result != NO_ERROR)
-	{
-		cerr << " ioctlsocket error : " << WSAGetLastError() << endl;
-		_getch();
-		return 1;
-	}
-
-	SOCKADDR_IN recvAddr;
-	memset(&recvAddr, 0, sizeof(recvAddr));
-	recvAddr.sin_family = AF_INET;
-	recvAddr.sin_port = htons(PORT);
-
-	int bRet;
-	do
-	{
-		char IP[20] = "";
-		cout << " 서버 IP : ";	cin >> IP;
-		inet_pton(AF_INET, IP, &(recvAddr.sin_addr.s_addr));
-
-		bRet = connect(sock, (SOCKADDR*)&recvAddr, sizeof(recvAddr));
-		if (bRet == SOCKET_ERROR)
-		{
-			cerr << " connect error : " << WSAGetLastError() << endl;
-			_getch();
-			system("cls");
-			cout << endl;
-		}
-	} while (bRet);
-
-	PDUHello pdu_hello;
-	pdu_hello.chracter = NULL;
-	cout << " 영어 알파벳 문자로 캐릭터 선택 : ";	
-	while (pdu_hello.chracter < 0x41 || (0x5a < pdu_hello.chracter && pdu_hello.chracter < 0x61) || 0x7a < pdu_hello.chracter)
-		pdu_hello.chracter = _getch();
-
-	thread(receive, sock).detach();
-
-	graphic.start();
-	graphic.clear_frame();
-	graphic.draw_field();
-
-	send(sock, reinterpret_cast<const char*>(&pdu_hello), sizeof(PDUHello), NULL);
-
-	unsigned char inputs[] = { 'W', 'A', 'S', 'D', VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, NULL };
-
-	// 움직임
 	while (1)
 	{
-		for (int i = 0; inputs[i]; i++)
-			// 키가 눌려있는 상태라면
-			if (GetKeyState(inputs[i]) & 0x8000)
+		// 화면 지우기
+		{
+			HANDLE console_buffer = GetStdHandle(STD_OUTPUT_HANDLE);
+			COORD coordScreen = { 0, 0 };
+			DWORD cCharsWritten;
+			CONSOLE_SCREEN_BUFFER_INFO csbi;
+			DWORD dwConSize;
+
+			GetConsoleScreenBufferInfo(console_buffer, &csbi);
+			dwConSize = csbi.dwSize.X * csbi.dwSize.Y;
+			FillConsoleOutputCharacter(console_buffer, ' ', dwConSize, coordScreen, &cCharsWritten);
+			SetConsoleCursorPosition(console_buffer, coordScreen);
+		}
+		cout << endl;
+
+		// 입력버퍼 비우기
+		while (_kbhit())
+			_getch();
+
+		SOCKET sock = WSASocket(PF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+		if (sock == INVALID_SOCKET)
+		{
+			cerr << " socket error : " << WSAGetLastError() << endl;
+			_getch();
+			return 1;
+		}
+		unsigned long mode = 0; // 0은 블로킹 모드, 1은 논블로킹 모드
+		int result = ioctlsocket(sock, FIONBIO, &mode);
+		if (result != NO_ERROR)
+		{
+			cerr << " ioctlsocket error : " << WSAGetLastError() << endl;
+			_getch();
+			return 1;
+		}
+
+		SOCKADDR_IN recvAddr;
+		memset(&recvAddr, 0, sizeof(recvAddr));
+		recvAddr.sin_family = AF_INET;
+		recvAddr.sin_port = htons(PORT);
+
+		int bRet;
+		do
+		{
+			char IP[20] = "";
+			cout << " 서버 IP : ";	cin >> IP;
+			inet_pton(AF_INET, IP, &(recvAddr.sin_addr.s_addr));
+
+			bRet = connect(sock, (SOCKADDR*)&recvAddr, sizeof(recvAddr));
+			if (bRet == SOCKET_ERROR)
 			{
-				PDUMov pdu_mov;
-				PDUShoot pdu_shoot;
-
-				char* buff = NULL;
-				int len = 0;
-
-				switch (inputs[i])
-				{
-				case 'W': pdu_mov.dir = UP;	len = sizeof(PDUMov); buff = (char*)&pdu_mov; break;
-				case 'A': pdu_mov.dir = LEFT; len = sizeof(PDUMov); buff = (char*)&pdu_mov; break;
-				case 'S': pdu_mov.dir = DOWN; len = sizeof(PDUMov); buff = (char*)&pdu_mov; break;
-				case 'D': pdu_mov.dir = RIGHT; len = sizeof(PDUMov); buff = (char*)&pdu_mov; break;
-
-				case VK_UP: pdu_shoot.dir = UP; len = sizeof(PDUShoot); buff = (char*)&pdu_shoot; break;
-				case VK_DOWN: pdu_shoot.dir = DOWN; len = sizeof(PDUShoot); buff = (char*)&pdu_shoot; break;
-				case VK_LEFT: pdu_shoot.dir = LEFT; len = sizeof(PDUShoot); buff = (char*)&pdu_shoot; break;
-				case VK_RIGHT: pdu_shoot.dir = RIGHT; len = sizeof(PDUShoot); buff = (char*)&pdu_shoot; break;
-				}
-				
-				send(sock, buff, len, NULL);
+				cerr << " connect error : " << WSAGetLastError() << endl;
+				_getch();
+				system("cls");
+				cout << endl;
 			}
+		} while (bRet);
 
-		Sleep(30);
+		PDUHello pdu_hello;
+		pdu_hello.chracter = NULL;
+		cout << " 영어 알파벳 문자로 캐릭터 선택 : ";	
+		while (pdu_hello.chracter < 0x41 || (0x5a < pdu_hello.chracter && pdu_hello.chracter < 0x61) || 0x7a < pdu_hello.chracter)
+			pdu_hello.chracter = _getch();
+
+		thread(receive, sock).detach();
+
+		graphic.clear_frame();
+		graphic.draw_field();
+		graphic.start();
+
+		send(sock, reinterpret_cast<const char*>(&pdu_hello), sizeof(PDUHello), NULL);
+
+		unsigned char inputs[] = { 'W', 'A', 'S', 'D', VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, NULL };
+
+		// 움직임
+		while (graphic.is_started()) // 게임이 진행되는 중에 반복
+		{
+			for (int i = 0; inputs[i]; i++)
+				// 키가 눌려있는 상태라면
+				if (GetKeyState(inputs[i]) & 0x8000)
+				{
+					PDUMov pdu_mov;
+					PDUShoot pdu_shoot;
+
+					char* buff = NULL;
+					int len = 0;
+
+					switch (inputs[i])
+					{
+					case 'W': pdu_mov.dir = UP;	len = sizeof(PDUMov); buff = (char*)&pdu_mov; break;
+					case 'A': pdu_mov.dir = LEFT; len = sizeof(PDUMov); buff = (char*)&pdu_mov; break;
+					case 'S': pdu_mov.dir = DOWN; len = sizeof(PDUMov); buff = (char*)&pdu_mov; break;
+					case 'D': pdu_mov.dir = RIGHT; len = sizeof(PDUMov); buff = (char*)&pdu_mov; break;
+
+					case VK_UP: pdu_shoot.dir = UP; len = sizeof(PDUShoot); buff = (char*)&pdu_shoot; break;
+					case VK_DOWN: pdu_shoot.dir = DOWN; len = sizeof(PDUShoot); buff = (char*)&pdu_shoot; break;
+					case VK_LEFT: pdu_shoot.dir = LEFT; len = sizeof(PDUShoot); buff = (char*)&pdu_shoot; break;
+					case VK_RIGHT: pdu_shoot.dir = RIGHT; len = sizeof(PDUShoot); buff = (char*)&pdu_shoot; break;
+					}
+				
+					send(sock, buff, len, NULL);
+				}
+
+			Sleep(30);
+		}
 	}
 }
 
