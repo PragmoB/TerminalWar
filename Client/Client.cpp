@@ -204,10 +204,12 @@ int main()
 
 		unsigned char inputs[] = { 'W', 'A', 'S', 'D', VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, NULL };
 
+		HWND console_wnd = GetConsoleWindow();
+
 		// 움직임
 		while (graphic.is_started()) // 게임이 진행되는 중에 반복
 		{
-			for (int i = 0; inputs[i]; i++)
+			for (int i = 0; inputs[i] && console_wnd == GetForegroundWindow(); i++)
 				// 키가 눌려있는 상태라면
 				if (GetKeyState(inputs[i]) & 0x8000)
 				{
