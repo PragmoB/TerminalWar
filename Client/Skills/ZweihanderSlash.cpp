@@ -5,8 +5,8 @@
 
 extern Graphic graphic;
 
-const int ZweihanderSlash::DAMAGE[] = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
-const int ZweihanderSlash::COOLDOWN[] = { 170, 170, 170, 170, 170, 170, 170, 170, 170, 170 };
+const int ZweihanderSlash::DAMAGE[] = { 120, 126, 132, 138, 144, 151, 158, 165, 173, 181 };
+const int ZweihanderSlash::COOLDOWN[] = { 788, 710, 639, 576, 519, 468, 422, 380, 342, 308 };
 
 ZweihanderSlash::ZweihanderSlash(const Player* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
 	: Slash(owner, level, type, MAX_LEVEL)
@@ -21,16 +21,14 @@ bool ZweihanderSlash::cast(DIRECTION dir)
 		return false;
 
 	const COORD pos = owner->get_pos();
+	COORD pos_temp = pos;
 
-	COORD pos_temp;
-
-	pos_temp = pos;
+	static const int frames_delay[] = { 30, 30, 20, 10, 10, 10, 150, 0, NULL };
 
 	switch (dir)
 	{
 	case UP:
 	{
-		static const int up_frames_delay[] = { 50, 1, 1, 1, 1, 1, 150, 0 };
 		// [i][j] = i번째 프레임의 j번째 이펙트의 상대 좌표.
 		// 상대 좌표라 함은 COORD{0, 0}이 중심인 좌표계에서 표현된 좌표값이다.
 		static const COORD up_frames_pos[][9] = {
@@ -65,14 +63,13 @@ bool ZweihanderSlash::cast(DIRECTION dir)
 				graphic.draw_in_field(pos_temp, up_frames[i][j]);
 			}
 
-			Sleep(up_frames_delay[i]);
+			Sleep(frames_delay[i]);
 		}
 		break;
 
 	}
 	case DOWN:
 	{
-		static const int down_frames_delay[] = { 50, 1, 1, 1, 1, 1, 150, 0 };
 		// [i][j] = i번째 프레임의 j번째 이펙트의 상대 좌표.
 		// 상대 좌표라 함은 COORD{0, 0}이 중심인 좌표계에서 표현된 좌표값이다.
 		static const COORD down_frames_pos[][9] = {
@@ -107,7 +104,7 @@ bool ZweihanderSlash::cast(DIRECTION dir)
 				graphic.draw_in_field(pos_temp, down_frames[i][j]);
 			}
 
-			Sleep(down_frames_delay[i]);
+			Sleep(frames_delay[i]);
 		}
 		break;
 
@@ -116,8 +113,6 @@ bool ZweihanderSlash::cast(DIRECTION dir)
 	{
 		/* 스킬 애니메이션 정의. 참고)스킬 애니메이션은 그냥 쌩노다가이므로 참고할것 */
 
-		// [i] = i번째 프레임의 딜레이
-		static const int left_frames_delay[] = { 50, 1, 1, 1, 1, 1, 150, 0 };
 		// [i][j] = i번째 프레임의 j번째 이펙트의 상대 좌표.
 		// 상대 좌표라 함은 COORD{0, 0}이 중심인 좌표계에서 표현된 좌표값이다.
 		static const COORD left_frames_pos[][9] = {
@@ -153,13 +148,12 @@ bool ZweihanderSlash::cast(DIRECTION dir)
 				graphic.draw_in_field(pos_temp, left_frames[i][j]);
 			}
 
-			Sleep(left_frames_delay[i]);
+			Sleep(frames_delay[i]);
 		}
 		break;
 	}
 	case RIGHT:
 	{
-		static const int right_frames_delay[] = { 50, 1, 1, 1, 1, 1, 150, 0 };
 		static const COORD right_frames_pos[][9] = {
 		   { COORD{-1, -1}, COORD{-2, -2}, COORD{-4, -3} },
 		   { COORD{-1, -1}, COORD{-2, -2}, COORD{-3, -3}, COORD{-3, -4} },
@@ -192,7 +186,7 @@ bool ZweihanderSlash::cast(DIRECTION dir)
 				graphic.draw_in_field(pos_temp, right_frames[i][j]);
 			}
 
-			Sleep(right_frames_delay[i]);
+			Sleep(frames_delay[i]);
 		}
 		break;
 	}

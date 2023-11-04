@@ -5,10 +5,10 @@
 
 extern std::list<Client*> clients;
 
-const int LightsaberSlash::DAMAGE[] = { 20, 20, 20, 20, 20, 20, 20, 20, 20, 20 };
-const int LightsaberSlash::COOLDOWN[] = { 170, 170, 170, 170, 170, 170, 170, 170, 170, 170 };
+const int LightsaberSlash::DAMAGE[] = { 240, 252, 264, 277, 290, 304, 319, 334, 350, 367 };
+const int LightsaberSlash::COOLDOWN[] = { 788, 710, 639, 576, 519, 468, 422, 380, 342, 308 };
 
-LightsaberSlash::LightsaberSlash(const Client* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
+LightsaberSlash::LightsaberSlash(Client* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
 	: Slash(owner, level, type, MAX_LEVEL)
 {
 	damage = DAMAGE[level - 1];
@@ -21,7 +21,8 @@ bool LightsaberSlash::cast(DIRECTION dir)
 		return false;
 
 	const COORD pos = owner->get_pos();
-	static const int delay[] = { 50, 1, 1, 1, 1, 1, 150, NULL };
+	static const int delay[] = { 50, 20, 20, 10, 10, 10, 0, NULL };
+	owner->bind(120);
 
 	/* pos를 기준으로 피격 범위(hitting box) 정의 */
 

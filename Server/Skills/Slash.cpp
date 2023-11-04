@@ -5,10 +5,10 @@
 
 extern std::list<Client*> clients;
 
-const int Slash::DAMAGE[] = { 10, 10, 10, 10, 10 };
-const int Slash::COOLDOWN[] = { 170, 170, 170, 170, 170 };
+const int Slash::DAMAGE[] = { 100, 105, 110, 115, 120 };
+const int Slash::COOLDOWN[] = { 1200, 1080, 972, 875, 788 };
 
-Slash::Slash(const Client* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
+Slash::Slash(Client* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
 	: Skill(owner, level, type, MAX_LEVEL)
 {
 	damage = DAMAGE[level - 1];
@@ -22,7 +22,8 @@ bool Slash::cast(DIRECTION dir)
 
 	const COORD pos = owner->get_pos();
 
-	static const int delay[] = { 50, 1, 1, 1, 1, 1, 150, NULL };
+	static const int delay[] = { 50, 20, 20, 10, 10, 10, 0, NULL };
+	owner->bind(120);
 
 	/* pos를 기준으로 피격 범위(hitting box) 정의 */
 

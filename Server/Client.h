@@ -31,25 +31,22 @@ public:
 	ClientContext context;
 private:
 	// 체력
-	int HP;
+	int HP = 999;
 
 	// 캐릭터(영문 알파벳 한 글자)
-	char chracter;
+	char chracter = NULL;
 
 	// 현재 위치
 	COORD pos;
 
-	// 마지막으로 움직인 시간
-	clock_t last_mov;
-
-	// 마지막으로 총 쏜 시간
-	clock_t last_shoot;
+	// 이동 가능한 시간
+	clock_t next_able_mov_time = 0;
 
 	// 가지고 있는 액티브 스킬
 	Skill* active_skills[MAX_ACTIVE_SKILL];
 
 	// 가지고 있는 액티브 스킬 수
-	int len_active_skills;
+	int len_active_skills = 0;
 public:
 	Client(ClientContext context, COORD pos);
 
@@ -74,6 +71,8 @@ public:
 	// client가 죽었음을 반영함
 	void apply_die_of(const Client* client);
 
+	// time밀리초만큼 발이 묶임(못움직임)
+	void bind(clock_t time);
 	// 움직임
 	bool move(DIRECTION dir);
 	// 스킬 사용

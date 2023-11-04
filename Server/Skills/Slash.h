@@ -11,7 +11,7 @@ private:
 	static const int DAMAGE[5];
 	static const int COOLDOWN[5];
 public:
-	Slash(const Client* owner, int level = 1, SKILL_TYPE type = SLASH, int MAX_LEVEL = 5);
+	Slash(Client* owner, int level = 1, SKILL_TYPE type = SLASH, int MAX_LEVEL = 5);
 	virtual bool cast(DIRECTION dir);
 	virtual void level_up();
 };

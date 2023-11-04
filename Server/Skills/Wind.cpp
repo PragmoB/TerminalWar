@@ -7,14 +7,18 @@
 extern std::list<Client*> clients;
 extern Background background;
 
-const int Wind::DAMAGE[] = { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 };
-const int Wind::COOLDOWN[] = { 170, 170, 170, 170, 170, 170, 170, 170, 170, 170 };
+const int Wind::DAMAGE[] = { 60, 63, 66, 69, 72, 75, 78, 81, 85, 89 };
+const int Wind::COOLDOWN[] = { 788, 710, 639, 576, 519, 468, 422, 380, 342, 308 };
+const int Wind::BPS[] = { 25, 26, 27, 28, 29, 30, 31, 32, 33, 34 };
+const int Wind::DISTANCE[] = { 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };
 
-Wind::Wind(const Client* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
+Wind::Wind(Client* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
 	: Skill(owner, level, type, MAX_LEVEL)
 {
 	damage = DAMAGE[level - 1];
 	cooldown = COOLDOWN[level - 1];
+	bps = BPS[level - 1];
+	distance = DISTANCE[level - 1];
 }
 
 bool Wind::cast(DIRECTION dir)
@@ -23,9 +27,6 @@ bool Wind::cast(DIRECTION dir)
 		return false;
 
 	const COORD pos = owner->get_pos();
-
-	static const int distance = 6;
-	static const int delay = 12;
 
 	static const COORD up_hitting_box[] = {
 		COORD{-2, -1}, COORD{-1, -2}, COORD{ 0, -2}, COORD{ 1, -2}, COORD{ 2, -1}, COORD{NULL, NULL}
@@ -83,7 +84,7 @@ bool Wind::cast(DIRECTION dir)
 			}
 		}
 
-		Sleep(delay);
+		Sleep(1000 / bps);
 	}
 
 	return true;

@@ -17,7 +17,7 @@ protected:
 	int bps; // the valocity of the bullet. blocks per second
 	int distance; // 날아갈 거리
 public:
-	Shoot(const Client* owner, int level = 1, SKILL_TYPE type = SHOOT, int MAX_LEVEL = 5);
+	Shoot(Client* owner, int level = 1, SKILL_TYPE type = SHOOT, int MAX_LEVEL = 5);
 	virtual bool cast(DIRECTION dir);
 	virtual void level_up();
 

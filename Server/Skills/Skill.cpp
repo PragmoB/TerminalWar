@@ -3,7 +3,7 @@
 
 #include <ctime>
 
-Skill::Skill(const Client* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
+Skill::Skill(Client* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
 	: owner(owner), level(level), type(type), MAX_LEVEL(MAX_LEVEL)
 {
 
@@ -33,6 +33,10 @@ int Skill::get_damage() const
 int Skill::get_cooldown() const
 {
 	return cooldown;
+}
+Client* Skill::get_owner() const
+{
+	return owner;
 }
 
 void Skill::level_up()

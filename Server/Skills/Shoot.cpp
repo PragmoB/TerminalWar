@@ -5,12 +5,12 @@
 
 extern std::list<Client*> clients;
 
-const int Shoot::DAMAGE[] = { 10, 10, 10, 10, 10 };
-const int Shoot::COOLDOWN[] = { 170, 170, 170, 170, 170 };
-const int Shoot::BPS[] = { 25, 25, 25, 25, 25 };
-const int Shoot::DISTANCE[] = { 10, 10, 10, 10, 10 };
+const int Shoot::DAMAGE[] = { 100, 105, 110, 115, 120 };
+const int Shoot::COOLDOWN[] = { 1200, 1080, 972, 875, 788 };
+const int Shoot::BPS[] = { 25, 26, 27, 28, 29 };
+const int Shoot::DISTANCE[] = { 10, 11, 12, 13, 14 };
 
-Shoot::Shoot(const Client* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
+Shoot::Shoot(Client* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
 	: Skill(owner, level, type, MAX_LEVEL)
 {
 	damage = DAMAGE[level - 1];
@@ -40,6 +40,7 @@ bool Shoot::cast(DIRECTION dir)
 		return false;
 
 	COORD pos = owner->get_pos();
+	owner->bind(40);
 
 	int remain_distance = distance;
 

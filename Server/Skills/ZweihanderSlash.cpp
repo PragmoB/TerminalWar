@@ -5,10 +5,10 @@
 
 extern std::list<Client*> clients;
 
-const int ZweihanderSlash::DAMAGE[] = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
-const int ZweihanderSlash::COOLDOWN[] = { 170, 170, 170, 170, 170, 170, 170, 170, 170, 170 };
+const int ZweihanderSlash::DAMAGE[] = { 120, 126, 132, 138, 144, 151, 158, 165, 173, 181 };
+const int ZweihanderSlash::COOLDOWN[] = { 788, 710, 639, 576, 519, 468, 422, 380, 342, 308 };
 
-ZweihanderSlash::ZweihanderSlash(const Client* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
+ZweihanderSlash::ZweihanderSlash(Client* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
 	: Slash(owner, level, type, MAX_LEVEL)
 {
 	damage = DAMAGE[level - 1];
@@ -22,7 +22,8 @@ bool ZweihanderSlash::cast(DIRECTION dir)
 
 	const COORD pos = owner->get_pos();
 
-	static const int delay[] = { 1, 1, 1, 1, 1, 1, 0, NULL };
+	static const int delay[] = { 50, 20, 20, 10, 10, 10, 0, NULL };
+	owner->bind(120);
 
 	/* pos를 기준으로 피격 범위(hitting box) 정의 */
 

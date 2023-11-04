@@ -5,8 +5,8 @@
 
 extern Graphic graphic;
 
-const int WindSlash::DAMAGE[] = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
-const int WindSlash::COOLDOWN[] = { 170, 170, 170, 170, 170, 170, 170, 170, 170, 170 };
+const int WindSlash::DAMAGE[] = { 120, 126, 132, 138, 144, 151, 158, 165, 173, 181 };
+const int WindSlash::COOLDOWN[] = { 788, 710, 639, 576, 519, 468, 422, 380, 342, 308 };
 
 WindSlash::WindSlash(const Player* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
 	: Slash(owner, level, type, MAX_LEVEL), wind(owner)

@@ -17,16 +17,17 @@ private:
 protected:
 	int damage;
 	int cooldown;
+	Client* owner;
 public:
 	const int MAX_LEVEL;
-	const Client* owner;
 	const SKILL_TYPE type;
 
-	Skill(const Client* owner, int level, SKILL_TYPE type, int MAX_LEVEL);
+	Skill(Client* owner, int level, SKILL_TYPE type, int MAX_LEVEL);
 
 	virtual bool cast(DIRECTION dir);
 	virtual void level_up();
 	int get_level() const;
 	int get_damage() const;
 	int get_cooldown() const;
+	Client* get_owner() const;
 };

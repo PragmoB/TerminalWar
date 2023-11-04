@@ -19,7 +19,7 @@ std::list<Client*> clients;
 extern Background background;
 
 Client::Client(ClientContext context, COORD pos)
-: context(context), pos(pos), HP(999), last_mov(0), last_shoot(0), chracter(NULL), len_active_skills(0)
+: context(context), pos(pos)
 {
 	this->context.dataBuffer.buf = this->context.buffer;
 
@@ -99,7 +99,7 @@ void Client::apply_cast_skill_of(const Client* client, SKILL_TYPE skill_type, DI
 void Client::apply_hit_of(const Client* client, const Skill* skill)
 {
 	PDUHit pdu;
-	pdu.attacker_id = (DWORD)skill->owner->context.socket;
+	pdu.attacker_id = (DWORD)skill->get_owner()->context.socket;
 	pdu.victim_id = (DWORD)client->context.socket;
 	pdu.skill_type = skill->type;
 	
@@ -132,11 +132,19 @@ void Client::hello(char chracter)
 	}
 }
 
+void Client::bind(clock_t time)
+{
+	const clock_t now = clock();
+
+	// 이동제한이 목적이므로 변경 후의 이동가능 시간은 무조건 더 커야함
+	if (next_able_mov_time < now + time)
+		next_able_mov_time = now + time;
+}
 bool Client::move(DIRECTION dir)
 {
-	const uint32_t now = clock();
+	const clock_t now = clock();
 	
-	if (now - last_mov < 80) // 움직임을 80ms마다 한 번으로 제한
+	if (now < next_able_mov_time) // 이동속도 제한
 		return false;
 	if (!chracter) // hello를 하기 전이면 움직일 수 없음
 		return false;
@@ -153,7 +161,7 @@ bool Client::move(DIRECTION dir)
 
 	static std::mutex m;
 	m.lock();
-	last_mov = now;
+		next_able_mov_time = now + 80; // 움직임을 80ms마다 한 번으로 제한
 	m.unlock();
 
 	// 고객님들께 반영
@@ -176,11 +184,6 @@ bool Client::cast_skill(SKILL_TYPE skill_type, DIRECTION dir)
 	default :
 		return false; // 방향 값이 잘못된 경우 미승인
 	}
-
-	static std::mutex m;
-	m.lock();
-		last_shoot = now;
-	m.unlock();
 
 	// 사용 요청받은 skill_type에 대응하는 Skill객체를 찾음(skill_type 유효성 검증도 동시에 됨)
 	for (int i = 0; i < len_active_skills; i++)
@@ -207,7 +210,7 @@ void Client::hit(const Skill* skill)
 	if (!chracter)
 		return;
 	// 자기자신에게 맞다는건 말이 안됨
-	if (this == skill->owner)
+	if (this == skill->get_owner())
 		return;
 
 	HP -= skill->get_damage(); // 맞아서 체력 감소

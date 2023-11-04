@@ -4,8 +4,8 @@
 
 extern Graphic graphic;
 
-const int LightsaberSlash::DAMAGE[] = { 20, 20, 20, 20, 20, 20, 20, 20, 20, 20 };
-const int LightsaberSlash::COOLDOWN[] = { 170, 170, 170, 170, 170, 170, 170, 170, 170, 170 };
+const int LightsaberSlash::DAMAGE[] = { 240, 252, 264, 277, 290, 304, 319, 334, 350, 367 };
+const int LightsaberSlash::COOLDOWN[] = { 788, 710, 639, 576, 519, 468, 422, 380, 342, 308 };
 
 LightsaberSlash::LightsaberSlash(const Player* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
 	: Slash(owner, level, type, MAX_LEVEL)
@@ -20,16 +20,14 @@ bool LightsaberSlash::cast(DIRECTION dir)
 		return false;
 
 	const COORD pos = owner->get_pos();
+	COORD pos_temp = pos;
 
-	COORD pos_temp;
-
-	pos_temp = pos;
+	static const int frames_delay[] = { 30, 30, 20, 10, 10, 10, 150, 0, NULL };
 
 	switch (dir)
 	{
 	case UP:
 	{
-		static const int up_frames_delay[] = { 50, 1, 1, 1, 1, 1, 150, 0, NULL };
 		// [i][j] = i번째 프레임의 j번째 이펙트의 상대 좌표.
 		// 상대 좌표라 함은 COORD{0, 0}이 중심인 좌표계에서 표현된 좌표값이다.
 		static const COORD up_frames_pos[][9] = {
@@ -64,14 +62,13 @@ bool LightsaberSlash::cast(DIRECTION dir)
 				graphic.draw_in_field(pos_temp, up_frames[i][j], SKY_BLUE);
 			}
 
-			Sleep(up_frames_delay[i]);
+			Sleep(frames_delay[i]);
 		}
 		break;
 
 	}
 	case DOWN:
 	{
-		const int down_frames_delay[] = { 50, 1, 1, 1, 1, 1, 150, 0, NULL };
 		// [i][j] = i번째 프레임의 j번째 이펙트의 상대 좌표.
 		// 상대 좌표라 함은 COORD{0, 0}이 중심인 좌표계에서 표현된 좌표값이다.
 		static const COORD down_frames_pos[][9] = {
@@ -106,7 +103,7 @@ bool LightsaberSlash::cast(DIRECTION dir)
 				graphic.draw_in_field(pos_temp, down_frames[i][j], SKY_BLUE);
 			}
 
-			Sleep(down_frames_delay[i]);
+			Sleep(frames_delay[i]);
 		}
 		break;
 
@@ -115,7 +112,6 @@ bool LightsaberSlash::cast(DIRECTION dir)
 	{
 		/* 스킬 애니메이션 정의. 참고)스킬 애니메이션은 그냥 쌩노다가이므로 참고할것 */
 
-		const int left_frames_delay[] = { 50, 1, 1, 1, 1, 1, 150, 0, NULL };
 		// [i][j] = i번째 프레임의 j번째 이펙트의 상대 좌표.
 		// 상대 좌표라 함은 COORD{0, 0}이 중심인 좌표계에서 표현된 좌표값이다.
 		static const COORD left_frames_pos[][9] = {
@@ -151,13 +147,12 @@ bool LightsaberSlash::cast(DIRECTION dir)
 				graphic.draw_in_field(pos_temp, left_frames[i][j], SKY_BLUE);
 			}
 
-			Sleep(left_frames_delay[i]);
+			Sleep(frames_delay[i]);
 		}
 		break;
 	}
 	case RIGHT:
 	{
-		const int right_frames_delay[] = { 50, 1, 1, 1, 1, 1, 150, 0, NULL };
 		static const COORD right_frames_pos[][9] = {
 		   { COORD{-1, -1}, COORD{-2, -2} },
 		   { COORD{-1, -1}, COORD{-2, -2}, COORD{-1, -3}, COORD{0, -2}, COORD{0, -1} },
@@ -190,7 +185,7 @@ bool LightsaberSlash::cast(DIRECTION dir)
 				graphic.draw_in_field(pos_temp, right_frames[i][j], SKY_BLUE);
 			}
 
-			Sleep(right_frames_delay[i]);
+			Sleep(frames_delay[i]);
 		}
 		break;
 	}
