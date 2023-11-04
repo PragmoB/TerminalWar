@@ -51,7 +51,7 @@ void worker(HANDLE completion_port)
 
 		PDUHello* pdu_hello;
 		PDUMov* pdu_mov;
-		PDUShoot* pdu_shoot;
+		PDUCastSkill* pdu_cast_skill;
 
 		switch (client->context.dataBuffer.buf[0])
 		{
@@ -65,9 +65,9 @@ void worker(HANDLE completion_port)
 			client->move(pdu_mov->dir);
 			break;
 
-		case SHOOT:
-			pdu_shoot = reinterpret_cast<PDUShoot*>(client->context.dataBuffer.buf);
-			client->shoot(pdu_shoot->dir);
+		case CAST_SKILL:
+			pdu_cast_skill = reinterpret_cast<PDUCastSkill*>(client->context.dataBuffer.buf);
+			client->cast_skill(pdu_cast_skill->skill_type, pdu_cast_skill->dir);
 			break;
 		}
 
@@ -134,7 +134,7 @@ int main()
 
 	// IOCP 작업자 스레드를 생성
 	
-	for (int i = 0; i < std::thread::hardware_concurrency(); ++i) {
+	for (unsigned int i = 0; i < std::thread::hardware_concurrency(); i++) {
 		thread(worker, completionPort).detach();
 	}
 
@@ -154,7 +154,7 @@ int main()
 		client_context.dataBuffer.len = 1024;
 		client_context.overlapped.hEvent = NULL;
 		Client* client = new Client(client_context,
-									COORD{ (SHORT)(rand() % field_width + 1), (SHORT)(rand() % field_height + 1) });
+									COORD{ (SHORT)(rand() % FIELD_WIDTH + 1), (SHORT)(rand() % FIELD_HEIGHT + 1) });
 		clients.push_front(client);
 
 		// 클라이언트 소켓을 완료 포트에 연결

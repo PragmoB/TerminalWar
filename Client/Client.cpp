@@ -13,9 +13,17 @@
 #include <thread>
 
 #include "Graphic.h"
+#include "Menu.h"
 #include "Sound.h"
+#include "interface.h"
 #include "protocol.h"
 #include "Player.h"
+
+#include "Skills/Shoot.h"
+#include "Skills/Slash.h"
+#include "Skills/LightsaberSlash.h"
+#include "Skills/ZweihanderSlash.h"
+#include "Skills/WindSlash.h"
 
 using namespace std;
 
@@ -24,15 +32,16 @@ extern Sound sound;
 
 DWORD my_id = NULL;
 
+// 서버 응답 수신 후 반영
 void receive(SOCKET sock)
 {
-	char buff[1000] = "";
+	char buff[1200] = "";
 
 	map<DWORD, Player*> players;
 
 	while (1)
 	{
-		int len = recv(sock, buff, 1000, NULL);
+		int len = recv(sock, buff, 1200, NULL);
 		if (len <= 0)
 		{
 			my_id = NULL;
@@ -45,7 +54,7 @@ void receive(SOCKET sock)
 
 		PDUHello* pdu_hello;
 		PDUMov* pdu_mov;
-		PDUShoot* pdu_shoot;
+		PDUCastSkill* pdu_cast_skill;
 		PDUHit* pdu_hit;
 		PDUDie* pdu_die;
 
@@ -67,16 +76,16 @@ void receive(SOCKET sock)
 			{
 			case HELLO:
 				// 버그수정 : <PDUHello*>(buff) => <PDUHello*>(buff + complete_len).
-				pdu_hello = reinterpret_cast<PDUHello*>(buff + complete_len);	// 이거 찾는데 얼마나 qudtls같이 헛고생을 많이 했는지 당사자 아닌사람은 모를거다ㅠㅠ 별거 아닌거 같이 보여도 실시간 온라인게임이라 디버깅하기가 진짜 어렵다.
+				pdu_hello = reinterpret_cast<PDUHello*>(buff + complete_len);
 				
 				if (!my_id) // 첫빠다로 받은 hello 패킷이라면
 					my_id = pdu_hello->id; // 이 패킷의 id값은 나의 아이디
-				else if (my_id == pdu_hello->id) // 첫빠다는 아니지만 내 아이디의 hello 라면
-					// 내 캐릭터 정보
-					players[pdu_hello->id] = new Player(pdu_hello->pos, pdu_hello->HP, pdu_hello->chracter, true);
-				else // 그 외엔
-					// 다른사람거
-					players[pdu_hello->id] = new Player(pdu_hello->pos, pdu_hello->HP, pdu_hello->chracter, false);
+				else
+				{
+					players[pdu_hello->id] = new Player(pdu_hello->pos, pdu_hello->HP, pdu_hello->chracter,
+						my_id == pdu_hello->id, pdu_hello->len_skills, pdu_hello->skills);
+
+				}
 				complete_len += sizeof(PDUHello);
 				break;
 		
@@ -89,19 +98,19 @@ void receive(SOCKET sock)
 				complete_len += sizeof(PDUMov);
 				break;
 
-			case SHOOT:
-				pdu_shoot = reinterpret_cast<PDUShoot*>(buff + complete_len);
-				player = players[pdu_shoot->id];
+			case CAST_SKILL:
+				pdu_cast_skill = reinterpret_cast<PDUCastSkill*>(buff + complete_len);
+				player = players[pdu_cast_skill->id];
 				if (player)
-					player->shoot(pdu_shoot->dir);
-				complete_len += sizeof(PDUShoot);
+					player->cast_skill(pdu_cast_skill->skill_type, pdu_cast_skill->dir);
+				complete_len += sizeof(PDUCastSkill);
 				break;
 
 			case HIT:
 				pdu_hit = reinterpret_cast<PDUHit*>(buff + complete_len);
-				player = players[pdu_hit->id];
+				player = players[pdu_hit->attacker_id];
 				if (player)
-					player->hit();
+					player->attack(players[pdu_hit->victim_id], pdu_hit->skill_type);
 				complete_len += sizeof(PDUHit);
 				break;
 
@@ -116,6 +125,118 @@ void receive(SOCKET sock)
 			}
 		}
 	}
+}
+
+Menu active_skill_menu(COORD{ FIELD.Left + 2 * FIELD_WIDTH + 7, FIELD.Top + 7 },
+	"액티브 스킬", true);
+SKILL_TYPE active_skills[MAX_ACTIVE_SKILL];
+
+// 불연속적 유저 입력(메뉴 선택, 스킬 선택 등) 처리
+void send_discontinual_request(SOCKET sock)
+{
+	active_skill_menu.appear();
+
+	active_skill_menu.insert_menu("Lv.0 사격");
+	active_skill_menu.update_menu(
+		active_skill_menu.get_num_contents() - 1,
+		0, "Lv.0", YELLOW);
+	active_skills[0] = SHOOT;
+
+	active_skill_menu.insert_menu("Lv.0 수련기사의 일격");
+	active_skill_menu.update_menu(
+		active_skill_menu.get_num_contents() - 1,
+		0, "Lv.0", YELLOW);
+	active_skills[1] = SLASH;
+	
+	active_skill_menu.insert_menu("Lv.0 광선검·참격");
+	active_skill_menu.update_menu(
+		active_skill_menu.get_num_contents() - 1,
+		0, "Lv.0", YELLOW);
+	active_skills[2] = LIGHTSABER_SLASH;
+
+	active_skill_menu.insert_menu("Lv.0 양수검·참격");
+	active_skill_menu.update_menu(
+		active_skill_menu.get_num_contents() - 1,
+		0, "Lv.0", YELLOW);
+	active_skills[3] = ZWEIHANDER_SLASH;
+
+	active_skill_menu.insert_menu("Lv.0 풍마참(風磨斬)");
+	active_skill_menu.update_menu(
+		active_skill_menu.get_num_contents() - 1,
+		0, "Lv.0", YELLOW);
+	active_skills[4] = WIND_SLASH;
+
+	while (graphic.is_started()) // 게임이 진행되는 도중에 반복
+	{
+		char user_input = toupper(_getch());
+		
+		switch (user_input)
+		{
+		case 'R':
+			// 액티브 스킬 메뉴의 커서를 밑으로 내림
+			if (!active_skill_menu.set_focus(active_skill_menu.get_focus() + 1))
+				// 커서가 맨 끝이라면 커서는 처음으로 돌아감
+				active_skill_menu.set_focus(0);
+			break;
+		}
+	}
+
+	active_skill_menu.disappear();
+	active_skill_menu.clear();
+}
+
+// 연속적 유저 입력(움직임, 스킬 사용 등) 처리
+void send_continual_request(SOCKET sock)
+{
+	unsigned char inputs[] = { 'W', 'A', 'S', 'D', VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, NULL };
+
+	HWND console_wnd = GetForegroundWindow();
+
+	while (graphic.is_started()) // 게임이 진행되는 중에 반복
+	{
+		for (int i = 0; inputs[i] && console_wnd == GetForegroundWindow(); i++)
+			// 키가 눌려있는 상태라면
+			if (GetKeyState(inputs[i]) & 0x8000)
+			{
+				PDUMov pdu_mov;
+				PDUCastSkill pdu_cast_skill;
+
+				char* buff = NULL;
+				int len = 0;
+
+				switch (inputs[i])
+				{
+				case 'W': pdu_mov.dir = UP;	break;
+				case 'A': pdu_mov.dir = LEFT; break;
+				case 'S': pdu_mov.dir = DOWN; break;
+				case 'D': pdu_mov.dir = RIGHT; break;
+
+				case VK_UP: pdu_cast_skill.dir = UP; break;
+				case VK_DOWN: pdu_cast_skill.dir = DOWN; break;
+				case VK_LEFT: pdu_cast_skill.dir = LEFT; break;
+				case VK_RIGHT: pdu_cast_skill.dir = RIGHT; break;
+				}
+
+				switch (inputs[i])
+				{
+				case 'W': case 'A': case 'S': case 'D': // 무빙
+					len = sizeof(PDUMov);
+					buff = (char*)&pdu_mov;
+					break;
+				case VK_UP: case VK_DOWN: case VK_LEFT: case VK_RIGHT: // 스킬 사용
+					// 사용 스킬 종류는 메뉴에서 선택된 스킬
+					pdu_cast_skill.skill_type = active_skills[active_skill_menu.get_focus()];
+					len = sizeof(PDUCastSkill);
+					buff = (char*)&pdu_cast_skill;
+					break;
+				}
+
+				send(sock, buff, len, NULL);
+			}
+
+		Sleep(30);
+	}
+
 }
 
 int main()
@@ -190,6 +311,7 @@ int main()
 			}
 		} while (bRet);
 
+		// 게임 진행 장면 송출 시작
 		graphic.clear_frame();
 		graphic.draw_field();
 		graphic.start();
@@ -202,44 +324,11 @@ int main()
 		while (pdu_hello.chracter < 0x41 || (0x5a < pdu_hello.chracter && pdu_hello.chracter < 0x61) || 0x7a < pdu_hello.chracter)
 			pdu_hello.chracter = _getch();
 
-
+		// 게임 유저들에게 나의 존재를 알림
 		send(sock, reinterpret_cast<const char*>(&pdu_hello), sizeof(PDUHello), NULL);
 
-		unsigned char inputs[] = { 'W', 'A', 'S', 'D', VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, NULL };
-
-		HWND console_wnd = GetConsoleWindow();
-
-		// 움직임
-		while (graphic.is_started()) // 게임이 진행되는 중에 반복
-		{
-			for (int i = 0; inputs[i] && console_wnd == GetForegroundWindow(); i++)
-				// 키가 눌려있는 상태라면
-				if (GetKeyState(inputs[i]) & 0x8000)
-				{
-					PDUMov pdu_mov;
-					PDUShoot pdu_shoot;
-
-					char* buff = NULL;
-					int len = 0;
-
-					switch (inputs[i])
-					{
-					case 'W': pdu_mov.dir = UP;	len = sizeof(PDUMov); buff = (char*)&pdu_mov; break;
-					case 'A': pdu_mov.dir = LEFT; len = sizeof(PDUMov); buff = (char*)&pdu_mov; break;
-					case 'S': pdu_mov.dir = DOWN; len = sizeof(PDUMov); buff = (char*)&pdu_mov; break;
-					case 'D': pdu_mov.dir = RIGHT; len = sizeof(PDUMov); buff = (char*)&pdu_mov; break;
-
-					case VK_UP: pdu_shoot.dir = UP; len = sizeof(PDUShoot); buff = (char*)&pdu_shoot; break;
-					case VK_DOWN: pdu_shoot.dir = DOWN; len = sizeof(PDUShoot); buff = (char*)&pdu_shoot; break;
-					case VK_LEFT: pdu_shoot.dir = LEFT; len = sizeof(PDUShoot); buff = (char*)&pdu_shoot; break;
-					case VK_RIGHT: pdu_shoot.dir = RIGHT; len = sizeof(PDUShoot); buff = (char*)&pdu_shoot; break;
-					}
-				
-					send(sock, buff, len, NULL);
-				}
-
-			Sleep(30);
-		}
+		thread(send_discontinual_request, sock).detach();
+		send_continual_request(sock);
 	}
 }
 

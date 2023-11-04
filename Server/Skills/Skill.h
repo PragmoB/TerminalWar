@@ -1,0 +1,32 @@
+#pragma once
+
+#include <windows.h>
+#include <ctime>
+
+#include "protocol.h"
+
+class Client;
+
+class Skill
+{
+private:
+	int level;
+
+	// 다음 스킬 사용 가능시간
+	clock_t next_able_time = 0;
+protected:
+	int damage;
+	int cooldown;
+public:
+	const int MAX_LEVEL;
+	const Client* owner;
+	const SKILL_TYPE type;
+
+	Skill(const Client* owner, int level, SKILL_TYPE type, int MAX_LEVEL);
+
+	virtual bool cast(DIRECTION dir);
+	virtual void level_up();
+	int get_level() const;
+	int get_damage() const;
+	int get_cooldown() const;
+};

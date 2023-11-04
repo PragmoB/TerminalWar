@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="소스 파일\Skills">
+      <UniqueIdentifier>{87f6a52d-9acb-4083-a9de-152b86c60cf9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Skills">
+      <UniqueIdentifier>{437ca472-8377-493d-80d2-6e8098fbebee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Server.cpp">
@@ -21,11 +27,29 @@
     <ClCompile Include="Client.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Bullet.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Background.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Skills\Shoot.cpp">
+      <Filter>소스 파일\Skills</Filter>
+    </ClCompile>
+    <ClCompile Include="Skills\Skill.cpp">
+      <Filter>소스 파일\Skills</Filter>
+    </ClCompile>
+    <ClCompile Include="Skills\Slash.cpp">
+      <Filter>소스 파일\Skills</Filter>
+    </ClCompile>
+    <ClCompile Include="Skills\ZweihanderSlash.cpp">
+      <Filter>소스 파일\Skills</Filter>
+    </ClCompile>
+    <ClCompile Include="Skills\LightsaberSlash.cpp">
+      <Filter>소스 파일\Skills</Filter>
+    </ClCompile>
+    <ClCompile Include="Skills\WindSlash.cpp">
+      <Filter>소스 파일\Skills</Filter>
+    </ClCompile>
+    <ClCompile Include="Skills\Wind.cpp">
+      <Filter>소스 파일\Skills</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -38,11 +62,29 @@
     <ClInclude Include="..\Shared\protocol.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\Shared\Bullet.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Background.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Skills\LightsaberSlash.h">
+      <Filter>헤더 파일\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="Skills\Shoot.h">
+      <Filter>헤더 파일\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="Skills\Skill.h">
+      <Filter>헤더 파일\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="Skills\Slash.h">
+      <Filter>헤더 파일\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="Skills\Wind.h">
+      <Filter>헤더 파일\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="Skills\WindSlash.h">
+      <Filter>헤더 파일\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="Skills\ZweihanderSlash.h">
+      <Filter>헤더 파일\Skills</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

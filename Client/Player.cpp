@@ -6,21 +6,48 @@
 #include "Graphic.h"
 #include "Sound.h"
 #include "Player.h"
-#include "Bullet.h"
+
+#include "Skills/Shoot.h"
+#include "Skills/Slash.h"
+#include "Skills/LightsaberSlash.h"
+#include "Skills/ZweihanderSlash.h"
+#include "Skills/WindSlash.h"
 
 extern Graphic graphic;
 extern Sound sound;
 
-Player::Player(COORD pos, int HP, char chracter, bool me) : chracter(chracter), HP(HP), me(me)
+Player::Player(COORD pos, int HP, char chracter, bool me, int len_skills, SKILL_TYPE skills[MAX_ACTIVE_SKILL])
+	: chracter(chracter), HP(HP), me(me), len_skills(len_skills)
 {
+	for (int i = 0; i < len_skills; i++)
+	{
+		switch (skills[i])
+		{
+		case SHOOT:			   this->skills[i] = new Shoot(this); break;
+		case SLASH:			   this->skills[i] = new Slash(this); break;
+		case LIGHTSABER_SLASH: this->skills[i] = new LightsaberSlash(this); break;
+		case ZWEIHANDER_SLASH: this->skills[i] = new ZweihanderSlash(this); break;
+		case WIND_SLASH:	   this->skills[i] = new WindSlash(this); break;
+		}
+	}
+
 	// 화면에 캐릭터 첫 표시
 	pos.X *= 2; // 가로방향 이동은 2칸씩임을 고려함
-	pos.X += field.Left - 1;
-	pos.Y += field.Top;
+	pos.X += FIELD.Left - 1;
+	pos.Y += FIELD.Top;
 	this->pos = pos;
 	this->appear();
 }
 
+Skill* Player::get_skill(SKILL_TYPE skill_type)
+{
+	for (int i = 0; i < len_skills; i++)
+	{
+		if (skills[i]->type == skill_type)
+			return skills[i];
+	}
+	return NULL;
+}
 void Player::appear()
 {
 	/* 체력 상태 표시줄이 나올 위치 계산 */
@@ -29,10 +56,10 @@ void Player::appear()
 	COORD pos_temp = pos;
 	pos_temp.X -= 3; pos_temp.Y += 1;
 	
-	if ((signed)pos_temp.X < field.Left + 1) // 체력 상태 표시줄이 경기장 왼쪽 끝을 삐져나온다면
-		pos_temp.X = field.Left + 1; // 경기장 왼쪽 끝으로 맞춤
-	else if ((signed)pos_temp.X > field.Left + 2 * field_width - 7) // 경기장 오른쪽 끝을 삐져나온다면
-		pos_temp.X = field.Left + 2 * field_width - 7; // 경기장 오른쪽 끝으로 맞춤
+	if ((signed)pos_temp.X < FIELD.Left + 1) // 체력 상태 표시줄이 경기장 왼쪽 끝을 삐져나온다면
+		pos_temp.X = FIELD.Left + 1; // 경기장 왼쪽 끝으로 맞춤
+	else if ((signed)pos_temp.X > FIELD.Left + 2 * FIELD_WIDTH - 7) // 경기장 오른쪽 끝을 삐져나온다면
+		pos_temp.X = FIELD.Left + 2 * FIELD_WIDTH - 7; // 경기장 오른쪽 끝으로 맞춤
 
 	/* 체력 숫자 => 5자리 문자열로 변환 */
 
@@ -58,10 +85,10 @@ void Player::disappear()
 	COORD pos_temp = pos;
 	pos_temp.X -= 3; pos_temp.Y += 1;
 	
-	if ((signed)pos_temp.X < field.Left + 1) // 체력 상태 표시줄이 경기장 왼쪽 끝을 삐져나온다면
-		pos_temp.X = field.Left + 1; // 경기장 왼쪽 끝으로 맞춤
-	else if ((signed)pos_temp.X > field.Left + 2 * field_width - 7) // 경기장 오른쪽 끝을 삐져나온다면
-		pos_temp.X = field.Left + 2 * field_width - 7; // 경기장 오른쪽 끝으로 맞춤
+	if ((signed)pos_temp.X < FIELD.Left + 1) // 체력 상태 표시줄이 경기장 왼쪽 끝을 삐져나온다면
+		pos_temp.X = FIELD.Left + 1; // 경기장 왼쪽 끝으로 맞춤
+	else if ((signed)pos_temp.X > FIELD.Left + 2 * FIELD_WIDTH - 7) // 경기장 오른쪽 끝을 삐져나온다면
+		pos_temp.X = FIELD.Left + 2 * FIELD_WIDTH - 7; // 경기장 오른쪽 끝으로 맞춤
 
 	/* 지우기 */
 	
@@ -84,18 +111,51 @@ void Player::move(DIRECTION dir)
 	this->appear();
 }
 
-void Player::shoot(DIRECTION dir)
+void Player::cast_skill(SKILL_TYPE skill_type, DIRECTION dir)
 {
-	graphic.fire_queue.Enqueue(Bullet(pos, dir));
-	sound.shoot();
+	Skill* skill = get_skill(skill_type);
+	if (skill)
+		graphic.cast_skill(skill, dir);
 	return;
 }
 
-void Player::hit()
+void Player::upgrade_skill(SKILL_TYPE before, SKILL_TYPE after)
 {
-	HP -= 10;
+	for (int i = 0; i < len_skills; i++)
+	{
+		if (skills[i]->type == before)
+		{
+			skills[i]->level_up();
+
+			if (skills[i]->get_level() >= skills[i]->MAX_LEVEL)
+			{/*
+				switch (after)
+				{
+				case LI
+				}*/
+
+			}
+		}
+	}
+}
+
+void Player::attack(Player* player, SKILL_TYPE skill_type)
+{
+	Skill* skill;
+	
+	// 풍마참의 검기에 맞은 경우는
+	if (skill_type == WIND)
+		skill = &((WindSlash*)get_skill(WIND_SLASH))->wind; // '검기' 스킬이 풍마참 안에 있기에 따로 꺼내야함
+	else
+		skill = get_skill(skill_type);
+
+	if (skill)
+		skill->attack(player);
+}
+void Player::hit(const Skill* skill)
+{
+	HP -= skill->get_damage();
 	graphic.draw(pos, '*', RED);
-	sound.hit();
 }
 
 bool Player::is_me()
@@ -106,4 +166,9 @@ bool Player::is_me()
 Player::~Player()
 {
 	this->disappear();
+}
+
+COORD Player::get_pos() const
+{
+	return pos;
 }
