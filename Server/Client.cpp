@@ -206,6 +206,10 @@ bool Client::cast_skill(SKILL_TYPE skill_type, DIRECTION dir)
 }
 void Client::hit(const Skill* skill)
 {
+	// NULL ptr check
+	if (!skill)
+		return;
+
 	// hello 하기 전이면 안맞음
 	if (!chracter)
 		return;

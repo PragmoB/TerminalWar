@@ -144,7 +144,7 @@ void Player::upgrade_skill(SKILL_TYPE before, SKILL_TYPE after)
 
 void Player::attack(Player* player, SKILL_TYPE skill_type)
 {
-	Skill* skill;
+	Skill* skill = NULL;
 	
 	// 풍마참의 검기에 맞은 경우는
 	if (skill_type == WIND)
@@ -157,6 +157,11 @@ void Player::attack(Player* player, SKILL_TYPE skill_type)
 }
 void Player::hit(const Skill* skill)
 {
+	if (!skill)
+		return;
+
+	sound.request(HIT, skill->type);
+
 	HP -= skill->get_damage();
 	graphic.draw(pos, '*', RED);
 }

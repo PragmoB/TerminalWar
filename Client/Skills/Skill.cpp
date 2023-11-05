@@ -27,8 +27,8 @@ bool Skill::cast(DIRECTION dir)
 }
 void Skill::attack(Player* player)
 {
-	sound.request(HIT, type);
-	player->hit(this);
+	if (player)
+		player->hit(this);
 }
 void Skill::level_up()
 {

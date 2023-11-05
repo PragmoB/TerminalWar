@@ -45,8 +45,11 @@ void receive(SOCKET sock)
 		if (len <= 0)
 		{
 			my_id = NULL;
-			for (map<DWORD, Player*>::iterator iter = players.begin(); iter != players.end(); iter++)
+			for (map<DWORD, Player*>::iterator iter = players.begin(); iter != players.end();)
+			{
 				delete iter->second;
+				players.erase(iter++);
+			}
 
 			graphic.stop();
 			return;
