@@ -214,10 +214,10 @@ void Sound::mci_init()
 	}
 	for (int i = 0; i < LEN_HIT_WIND_SOUNDCHANNELS; i++)
 	{
-		wchar_t element_name[] = L"soundtracks\\hit_wind0.wav";
+		wchar_t element_name[] = L"soundtracks\\hit_wind0.mp3";
 		element_name[wcslen(element_name) - 5] = '0' + i;
 		mci_open_hit_wind[i].lpstrElementName = element_name;
-		mci_open_hit_wind[i].lpstrDeviceType = L"waveaudio";
+		mci_open_hit_wind[i].lpstrDeviceType = L"mpegvideo";
 		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONGLONG)(LPVOID)&mci_open_hit_wind[i]);
 	}
 }

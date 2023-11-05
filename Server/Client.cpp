@@ -229,3 +229,9 @@ void Client::die()
 		iter != clients.end(); iter++)
 		(*iter)->apply_die_of(this);
 }
+
+Client::~Client()
+{
+	for (int i = 0; i < len_active_skills; i++)
+		delete active_skills[i];
+}

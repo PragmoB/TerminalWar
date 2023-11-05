@@ -136,34 +136,34 @@ void send_discontinual_request(SOCKET sock)
 {
 	active_skill_menu.appear();
 
-	active_skill_menu.insert_menu("Lv.0 사격");
+	active_skill_menu.insert_menu("Lv.1 사격");
 	active_skill_menu.update_menu(
 		active_skill_menu.get_num_contents() - 1,
-		0, "Lv.0", YELLOW);
+		0, "Lv.1", DARK_YELLOW);
 	active_skills[0] = SHOOT;
 
-	active_skill_menu.insert_menu("Lv.0 수련기사의 일격");
+	active_skill_menu.insert_menu("Lv.1 수련기사의 일격");
 	active_skill_menu.update_menu(
 		active_skill_menu.get_num_contents() - 1,
-		0, "Lv.0", YELLOW);
+		0, "Lv.1", DARK_YELLOW);
 	active_skills[1] = SLASH;
 	
-	active_skill_menu.insert_menu("Lv.0 광선검·참격");
+	active_skill_menu.insert_menu("Lv.1 광선검·참격");
 	active_skill_menu.update_menu(
 		active_skill_menu.get_num_contents() - 1,
-		0, "Lv.0", YELLOW);
+		0, "Lv.1", DARK_YELLOW);
 	active_skills[2] = LIGHTSABER_SLASH;
 
-	active_skill_menu.insert_menu("Lv.0 양수검·참격");
+	active_skill_menu.insert_menu("Lv.1 양수검·참격");
 	active_skill_menu.update_menu(
 		active_skill_menu.get_num_contents() - 1,
-		0, "Lv.0", YELLOW);
+		0, "Lv.1", DARK_YELLOW);
 	active_skills[3] = ZWEIHANDER_SLASH;
 
-	active_skill_menu.insert_menu("Lv.0 풍마참(風磨斬)");
+	active_skill_menu.insert_menu("Lv.1 풍마참(風磨斬)");
 	active_skill_menu.update_menu(
 		active_skill_menu.get_num_contents() - 1,
-		0, "Lv.0", YELLOW);
+		0, "Lv.1", DARK_YELLOW);
 	active_skills[4] = WIND_SLASH;
 
 	while (graphic.is_started()) // 게임이 진행되는 도중에 반복

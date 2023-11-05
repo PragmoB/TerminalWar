@@ -14,12 +14,12 @@ private:
 	const char chracter;
 	bool me;
 
-	int len_skills;
-	Skill* skills[MAX_ACTIVE_SKILL];
+	int len_active_skills;
+	Skill* active_skills[MAX_ACTIVE_SKILL];
 
-	Skill* get_skill(SKILL_TYPE);
+	Skill* get_active_skill(SKILL_TYPE skill_type);
 public:
-	Player(COORD pos, int HP, char chracter, bool me, int len_skills, SKILL_TYPE skills[MAX_ACTIVE_SKILL]);
+	Player(COORD pos, int HP, char chracter, bool me, int len_active_skills, SKILL_TYPE skills[MAX_ACTIVE_SKILL]);
 	// 현재 위치에 모습을 드러냄
 	void appear();
 	// 현재 위치에서 모습이 사라짐

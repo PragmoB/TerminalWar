@@ -16,18 +16,21 @@
 extern Graphic graphic;
 extern Sound sound;
 
-Player::Player(COORD pos, int HP, char chracter, bool me, int len_skills, SKILL_TYPE skills[MAX_ACTIVE_SKILL])
-	: chracter(chracter), HP(HP), me(me), len_skills(len_skills)
+Player::Player(COORD pos, int HP, char chracter, bool me, int len_active_skills, SKILL_TYPE skills[MAX_ACTIVE_SKILL])
+	: chracter(chracter), HP(HP), me(me), len_active_skills(len_active_skills)
 {
-	for (int i = 0; i < len_skills; i++)
+	for (int i = 0; i < len_active_skills; i++)
+		this->active_skills[i] = NULL;
+
+	for (int i = 0; i < len_active_skills; i++)
 	{
 		switch (skills[i])
 		{
-		case SHOOT:			   this->skills[i] = new Shoot(this); break;
-		case SLASH:			   this->skills[i] = new Slash(this); break;
-		case LIGHTSABER_SLASH: this->skills[i] = new LightsaberSlash(this); break;
-		case ZWEIHANDER_SLASH: this->skills[i] = new ZweihanderSlash(this); break;
-		case WIND_SLASH:	   this->skills[i] = new WindSlash(this); break;
+		case SHOOT:			   this->active_skills[i] = new Shoot(this); break;
+		case SLASH:			   this->active_skills[i] = new Slash(this); break;
+		case LIGHTSABER_SLASH: this->active_skills[i] = new LightsaberSlash(this); break;
+		case ZWEIHANDER_SLASH: this->active_skills[i] = new ZweihanderSlash(this); break;
+		case WIND_SLASH:	   this->active_skills[i] = new WindSlash(this); break;
 		}
 	}
 
@@ -39,12 +42,12 @@ Player::Player(COORD pos, int HP, char chracter, bool me, int len_skills, SKILL_
 	this->appear();
 }
 
-Skill* Player::get_skill(SKILL_TYPE skill_type)
+Skill* Player::get_active_skill(SKILL_TYPE skill_type)
 {
-	for (int i = 0; i < len_skills; i++)
+	for (int i = 0; i < len_active_skills; i++)
 	{
-		if (skills[i]->type == skill_type)
-			return skills[i];
+		if (active_skills[i]->type == skill_type)
+			return active_skills[i];
 	}
 	return NULL;
 }
@@ -113,7 +116,7 @@ void Player::move(DIRECTION dir)
 
 void Player::cast_skill(SKILL_TYPE skill_type, DIRECTION dir)
 {
-	Skill* skill = get_skill(skill_type);
+	Skill* skill = get_active_skill(skill_type);
 	if (skill)
 		graphic.cast_skill(skill, dir);
 	return;
@@ -121,13 +124,13 @@ void Player::cast_skill(SKILL_TYPE skill_type, DIRECTION dir)
 
 void Player::upgrade_skill(SKILL_TYPE before, SKILL_TYPE after)
 {
-	for (int i = 0; i < len_skills; i++)
+	for (int i = 0; i < len_active_skills; i++)
 	{
-		if (skills[i]->type == before)
+		if (active_skills[i]->type == before)
 		{
-			skills[i]->level_up();
+			active_skills[i]->level_up();
 
-			if (skills[i]->get_level() >= skills[i]->MAX_LEVEL)
+			if (active_skills[i]->get_level() >= active_skills[i]->MAX_LEVEL)
 			{/*
 				switch (after)
 				{
@@ -145,9 +148,9 @@ void Player::attack(Player* player, SKILL_TYPE skill_type)
 	
 	// 풍마참의 검기에 맞은 경우는
 	if (skill_type == WIND)
-		skill = &((WindSlash*)get_skill(WIND_SLASH))->wind; // '검기' 스킬이 풍마참 안에 있기에 따로 꺼내야함
+		skill = &((WindSlash*)get_active_skill(WIND_SLASH))->wind; // '검기' 스킬이 풍마참 안에 있기에 따로 꺼내야함
 	else
-		skill = get_skill(skill_type);
+		skill = get_active_skill(skill_type);
 
 	if (skill)
 		skill->attack(player);
@@ -163,12 +166,14 @@ bool Player::is_me()
 	return me;
 }
 
-Player::~Player()
-{
-	this->disappear();
-}
-
 COORD Player::get_pos() const
 {
 	return pos;
+}
+
+Player::~Player()
+{
+	this->disappear();
+	for (int i = 0; i < len_active_skills; i++)
+		delete active_skills[i];
 }

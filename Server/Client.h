@@ -83,4 +83,6 @@ public:
 	// client의 skill에 맞음
 	void hit(const Skill* skill);
 	void die();
+
+	~Client();
 };
