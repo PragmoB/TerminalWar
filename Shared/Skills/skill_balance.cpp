@@ -1,4 +1,5 @@
 #include "Skills/Shoot.h"
+#include "Skills/Snipe.h"
 #include "Skills/Slash.h"
 #include "Skills/LightsaberSlash.h"
 #include "Skills/ZweihanderSlash.h"
@@ -10,6 +11,12 @@ const int Shoot::DAMAGE[] = { 100, 105, 110, 115, 120 };
 const int Shoot::COOLDOWN[] = { 1200, 1080, 972, 875, 788 };
 const int Shoot::BPS[] = { 25, 26, 27, 28, 29 };
 const int Shoot::DISTANCE[] = { 10, 11, 12, 13, 14 };
+
+const int Snipe::MAX_LEVEL = 10;
+const int Snipe::DAMAGE[] = { 240, 264, 290, 319, 350, 385, 423, 465, 511, 562 };
+const int Snipe::COOLDOWN[] = { 2000, 1800, 1620, 1458, 1313, 1182, 1064, 958, 863, 777 };
+const int Snipe::BPS[] = { 65, 71, 78, 85, 93, 102, 112, 123, 135, 148 };
+const int Snipe::DISTANCE[] = { 25, 27, 29, 31, 34, 37, 40, 44, 48, 52  };
 
 const int Slash::MAX_LEVEL = 5;
 const int Slash::DAMAGE[] = { 100, 105, 110, 115, 120 };

@@ -72,6 +72,9 @@
     <ClCompile Include="..\Shared\Skills\skill_balance.cpp">
       <Filter>소스 파일\Skills</Filter>
     </ClCompile>
+    <ClCompile Include="Skills\Snipe.cpp">
+      <Filter>소스 파일\Skills</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -115,6 +118,9 @@
     </ClInclude>
     <ClInclude Include="Items\Heart.h">
       <Filter>헤더 파일\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="Skills\Snipe.h">
+      <Filter>헤더 파일\Skills</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

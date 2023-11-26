@@ -175,6 +175,7 @@
     <ClCompile Include="Skills\Shoot.cpp" />
     <ClCompile Include="Skills\Skill.cpp" />
     <ClCompile Include="Skills\Slash.cpp" />
+    <ClCompile Include="Skills\Snipe.cpp" />
     <ClCompile Include="Skills\Wind.cpp" />
     <ClCompile Include="Skills\WindSlash.cpp" />
     <ClCompile Include="Skills\ZweihanderSlash.cpp" />
@@ -191,6 +192,7 @@
     <ClInclude Include="Skills\Shoot.h" />
     <ClInclude Include="Skills\Skill.h" />
     <ClInclude Include="Skills\Slash.h" />
+    <ClInclude Include="Skills\Snipe.h" />
     <ClInclude Include="Skills\Wind.h" />
     <ClInclude Include="Skills\WindSlash.h" />
     <ClInclude Include="Skills\ZweihanderSlash.h" />

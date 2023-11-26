@@ -7,6 +7,7 @@
 
 #include "Skills/Skill.h"
 #include "Skills/Shoot.h"
+#include "Skills/Snipe.h"
 #include "Skills/Slash.h"
 #include "Skills/LightsaberSlash.h"
 #include "Skills/ZweihanderSlash.h"
@@ -28,6 +29,7 @@ Skill* Skill::create_object_by_type(SKILL_TYPE type, Player* owner, int level)
 	switch (type)
 	{
 	case SHOOT:			   skill = new Shoot(owner, level);		      break;
+	case SNIPE:			   skill = new Snipe(owner, level);			  break;
 	case SLASH:			   skill = new Slash(owner, level);		      break;
 	case LIGHTSABER_SLASH: skill = new LightsaberSlash(owner, level); break;
 	case ZWEIHANDER_SLASH: skill = new ZweihanderSlash(owner, level); break;

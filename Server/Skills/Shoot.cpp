@@ -121,11 +121,17 @@ int Shoot::get_ordinal() const
 }
 bool Shoot::upgradable() const
 {
-	return false;
+	return true;
 }
 bool Shoot::upgradable_to(SKILL_TYPE type) const
 {
-	return false;
+	switch (type)
+	{
+	case SNIPE:
+		return true;
+	default:
+		return false;
+	}
 }
 bool Shoot::downgradable() const
 {
