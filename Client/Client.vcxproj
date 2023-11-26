@@ -167,8 +167,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Shared\Items\item_balance.cpp" />
+    <ClCompile Include="..\Shared\Skills\skill_balance.cpp" />
     <ClCompile Include="Client.cpp" />
+    <ClCompile Include="EnergyBar.cpp" />
     <ClCompile Include="Graphic.cpp" />
+    <ClCompile Include="Items\Energy.cpp" />
+    <ClCompile Include="Items\Heart.cpp" />
+    <ClCompile Include="Items\Item.cpp" />
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Skills\LightsaberSlash.cpp" />
@@ -179,11 +185,16 @@
     <ClCompile Include="Skills\WindSlash.cpp" />
     <ClCompile Include="Skills\ZweihanderSlash.cpp" />
     <ClCompile Include="Sound.cpp" />
+    <ClCompile Include="UpgradeOptionList.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Shared\interface.h" />
     <ClInclude Include="..\Shared\protocol.h" />
+    <ClInclude Include="EnergyBar.h" />
     <ClInclude Include="Graphic.h" />
+    <ClInclude Include="Items\Energy.h" />
+    <ClInclude Include="Items\Heart.h" />
+    <ClInclude Include="Items\Item.h" />
     <ClInclude Include="Menu.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Skills\LightsaberSlash.h" />
@@ -194,6 +205,7 @@
     <ClInclude Include="Skills\WindSlash.h" />
     <ClInclude Include="Skills\ZweihanderSlash.h" />
     <ClInclude Include="Sound.h" />
+    <ClInclude Include="UpgradeOptionList.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

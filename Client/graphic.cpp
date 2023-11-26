@@ -1,16 +1,25 @@
 #include <iostream>
 #include <windows.h>
 
+#include <map>
+#include <list>
+
 #include "blocking_queue.h"
 
 #include "Graphic.h"
 #include "interface.h"
 #include "protocol.h"
 
+#include "Player.h"
+#include "Items/Item.h"
+
 using namespace std;
 
 // 게임 그래픽 엔진
 Graphic graphic;
+
+extern map<DWORD, Player*> players;
+extern list<Item*> items;
 
 Graphic::Graphic() : skill_queue(50), started(false)
 {
@@ -29,6 +38,8 @@ Graphic::Graphic() : skill_queue(50), started(false)
 
 	for (uint32_t i = 0; i < 10; i++)
 		skill_renderers[i] = std::thread(&Graphic::render_skill, this);
+
+	resource_renderer = std::thread(&Graphic::render_resources, this);
 }
 
 bool Graphic::is_started() const
@@ -91,7 +102,6 @@ void Graphic::draw_in_field(COORD pos, const char* value, COLOR color, COLOR bgc
 		start = 0;
 	if (len_value <= start)
 		return;
-	
 
 	SHORT end =  - ((signed)len_value + pos.X - (FIELD.Left + 2 * FIELD_WIDTH));
 	if (end > 0)
@@ -115,6 +125,7 @@ void Graphic::draw_in_field(COORD pos, const char* value, COLOR color, COLOR bgc
 	}
 	
 }
+
 /* 사용 대기 스킬 출력 처리 */
 void Graphic::render_skill()
 {
@@ -122,6 +133,29 @@ void Graphic::render_skill()
 	{
 		SkillParam skill_param = skill_queue.Dequeue();
 		skill_param.skill->cast(skill_param.dir);
+	}
+}
+
+/* 화면 리소스 출력 동기화 */
+void Graphic::render_resources()
+{
+	// players, items 객체의 초기화를 기다림
+	Sleep(5000);
+
+	while (1)
+	{
+		for (map<DWORD, Player*>::iterator iter = players.begin();
+			iter != players.end(); iter++)
+		{
+			if (!iter->second->is_moving())
+				iter->second->appear();
+		}
+
+		for (list<Item*>::iterator iter = items.begin();
+			iter != items.end(); iter++)
+			(*iter)->appear();
+
+		Sleep(700);
 	}
 }
 
@@ -174,4 +208,12 @@ void Graphic::cast_skill(Skill* skill, DIRECTION dir)
 	skill_param.skill = skill;
 	skill_param.dir = dir;
 	skill_queue.Enqueue(skill_param);
+}
+
+COORD Graphic::get_client_pos_by_server_pos(COORD server_pos)
+{
+	server_pos.X *= 2; // 가로방향 이동은 2칸씩임을 고려함
+	server_pos.X += FIELD.Left - 1;
+	server_pos.Y += FIELD.Top;
+	return server_pos;
 }

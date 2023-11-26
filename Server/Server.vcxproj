@@ -163,8 +163,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Shared\Items\item_balance.cpp" />
+    <ClCompile Include="..\Shared\Skills\skill_balance.cpp" />
     <ClCompile Include="Background.cpp" />
     <ClCompile Include="Client.cpp" />
+    <ClCompile Include="Items\Energy.cpp" />
+    <ClCompile Include="Items\Heart.cpp" />
+    <ClCompile Include="Items\Item.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="Skills\LightsaberSlash.cpp" />
     <ClCompile Include="Skills\Shoot.cpp" />
@@ -179,6 +184,9 @@
     <ClInclude Include="..\Shared\protocol.h" />
     <ClInclude Include="Background.h" />
     <ClInclude Include="Client.h" />
+    <ClInclude Include="Items\Energy.h" />
+    <ClInclude Include="Items\Heart.h" />
+    <ClInclude Include="Items\Item.h" />
     <ClInclude Include="Skills\LightsaberSlash.h" />
     <ClInclude Include="Skills\Shoot.h" />
     <ClInclude Include="Skills\Skill.h" />

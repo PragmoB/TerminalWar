@@ -4,21 +4,11 @@
 #include "Background.h"
 #include "Skills/Wind.h"
 
-extern std::list<Client*> clients;
 extern Background background;
 
-const int Wind::DAMAGE[] = { 60, 63, 66, 69, 72, 75, 78, 81, 85, 89 };
-const int Wind::COOLDOWN[] = { 788, 710, 639, 576, 519, 468, 422, 380, 342, 308 };
-const int Wind::BPS[] = { 25, 26, 27, 28, 29, 30, 31, 32, 33, 34 };
-const int Wind::DISTANCE[] = { 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };
-
-Wind::Wind(Client* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
-	: Skill(owner, level, type, MAX_LEVEL)
+Wind::Wind(Client* owner, int level)
+	: Skill(owner, level)
 {
-	damage = DAMAGE[level - 1];
-	cooldown = COOLDOWN[level - 1];
-	bps = BPS[level - 1];
-	distance = DISTANCE[level - 1];
 }
 
 bool Wind::cast(DIRECTION dir)
@@ -26,6 +16,7 @@ bool Wind::cast(DIRECTION dir)
 	if (!Skill::cast(dir))
 		return false;
 
+	Client* owner = get_owner();
 	const COORD pos = owner->get_pos();
 
 	static const COORD up_hitting_box[] = {
@@ -55,12 +46,15 @@ bool Wind::cast(DIRECTION dir)
 
 	/* 플레이어 피격 판정 */
 
+	const int bps = get_bps();
+	const int distance = get_distance();
+
 	// 검기가 1칸씩 이동(i++)
 	for (int i = 0; i < distance; i++)
 	{
 		// 플레이어를 하나씩 선택
-		for (std::list<Client*>::iterator iter = clients.begin();
-			iter != clients.end(); iter++)
+		for (std::list<Client*>::iterator iter = background.clients.begin();
+			iter != background.clients.end(); iter++)
 		{
 			Client* client = (*iter);
 			COORD client_pos = client->get_pos();
@@ -89,11 +83,49 @@ bool Wind::cast(DIRECTION dir)
 
 	return true;
 }
-void Wind::level_up()
-{
-	if (get_level() < MAX_LEVEL)
-		Skill::level_up();
 
-	damage = DAMAGE[get_level() - 1];
-	cooldown = COOLDOWN[get_level() - 1];
+int Wind::get_damage() const
+{
+	return DAMAGE[get_level() - 1];
+}
+int Wind::get_cooldown() const
+{
+	return COOLDOWN[get_level() - 1];
+}
+int Wind::get_bps() const
+{
+	return BPS[get_level() - 1];
+}
+int Wind::get_distance() const
+{
+	return DISTANCE[get_level() - 1];
+}
+SKILL_TYPE Wind::get_type() const
+{
+	return WIND;
+}
+int Wind::get_max_level() const
+{
+	return MAX_LEVEL;
+}
+int Wind::get_ordinal() const
+{
+	return 2;
+}
+bool Wind::upgradable() const
+{
+	return false;
+}
+bool Wind::upgradable_to(SKILL_TYPE type) const
+{
+	return false;
+}
+bool Wind::downgradable() const
+{
+	return false;
+}
+
+bool Wind::downgradable_to(SKILL_TYPE type) const
+{
+	return false;
 }

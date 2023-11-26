@@ -19,6 +19,12 @@
     <Filter Include="헤더 파일\Skills">
       <UniqueIdentifier>{437ca472-8377-493d-80d2-6e8098fbebee}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\Items">
+      <UniqueIdentifier>{5e7908e6-f7a3-41de-9c93-0821fcc82b3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Items">
+      <UniqueIdentifier>{38edb78b-356f-43e6-9a76-9605ae5316c3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Server.cpp">
@@ -49,6 +55,21 @@
       <Filter>소스 파일\Skills</Filter>
     </ClCompile>
     <ClCompile Include="Skills\Wind.cpp">
+      <Filter>소스 파일\Skills</Filter>
+    </ClCompile>
+    <ClCompile Include="Items\Item.cpp">
+      <Filter>소스 파일\Items</Filter>
+    </ClCompile>
+    <ClCompile Include="Items\Energy.cpp">
+      <Filter>소스 파일\Items</Filter>
+    </ClCompile>
+    <ClCompile Include="Items\Heart.cpp">
+      <Filter>소스 파일\Items</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Shared\Items\item_balance.cpp">
+      <Filter>소스 파일\Items</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Shared\Skills\skill_balance.cpp">
       <Filter>소스 파일\Skills</Filter>
     </ClCompile>
   </ItemGroup>
@@ -85,6 +106,15 @@
     </ClInclude>
     <ClInclude Include="Skills\ZweihanderSlash.h">
       <Filter>헤더 파일\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="Items\Item.h">
+      <Filter>헤더 파일\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="Items\Energy.h">
+      <Filter>헤더 파일\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="Items\Heart.h">
+      <Filter>헤더 파일\Items</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

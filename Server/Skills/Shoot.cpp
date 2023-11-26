@@ -1,29 +1,22 @@
 #include <list>
 
 #include "Client.h"
+#include "Background.h"
 #include "Skills/Shoot.h"
 
-extern std::list<Client*> clients;
+extern Background background;
 
-const int Shoot::DAMAGE[] = { 100, 105, 110, 115, 120 };
-const int Shoot::COOLDOWN[] = { 1200, 1080, 972, 875, 788 };
-const int Shoot::BPS[] = { 25, 26, 27, 28, 29 };
-const int Shoot::DISTANCE[] = { 10, 11, 12, 13, 14 };
-
-Shoot::Shoot(Client* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
-	: Skill(owner, level, type, MAX_LEVEL)
+Shoot::Shoot(Client* owner, int level)
+	: Skill(owner, level)
 {
-	damage = DAMAGE[level - 1];
-	cooldown = COOLDOWN[level - 1];
-	bps = BPS[level - 1];
-	distance = DISTANCE[level - 1];
+
 }
 
 // pos 위치의 클라이언트를 하나만 찾아오기
 Client* get_client_at_pos(COORD pos)
 {
-	for (std::list<Client*>::iterator iter = clients.begin();
-		iter != clients.end(); iter++)
+	for (std::list<Client*>::iterator iter = background.clients.begin();
+		iter != background.clients.end(); iter++)
 	{
 		Client* cur = *iter;
 		COORD cur_pos = cur->get_pos();
@@ -39,10 +32,12 @@ bool Shoot::cast(DIRECTION dir)
 	if (!Skill::cast(dir))
 		return false;
 
+	Client* owner = get_owner();
 	COORD pos = owner->get_pos();
 	owner->bind(40);
 
-	int remain_distance = distance;
+	const int bps = get_bps();
+	int remain_distance = get_distance();
 
 	switch (dir)
 	{
@@ -95,13 +90,49 @@ bool Shoot::cast(DIRECTION dir)
 
 	return true;
 }
-void Shoot::level_up()
-{
-	if (get_level() < MAX_LEVEL)
-		Skill::level_up();
 
-	damage = DAMAGE[get_level() - 1];
-	cooldown = COOLDOWN[get_level() - 1];
-	bps = BPS[get_level() - 1];
-	distance = DISTANCE[get_level() - 1];
+int Shoot::get_damage() const
+{
+	return DAMAGE[get_level() - 1];
+}
+int Shoot::get_cooldown() const
+{
+	return COOLDOWN[get_level() - 1];
+}
+int Shoot::get_bps() const
+{
+	return BPS[get_level() - 1];
+}
+int Shoot::get_distance() const
+{
+	return DISTANCE[get_level() - 1];
+}
+SKILL_TYPE Shoot::get_type() const
+{
+	return SHOOT;
+}
+int Shoot::get_max_level() const
+{
+	return MAX_LEVEL;
+}
+int Shoot::get_ordinal() const
+{
+	return 1;
+}
+bool Shoot::upgradable() const
+{
+	return false;
+}
+bool Shoot::upgradable_to(SKILL_TYPE type) const
+{
+	return false;
+}
+bool Shoot::downgradable() const
+{
+	return false;
+}
+
+bool Shoot::downgradable_to(SKILL_TYPE type) const
+{
+	return false;
 }

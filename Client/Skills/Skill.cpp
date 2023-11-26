@@ -1,18 +1,56 @@
 #include "protocol.h"
 #include "Player.h"
 #include "Sound.h"
-#include "Skills/Skill.h"
-
 #include <ctime>
+
+#include <map>
+
+#include "Skills/Skill.h"
+#include "Skills/Shoot.h"
+#include "Skills/Slash.h"
+#include "Skills/LightsaberSlash.h"
+#include "Skills/ZweihanderSlash.h"
+#include "Skills/Wind.h"
+#include "Skills/WindSlash.h"
 
 extern Sound sound;
 
-Skill::Skill(const Player* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
-	: owner(owner), level(level), type(type), MAX_LEVEL(MAX_LEVEL)
+Skill::Skill(Player* owner, int level)
+	: owner(owner), level(level)
 {
 
 }
 
+Skill* Skill::create_object_by_type(SKILL_TYPE type, Player* owner, int level)
+{
+	Skill* skill = NULL;
+
+	switch (type)
+	{
+	case SHOOT:			   skill = new Shoot(owner, level);		      break;
+	case SLASH:			   skill = new Slash(owner, level);		      break;
+	case LIGHTSABER_SLASH: skill = new LightsaberSlash(owner, level); break;
+	case ZWEIHANDER_SLASH: skill = new ZweihanderSlash(owner, level); break;
+	case WIND:			   skill = new Wind(owner, level);			  break;
+	case WIND_SLASH:	   skill = new WindSlash(owner, level);	      break;
+	}
+
+	return skill;
+
+}
+const Skill* Skill::get_object_by_type(SKILL_TYPE type)
+{
+	static std::map<SKILL_TYPE, Skill*> data;
+
+	Skill* skill = data[type];
+	if (skill)
+		return skill;
+	else
+	{
+		data[type] = skill = create_object_by_type(type, NULL);
+		return skill;
+	}
+}
 bool Skill::cast(DIRECTION dir)
 {
 	clock_t now = clock();
@@ -21,28 +59,20 @@ bool Skill::cast(DIRECTION dir)
 	if (now < next_able_time)
 		return false; // 실패
 
-	sound.request(CAST_SKILL, type);
-	next_able_time = now + cooldown;
+	sound.request(CAST_SKILL, get_type());
+	next_able_time = now + get_cooldown();
 	return true; // 성공
-}
-void Skill::attack(Player* player)
-{
-	if (player)
-		player->hit(this);
 }
 void Skill::level_up()
 {
-	level++;
+	if (level < get_max_level())
+		level++;
 }
 int Skill::get_level() const
 {
 	return level;
 }
-int Skill::get_damage() const
+Player* Skill::get_owner() const
 {
-	return damage;
-}
-int Skill::get_cooldown() const
-{
-	return cooldown;
+	return owner;
 }

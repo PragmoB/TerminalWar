@@ -5,18 +5,9 @@
 
 extern Graphic graphic;
 
-const int Wind::DAMAGE[] = { 60, 63, 66, 69, 72, 75, 78, 81, 85, 89 };
-const int Wind::COOLDOWN[] = { 788, 710, 639, 576, 519, 468, 422, 380, 342, 308 };
-const int Wind::BPS[] = { 25, 26, 27, 28, 29, 30, 31, 32, 33, 34 };
-const int Wind::DISTANCE[] = { 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };
-
-Wind::Wind(const Player* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
-	: Skill(owner, level, type, MAX_LEVEL)
+Wind::Wind(Player* owner, int level)
+	: Skill(owner, level)
 {
-	damage = DAMAGE[level - 1];
-	cooldown = COOLDOWN[level - 1];
-	bps = BPS[level - 1];
-	distance = DISTANCE[level - 1];
 }
 
 bool Wind::cast(DIRECTION dir)
@@ -24,6 +15,9 @@ bool Wind::cast(DIRECTION dir)
 	if (!Skill::cast(dir))
 		return false;
 
+	Player* owner = get_owner();
+	const int distance = get_distance();
+	const int bps = get_bps();
 	const COORD pos = owner->get_pos();
 	COORD pos_temp = pos;
 
@@ -188,11 +182,70 @@ bool Wind::cast(DIRECTION dir)
 
 	return true;
 }
-void Wind::level_up()
-{
-	if (get_level() < MAX_LEVEL)
-		Skill::level_up();
 
-	damage = DAMAGE[get_level() - 1];
-	cooldown = COOLDOWN[get_level() - 1];
+int Wind::get_damage() const
+{
+	return DAMAGE[get_level() - 1];
+}
+int Wind::get_cooldown() const
+{
+	return COOLDOWN[get_level() - 1];
+}
+int Wind::get_bps() const
+{
+	return BPS[get_level() - 1];
+}
+int Wind::get_distance() const
+{
+	return DISTANCE[get_level() - 1];
+}
+SKILL_TYPE Wind::get_type() const
+{
+	return WIND;
+}
+int Wind::get_max_level() const
+{
+	return MAX_LEVEL;
+}
+const char* Wind::get_skill_name() const
+{
+	return "풍마";
+}
+void Wind::get_level_up_message(char* output, int len) const
+{
+	const char* skill_name = Wind::get_skill_name();
+	const int LEVEL = get_level();
+
+	if (LEVEL == MAX_LEVEL)
+		sprintf_s(output, len, "[액티브] %s 진화", skill_name);
+	else
+	{
+		sprintf_s(output, len, "[액티브] %-16s : 공격력 %d%% 증가 | 쿨타임 %d%% 감소 | 탄속 %d%%증가 | 사거리 %d칸 증가",
+			skill_name,
+			100 * (DAMAGE[LEVEL + 1] - DAMAGE[LEVEL]) / DAMAGE[LEVEL],
+			100 * (COOLDOWN[LEVEL] - COOLDOWN[LEVEL + 1]) / COOLDOWN[LEVEL],
+			100 * (BPS[LEVEL + 1] - BPS[LEVEL]) / BPS[LEVEL],
+			DISTANCE[LEVEL + 1] - DISTANCE[LEVEL]);
+	}
+}
+void Wind::get_learn_message(char* output, int len) const
+{
+	const char* skill_name = Wind::get_skill_name();
+
+	sprintf_s(output, len, "[액티브] %-16s : 전방에 검기를 날립니다. | 공격력 %d | 쿨타임 %d.%d초",
+		skill_name,
+		DAMAGE[0],
+		COOLDOWN[0] / 1000, COOLDOWN[0] % 1000);
+}
+int Wind::get_ordinal() const
+{
+	return 2;
+}
+bool Wind::upgradable() const
+{
+	return false;
+}
+bool Wind::upgradable_to(SKILL_TYPE type) const
+{
+	return false;
 }

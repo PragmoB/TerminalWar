@@ -4,14 +4,9 @@
 
 extern Graphic graphic;
 
-const int LightsaberSlash::DAMAGE[] = { 240, 252, 264, 277, 290, 304, 319, 334, 350, 367 };
-const int LightsaberSlash::COOLDOWN[] = { 788, 710, 639, 576, 519, 468, 422, 380, 342, 308 };
-
-LightsaberSlash::LightsaberSlash(const Player* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
-	: Slash(owner, level, type, MAX_LEVEL)
+LightsaberSlash::LightsaberSlash(Player* owner, int level)
+	: Slash(owner, level)
 {	
-	damage = DAMAGE[level - 1];
-	cooldown = COOLDOWN[level - 1];
 }
 
 bool LightsaberSlash::cast(DIRECTION dir)
@@ -19,9 +14,11 @@ bool LightsaberSlash::cast(DIRECTION dir)
 	if (!Skill::cast(dir))
 		return false;
 
+	Player* owner = get_owner();
 	const COORD pos = owner->get_pos();
 	COORD pos_temp = pos;
 
+	static const COLOR color = YELLOW;
 	static const int frames_delay[] = { 30, 30, 20, 10, 10, 10, 150, 0, NULL };
 
 	switch (dir)
@@ -59,7 +56,7 @@ bool LightsaberSlash::cast(DIRECTION dir)
 				pos_temp.X = pos.X + up_frames_pos[i][j].X;
 				pos_temp.Y = pos.Y + up_frames_pos[i][j].Y;
 
-				graphic.draw_in_field(pos_temp, up_frames[i][j], SKY_BLUE);
+				graphic.draw_in_field(pos_temp, up_frames[i][j], color);
 			}
 
 			Sleep(frames_delay[i]);
@@ -100,7 +97,7 @@ bool LightsaberSlash::cast(DIRECTION dir)
 				pos_temp.X = pos.X + down_frames_pos[i][j].X;
 				pos_temp.Y = pos.Y + down_frames_pos[i][j].Y;
 
-				graphic.draw_in_field(pos_temp, down_frames[i][j], SKY_BLUE);
+				graphic.draw_in_field(pos_temp, down_frames[i][j], color);
 			}
 
 			Sleep(frames_delay[i]);
@@ -144,7 +141,7 @@ bool LightsaberSlash::cast(DIRECTION dir)
 				pos_temp.X = pos.X + left_frames_pos[i][j].X;
 				pos_temp.Y = pos.Y + left_frames_pos[i][j].Y;
 
-				graphic.draw_in_field(pos_temp, left_frames[i][j], SKY_BLUE);
+				graphic.draw_in_field(pos_temp, left_frames[i][j], color);
 			}
 
 			Sleep(frames_delay[i]);
@@ -182,7 +179,7 @@ bool LightsaberSlash::cast(DIRECTION dir)
 				pos_temp.X = pos.X + right_frames_pos[i][j].X;
 				pos_temp.Y = pos.Y + right_frames_pos[i][j].Y;
 
-				graphic.draw_in_field(pos_temp, right_frames[i][j], SKY_BLUE);
+				graphic.draw_in_field(pos_temp, right_frames[i][j], color);
 			}
 
 			Sleep(frames_delay[i]);
@@ -192,11 +189,60 @@ bool LightsaberSlash::cast(DIRECTION dir)
 	}
 	return true;
 }
-void LightsaberSlash::level_up()
-{
-	if (get_level() < MAX_LEVEL)
-		Skill::level_up();
 
-	damage = DAMAGE[get_level() - 1];
-	cooldown = COOLDOWN[get_level() - 1];
+int LightsaberSlash::get_damage() const
+{
+	return DAMAGE[get_level() - 1];
+}
+int LightsaberSlash::get_cooldown() const
+{
+	return COOLDOWN[get_level() - 1];
+}
+SKILL_TYPE LightsaberSlash::get_type() const
+{
+	return LIGHTSABER_SLASH;
+}
+int LightsaberSlash::get_max_level() const
+{
+	return MAX_LEVEL;
+}
+const char* LightsaberSlash::get_skill_name() const
+{
+	return "광선검·참격";
+}
+void LightsaberSlash::get_level_up_message(char* output, int len) const
+{
+	const char* skill_name = LightsaberSlash::get_skill_name();
+	const int LEVEL = get_level();
+
+	if (LEVEL == MAX_LEVEL)
+		sprintf_s(output, len, "[액티브] %s 진화", skill_name);
+	else
+	{
+		sprintf_s(output, len, "[액티브] %-16s : 공격력 %d%% 증가 | 쿨타임 %d%% 감소",
+			skill_name,
+			100 * (DAMAGE[LEVEL + 1] - DAMAGE[LEVEL]) / DAMAGE[LEVEL],
+			100 * (COOLDOWN[LEVEL] - COOLDOWN[LEVEL + 1]) / COOLDOWN[LEVEL]);
+	}
+}
+void LightsaberSlash::get_learn_message(char* output, int len) const
+{
+	const char* skill_name = LightsaberSlash::get_skill_name();
+
+	sprintf_s(output, len, "[액티브] %-16s : 강력한 데미지의 광선검을 휘두릅니다. | 공격력 %d | 쿨타임 %d.%d초",
+		skill_name,	
+		DAMAGE[0],
+		COOLDOWN[0] / 1000, COOLDOWN[0] % 1000);
+}
+int LightsaberSlash::get_ordinal() const
+{
+	return 2;
+}
+bool LightsaberSlash::upgradable() const
+{
+	return false;
+}
+bool LightsaberSlash::upgradable_to(SKILL_TYPE type) const
+{
+	return false;
 }

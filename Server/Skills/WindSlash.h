@@ -8,12 +8,24 @@
 
 class WindSlash : public Slash
 {
-private:
-	static const int DAMAGE[10];
-	static const int COOLDOWN[10];
+public:
+	static const int MAX_LEVEL;
+	static const int DAMAGE[];
+	static const int COOLDOWN[];
 public:
 	Wind wind;
-	WindSlash(Client* owner, int level = 1, SKILL_TYPE type = WIND_SLASH, int MAX_LEVEL = 10);
+	WindSlash(Client* owner, int level = 1);
 	virtual bool cast(DIRECTION dir);
-	virtual void level_up();
+	virtual bool level_up();
+
+	virtual int get_damage() const;
+	virtual int get_cooldown() const;
+	virtual SKILL_TYPE get_type() const;
+	virtual int get_max_level() const;
+	virtual int get_ordinal() const;
+
+	virtual bool upgradable() const;
+	virtual bool upgradable_to(SKILL_TYPE type) const;
+	virtual bool downgradable() const;
+	virtual bool downgradable_to(SKILL_TYPE type) const;
 };

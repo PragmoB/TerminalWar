@@ -12,12 +12,13 @@
 #include <exception>
 
 #include "Client.h"
+#include "Background.h"
 #include "protocol.h"
 #include "interface.h"
 
 using namespace std;
 
-extern list<Client*> clients;
+extern Background background;
 
 void worker(HANDLE completion_port)
 {
@@ -27,31 +28,33 @@ void worker(HANDLE completion_port)
 		ULONG_PTR key;
 		LPOVERLAPPED overlapped;
 
-		BOOL result = GetQueuedCompletionStatus(completion_port, &bytesTransferred, &key, &overlapped, INFINITE);
+		BOOL bSuccess = GetQueuedCompletionStatus(completion_port, &bytesTransferred, &key, &overlapped, INFINITE);
 
 		// 클라이언트 데이터 처리
 		Client* client = reinterpret_cast<Client*>(overlapped);
-
+		
 		if (bytesTransferred == 0)
 		{
 			cout << " Client " << client->context.socket << " died" << endl;
-			client->die();
+			closesocket(client->context.socket);
 
 			// 클라이언트 리스트에서 client 삭제
-			for (list<Client*>::iterator iter = clients.begin();
-				iter != clients.end(); iter++)
+			for (list<Client*>::iterator iter = background.clients.begin();
+				iter != background.clients.end(); iter++)
 				if (*iter == client)
 				{
 					delete client;
-					clients.erase(iter);
+					background.clients.erase(iter);
 					break;
 				}
+			
 			continue;
 		}
 
 		PDUHello* pdu_hello;
 		PDUMov* pdu_mov;
 		PDUCastSkill* pdu_cast_skill;
+		PDUUpgradeSkill* pdu_upgrade_skill;
 
 		switch (client->context.dataBuffer.buf[0])
 		{
@@ -68,6 +71,12 @@ void worker(HANDLE completion_port)
 		case CAST_SKILL:
 			pdu_cast_skill = reinterpret_cast<PDUCastSkill*>(client->context.dataBuffer.buf);
 			client->cast_skill(pdu_cast_skill->skill_type, pdu_cast_skill->dir);
+			break;
+
+		case UPGRADE_SKILL:
+			pdu_upgrade_skill = reinterpret_cast<PDUUpgradeSkill*>(client->context.dataBuffer.buf);
+			if (pdu_upgrade_skill->skill_is_active)
+				client->upgrade_skill(pdu_upgrade_skill->active_skill_type, pdu_upgrade_skill->upgraded_active_skill_type);
 			break;
 		}
 
@@ -155,7 +164,7 @@ int main()
 		client_context.overlapped.hEvent = NULL;
 		Client* client = new Client(client_context,
 									COORD{ (SHORT)(rand() % FIELD_WIDTH + 1), (SHORT)(rand() % FIELD_HEIGHT + 1) });
-		clients.push_front(client);
+		background.clients.push_front(client);
 
 		// 클라이언트 소켓을 완료 포트에 연결
 		CreateIoCompletionPort(reinterpret_cast<HANDLE>(clientSocket), completionPort, reinterpret_cast<ULONG_PTR>(client), 0);

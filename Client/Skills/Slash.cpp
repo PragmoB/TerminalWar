@@ -8,14 +8,9 @@
 
 extern Graphic graphic;
 
-const int Slash::DAMAGE[] = { 100, 105, 110, 115, 120 };
-const int Slash::COOLDOWN[] = { 1200, 1080, 972, 875, 788 };
-
-Slash::Slash(const Player* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
-	: Skill(owner, level, type, MAX_LEVEL)
+Slash::Slash(Player* owner, int level)
+	: Skill(owner, level)
 {
-	damage = DAMAGE[level - 1];
-	cooldown = COOLDOWN[level - 1];
 }
 
 bool Slash::cast(DIRECTION dir)
@@ -23,6 +18,7 @@ bool Slash::cast(DIRECTION dir)
 	if (!Skill::cast(dir))
 		return false;
 
+	Player* owner = get_owner();
 	const COORD pos = owner->get_pos();
 	COORD pos_temp = pos;
 
@@ -198,11 +194,68 @@ bool Slash::cast(DIRECTION dir)
 	}
 	return true;
 }
-void Slash::level_up()
-{
-	if (get_level() < MAX_LEVEL)
-		Skill::level_up();
 
-	damage = DAMAGE[get_level() - 1];
-	cooldown = COOLDOWN[get_level() - 1];
+int Slash::get_damage() const
+{
+	return DAMAGE[get_level() - 1];
+}
+int Slash::get_cooldown() const
+{
+	return COOLDOWN[get_level() - 1];
+}
+SKILL_TYPE Slash::get_type() const
+{
+	return SLASH;
+}
+int Slash::get_max_level() const
+{
+	return MAX_LEVEL;
+}
+const char* Slash::get_skill_name() const
+{
+	return "참격";
+}
+void Slash::get_level_up_message(char* output, int len) const
+{
+	const char* skill_name = Slash::get_skill_name();
+	const int LEVEL = get_level();
+
+	if (LEVEL == MAX_LEVEL)
+		sprintf_s(output, len, "[액티브] %s 진화", skill_name);
+	else
+	{
+		sprintf_s(output, len, "[액티브] %-16s : 공격력 %d%% 증가 | 쿨타임 %d%% 감소",
+			skill_name,
+			100 * (DAMAGE[LEVEL + 1] - DAMAGE[LEVEL]) / DAMAGE[LEVEL],
+			100 * (COOLDOWN[LEVEL] - COOLDOWN[LEVEL + 1]) / COOLDOWN[LEVEL]);
+	}
+}
+void Slash::get_learn_message(char* output, int len) const
+{
+	const char* skill_name = Slash::get_skill_name();
+
+	sprintf_s(output, len, "[액티브] %-16s : 전방으로 검을 휘두릅니다. | 공격력 %d | 쿨타임 %d.%d초",
+		skill_name,
+		DAMAGE[0],
+		COOLDOWN[0] / 1000, COOLDOWN[0] % 1000);
+}
+int Slash::get_ordinal() const
+{
+	return 1;
+}
+bool Slash::upgradable() const
+{
+	return true;
+}
+bool Slash::upgradable_to(SKILL_TYPE type) const
+{
+	switch (type)
+	{
+	case LIGHTSABER_SLASH:
+	case ZWEIHANDER_SLASH:
+	case WIND_SLASH:
+		return true;
+	default:
+		return false;
+	}
 }

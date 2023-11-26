@@ -33,11 +33,15 @@ private:
 	HANDLE console_buffer;
 	// console_buffer 동기화 담당 뮤텍스
 	std::mutex mtx_console_buffer;
+
 	std::thread skill_renderers[10];
+	std::thread resource_renderer;
 
 	/* 사용 대기 스킬 출력 처리 */
 	void render_skill();
 
+	/* 화면 리소스 출력 동기화 */
+	void render_resources();
 	
 public:
 	
@@ -66,4 +70,7 @@ public:
 
 	/* 스킬 사용 요청 */
 	void cast_skill(Skill* skill, DIRECTION dir);
+
+	/* 서버의 좌표값을 클라이언트 좌표(화면상 좌표)로 바꿈 */
+	COORD get_client_pos_by_server_pos(COORD server_pos);
 };

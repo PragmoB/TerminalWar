@@ -1,18 +1,15 @@
 #include <list>
 
 #include "Client.h"
+#include "background.h"
 #include "Skills/LightsaberSlash.h"
 
-extern std::list<Client*> clients;
+extern Background background;
 
-const int LightsaberSlash::DAMAGE[] = { 240, 252, 264, 277, 290, 304, 319, 334, 350, 367 };
-const int LightsaberSlash::COOLDOWN[] = { 788, 710, 639, 576, 519, 468, 422, 380, 342, 308 };
-
-LightsaberSlash::LightsaberSlash(Client* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
-	: Slash(owner, level, type, MAX_LEVEL)
+LightsaberSlash::LightsaberSlash(Client* owner, int level)
+	: Slash(owner, level)
 {
-	damage = DAMAGE[level - 1];
-	cooldown = COOLDOWN[level - 1];
+
 }
 
 bool LightsaberSlash::cast(DIRECTION dir)
@@ -20,6 +17,7 @@ bool LightsaberSlash::cast(DIRECTION dir)
 	if (!Skill::cast(dir))
 		return false;
 
+	Client* owner = get_owner();
 	const COORD pos = owner->get_pos();
 	static const int delay[] = { 50, 20, 20, 10, 10, 10, 0, NULL };
 	owner->bind(120);
@@ -85,8 +83,8 @@ bool LightsaberSlash::cast(DIRECTION dir)
 	for (int i = 0; (hitting_box + i)->X | (hitting_box + i)->Y; i += 5)
 	{
 		// 플레이어를 하나씩 선택
-		for (std::list<Client*>::iterator iter = clients.begin();
-			iter != clients.end(); iter++)
+		for (std::list<Client*>::iterator iter = background.clients.begin();
+			iter != background.clients.end(); iter++)
 		{
 			Client* client = (*iter);
 			COORD client_pos = client->get_pos();
@@ -108,11 +106,44 @@ bool LightsaberSlash::cast(DIRECTION dir)
 
 	return true;
 }
-void LightsaberSlash::level_up()
+int LightsaberSlash::get_damage() const
 {
-	if (get_level() < MAX_LEVEL)
-		Skill::level_up();
+	return DAMAGE[get_level() - 1];
+}
+int LightsaberSlash::get_cooldown() const
+{
+	return COOLDOWN[get_level() - 1];
+}
+SKILL_TYPE LightsaberSlash::get_type() const
+{
+	return LIGHTSABER_SLASH;
+}
+int LightsaberSlash::get_max_level() const
+{
+	return MAX_LEVEL;
+}
+int LightsaberSlash::get_ordinal() const
+{
+	return 2;
+}
+bool LightsaberSlash::upgradable() const
+{
+	return false;
+}
+bool LightsaberSlash::upgradable_to(SKILL_TYPE type) const
+{
+	return false;
+}
 
-	damage = DAMAGE[get_level() - 1];
-	cooldown = COOLDOWN[get_level() - 1];
+bool LightsaberSlash::downgradable() const
+{
+	return true;
+}
+
+bool LightsaberSlash::downgradable_to(SKILL_TYPE type) const
+{
+	if (type == SLASH)
+		return true;
+
+	return Slash::downgradable_to(type);
 }

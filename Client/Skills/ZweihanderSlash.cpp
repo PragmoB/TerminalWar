@@ -5,14 +5,9 @@
 
 extern Graphic graphic;
 
-const int ZweihanderSlash::DAMAGE[] = { 120, 126, 132, 138, 144, 151, 158, 165, 173, 181 };
-const int ZweihanderSlash::COOLDOWN[] = { 788, 710, 639, 576, 519, 468, 422, 380, 342, 308 };
-
-ZweihanderSlash::ZweihanderSlash(const Player* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
-	: Slash(owner, level, type, MAX_LEVEL)
-{	
-	damage = DAMAGE[level - 1];
-	cooldown = COOLDOWN[level - 1];
+ZweihanderSlash::ZweihanderSlash(Player* owner, int level)
+	: Slash(owner, level)
+{
 }
 
 bool ZweihanderSlash::cast(DIRECTION dir)
@@ -20,6 +15,7 @@ bool ZweihanderSlash::cast(DIRECTION dir)
 	if (!Skill::cast(dir))
 		return false;
 
+	Player* owner = get_owner();
 	const COORD pos = owner->get_pos();
 	COORD pos_temp = pos;
 
@@ -194,11 +190,60 @@ bool ZweihanderSlash::cast(DIRECTION dir)
 
 	return true;
 }
-void ZweihanderSlash::level_up()
-{
-	if (get_level() < MAX_LEVEL)
-		Skill::level_up();
 
-	damage = DAMAGE[get_level() - 1];
-	cooldown = COOLDOWN[get_level() - 1];
+int ZweihanderSlash::get_damage() const
+{
+	return DAMAGE[get_level() - 1];
+}
+int ZweihanderSlash::get_cooldown() const
+{
+	return COOLDOWN[get_level() - 1];
+}
+SKILL_TYPE ZweihanderSlash::get_type() const
+{
+	return ZWEIHANDER_SLASH;
+}
+int ZweihanderSlash::get_max_level() const
+{
+	return MAX_LEVEL;
+}
+const char* ZweihanderSlash::get_skill_name() const
+{
+	return "양수검·참격";
+}
+void ZweihanderSlash::get_level_up_message(char* output, int len) const
+{
+	const char* skill_name = ZweihanderSlash::get_skill_name();
+	const int LEVEL = get_level();
+
+	if (LEVEL == MAX_LEVEL)
+		sprintf_s(output, len, "[액티브] %s 진화", skill_name);
+	else
+	{
+		sprintf_s(output, len, "[액티브] %-16s : 공격력 %d%% 증가 | 쿨타임 %d%% 감소",
+			skill_name,
+			100 * (DAMAGE[LEVEL + 1] - DAMAGE[LEVEL]) / DAMAGE[LEVEL],
+			100 * (COOLDOWN[LEVEL] - COOLDOWN[LEVEL + 1]) / COOLDOWN[LEVEL]);
+	}
+}
+void ZweihanderSlash::get_learn_message(char* output, int len) const
+{
+	const char* skill_name = ZweihanderSlash::get_skill_name();
+
+	sprintf_s(output, len, "[액티브] %-16s : 넓은 공격범위의 양손검을 휘두릅니다. | 공격력 %d | 쿨타임 %d.%d초",
+		skill_name,
+		DAMAGE[0],
+		COOLDOWN[0] / 1000, COOLDOWN[0] % 1000);
+}
+int ZweihanderSlash::get_ordinal() const
+{
+	return 2;
+}
+bool ZweihanderSlash::upgradable() const
+{
+	return false;
+}
+bool ZweihanderSlash::upgradable_to(SKILL_TYPE type) const
+{
+	return false;
 }

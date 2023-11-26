@@ -1,3 +1,5 @@
+#include <cstring>
+
 #include "Skills/Shoot.h"
 #include "Player.h"
 #include "Graphic.h"
@@ -5,18 +7,9 @@
 
 extern Graphic graphic;
 
-const int Shoot::DAMAGE[] = { 100, 105, 110, 115, 120 };
-const int Shoot::COOLDOWN[] = { 1200, 1080, 972, 875, 788 };
-const int Shoot::BPS[] = { 25, 26, 27, 28, 29 };
-const int Shoot::DISTANCE[] = { 10, 11, 12, 13, 14 };
-
-Shoot::Shoot(const Player* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
-	: Skill(owner, level, type, MAX_LEVEL)
+Shoot::Shoot(Player* owner, int level)
+	: Skill(owner, level)
 {
-	damage = DAMAGE[level - 1];
-	cooldown = COOLDOWN[level - 1];
-	bps = BPS[level - 1];
-	distance = DISTANCE[level - 1];
 }
 
 /* 총알 위치를 조정하고, graphic에 반영함 */
@@ -26,10 +19,12 @@ bool Shoot::cast(DIRECTION dir)
 	if (!Skill::cast(dir))
 		return false;
 
+	Player* owner = get_owner();
 	COORD pos = owner->get_pos();
 
 	const char shape_horizontal = '-', shape_vertical = '|';
-	int remain_distance = distance;
+	const int bps = get_bps();
+	int remain_distance = get_distance();
 	switch (dir)
 	{
 	case UP:
@@ -77,22 +72,72 @@ bool Shoot::cast(DIRECTION dir)
 
 	return true;
 }
-void Shoot::level_up()
-{
-	if (get_level() < MAX_LEVEL)
-		Skill::level_up();
 
-	damage = DAMAGE[get_level() - 1];
-	cooldown = COOLDOWN[get_level() - 1];
-	bps = BPS[get_level() - 1];
-	distance = DISTANCE[get_level() - 1];
+int Shoot::get_damage() const
+{
+	return DAMAGE[get_level() - 1];
 }
+int Shoot::get_cooldown() const
+{
+	return COOLDOWN[get_level() - 1];
+}
+int Shoot::get_bps() const
+{
+	return BPS[get_level() - 1];
+}
+int Shoot::get_distance() const
+{
+	return DISTANCE[get_level() - 1];
+}
+SKILL_TYPE Shoot::get_type() const
+{
+	return SHOOT;
+}
+int Shoot::get_max_level() const
+{
+	return MAX_LEVEL;
+}
+const char* Shoot::get_skill_name() const
+{
+	return "사격";
+}
+void Shoot::get_level_up_message(char* output, int len) const
+{
+	const char* skill_name = Shoot::get_skill_name();
+	const int LEVEL = get_level();
 
-int Shoot::get_bps()
-{
-	return bps;
+	if (LEVEL == MAX_LEVEL)
+		sprintf_s(output, len, "[액티브] %s 진화", skill_name);
+	else
+	{
+		sprintf_s(output, len, "[액티브] %-16s : 공격력 %d%% 증가 | 쿨타임 %d%% 감소 | 탄속 %d%% 증가 | 사거리 %d칸 증가",
+			skill_name,
+			100 * (DAMAGE[LEVEL + 1] - DAMAGE[LEVEL]) / DAMAGE[LEVEL],
+			100 * (COOLDOWN[LEVEL] - COOLDOWN[LEVEL + 1]) / COOLDOWN[LEVEL],
+			100 * (BPS[LEVEL + 1] - BPS[LEVEL]) / BPS[LEVEL],
+			DISTANCE[LEVEL + 1] - DISTANCE[LEVEL]);
+	}
 }
-int Shoot::get_distance()
+void Shoot::get_learn_message(char* output, int len) const
 {
-	return distance;
+	const char* skill_name = Shoot::get_skill_name();
+
+	sprintf_s(output, len, "[액티브] %-16s : 전방으로 총을 쏩니다. | 공격력 %d | 쿨타임 %d.%d초 | 탄속 %dbps | 사거리 %d칸",
+		skill_name,
+		DAMAGE[0],
+		COOLDOWN[0] / 1000, COOLDOWN[0] % 1000,
+		BPS[0],
+		DISTANCE[0]);
+}
+int Shoot::get_ordinal() const
+{
+	return 1;
+}
+bool Shoot::upgradable() const
+{
+	return false;
+}
+bool Shoot::upgradable_to(SKILL_TYPE type) const
+{
+	return false;
 }

@@ -4,17 +4,11 @@
 #include "Background.h"
 #include "Skills/WindSlash.h"
 
-extern std::list<Client*> clients;
 extern Background background;
 
-const int WindSlash::DAMAGE[] = { 120, 126, 132, 138, 144, 151, 158, 165, 173, 181 };
-const int WindSlash::COOLDOWN[] = { 788, 710, 639, 576, 519, 468, 422, 380, 342, 308 };
-
-WindSlash::WindSlash(Client* owner, int level, SKILL_TYPE type, int MAX_LEVEL)
-	: Slash(owner, level, type, MAX_LEVEL), wind(owner)
+WindSlash::WindSlash(Client* owner, int level)
+	: Slash(owner, level), wind(owner, level)
 {
-	damage = DAMAGE[level - 1];
-	cooldown = COOLDOWN[level - 1];
 }
 
 bool WindSlash::cast(DIRECTION dir)
@@ -24,11 +18,48 @@ bool WindSlash::cast(DIRECTION dir)
 
 	return true;
 }
-void WindSlash::level_up()
+bool WindSlash::level_up()
 {
-	if (get_level() < MAX_LEVEL)
-		Skill::level_up();
+	return (wind.level_up() && Skill::level_up());
+}
+int WindSlash::get_damage() const
+{
+	return DAMAGE[get_level() - 1];
+}
+int WindSlash::get_cooldown() const
+{
+	return COOLDOWN[get_level() - 1];
+}
+SKILL_TYPE WindSlash::get_type() const
+{
+	return WIND_SLASH;
+}
+int WindSlash::get_max_level() const
+{
+	return MAX_LEVEL;
+}
+int WindSlash::get_ordinal() const
+{
+	return 2;
+}
+bool WindSlash::upgradable() const
+{
+	return false;
+}
+bool WindSlash::upgradable_to(SKILL_TYPE type) const
+{
+	return false;
+}
 
-	damage = DAMAGE[get_level() - 1];
-	cooldown = COOLDOWN[get_level() - 1];
+bool WindSlash::downgradable() const
+{
+	return true;
+}
+
+bool WindSlash::downgradable_to(SKILL_TYPE type) const
+{
+	if (type == SLASH)
+		return true;
+
+	return Slash::downgradable_to(type);
 }

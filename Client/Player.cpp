@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <map>
 #include <windows.h>
 #include <mmsystem.h>
 
@@ -7,6 +8,11 @@
 #include "Sound.h"
 #include "Player.h"
 
+#include "Items/Item.h"
+#include "Items/Heart.h"
+#include "Items/Energy.h"
+
+#include "Skills/Skill.h"
 #include "Skills/Shoot.h"
 #include "Skills/Slash.h"
 #include "Skills/LightsaberSlash.h"
@@ -16,29 +22,19 @@
 extern Graphic graphic;
 extern Sound sound;
 
-Player::Player(COORD pos, int HP, char chracter, bool me, int len_active_skills, SKILL_TYPE skills[MAX_ACTIVE_SKILL])
+std::map<DWORD, Player*> players;
+
+Player::Player(COORD pos, int HP, char chracter, bool me, int len_active_skills, SKILL_TYPE skills[MAX_ACTIVE_SKILL], int skill_levels[MAX_ACTIVE_SKILL])
 	: chracter(chracter), HP(HP), me(me), len_active_skills(len_active_skills)
 {
 	for (int i = 0; i < len_active_skills; i++)
 		this->active_skills[i] = NULL;
 
 	for (int i = 0; i < len_active_skills; i++)
-	{
-		switch (skills[i])
-		{
-		case SHOOT:			   this->active_skills[i] = new Shoot(this); break;
-		case SLASH:			   this->active_skills[i] = new Slash(this); break;
-		case LIGHTSABER_SLASH: this->active_skills[i] = new LightsaberSlash(this); break;
-		case ZWEIHANDER_SLASH: this->active_skills[i] = new ZweihanderSlash(this); break;
-		case WIND_SLASH:	   this->active_skills[i] = new WindSlash(this); break;
-		}
-	}
+		this->active_skills[i] = Skill::create_object_by_type(skills[i], this, skill_levels[i]);
 
 	// 화면에 캐릭터 첫 표시
-	pos.X *= 2; // 가로방향 이동은 2칸씩임을 고려함
-	pos.X += FIELD.Left - 1;
-	pos.Y += FIELD.Top;
-	this->pos = pos;
+	this->pos = graphic.get_client_pos_by_server_pos(pos);
 	this->appear();
 }
 
@@ -46,7 +42,7 @@ Skill* Player::get_active_skill(SKILL_TYPE skill_type)
 {
 	for (int i = 0; i < len_active_skills; i++)
 	{
-		if (active_skills[i]->type == skill_type)
+		if (active_skills[i]->get_type() == skill_type)
 			return active_skills[i];
 	}
 	return NULL;
@@ -100,6 +96,8 @@ void Player::disappear()
 }
 void Player::move(DIRECTION dir)
 {
+	moving = true;
+
 	this->disappear();
 
 	switch (dir)
@@ -112,6 +110,8 @@ void Player::move(DIRECTION dir)
 	case RIGHT: pos.X += 2; break;
 	}
 	this->appear();
+
+	moving = false;
 }
 
 void Player::cast_skill(SKILL_TYPE skill_type, DIRECTION dir)
@@ -126,20 +126,23 @@ void Player::upgrade_skill(SKILL_TYPE before, SKILL_TYPE after)
 {
 	for (int i = 0; i < len_active_skills; i++)
 	{
-		if (active_skills[i]->type == before)
+		if (active_skills[i]->get_type() == before)
 		{
-			active_skills[i]->level_up();
-
-			if (active_skills[i]->get_level() >= active_skills[i]->MAX_LEVEL)
-			{/*
-				switch (after)
-				{
-				case LI
-				}*/
-
+			// 진화
+			if (active_skills[i]->get_level() >= active_skills[i]->get_max_level())
+			{
+				delete active_skills[i];
+				active_skills[i] = Skill::create_object_by_type(after, this);
 			}
+			else
+				active_skills[i]->level_up();
+
+			return;
 		}
 	}
+	
+	// 새로운 스킬
+	active_skills[len_active_skills++] = Skill::create_object_by_type(before, this);
 }
 
 void Player::attack(Player* player, SKILL_TYPE skill_type)
@@ -152,23 +155,44 @@ void Player::attack(Player* player, SKILL_TYPE skill_type)
 	else
 		skill = get_active_skill(skill_type);
 
-	if (skill)
-		skill->attack(player);
+	player->hit(skill);
 }
 void Player::hit(const Skill* skill)
 {
 	if (!skill)
 		return;
 
-	sound.request(HIT, skill->type);
+	sound.request(HIT, skill->get_type());
 
 	HP -= skill->get_damage();
 	graphic.draw(pos, '*', RED);
 }
 
+void Player::earn_item(Item* item)
+{
+	if (!item)
+		return;
+
+	switch (item->get_type())
+	{
+	case HEART:
+	{
+		const Heart* heart_item = dynamic_cast<Heart*>(item);
+		HP += heart_item->get_amount();
+		break;
+	}
+	}
+
+	delete item;
+}
+
 bool Player::is_me()
 {
 	return me;
+}
+bool Player::is_moving()
+{
+	return moving;
 }
 
 COORD Player::get_pos() const

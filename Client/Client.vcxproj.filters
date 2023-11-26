@@ -19,6 +19,12 @@
     <Filter Include="헤더 파일\Skills">
       <UniqueIdentifier>{06b9dd7a-3142-4857-bf73-a4317c400265}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\Items">
+      <UniqueIdentifier>{e1eccccb-d998-4100-830f-cf594cc2dfa1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Items">
+      <UniqueIdentifier>{2c7c57ef-835a-4011-aa4a-aa07add47ea3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -39,9 +45,6 @@
     <ClCompile Include="Menu.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Graphic.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Skills\Slash.cpp">
       <Filter>소스 파일\Skills</Filter>
     </ClCompile>
@@ -56,6 +59,30 @@
     </ClCompile>
     <ClCompile Include="Skills\Wind.cpp">
       <Filter>소스 파일\Skills</Filter>
+    </ClCompile>
+    <ClCompile Include="Items\Item.cpp">
+      <Filter>소스 파일\Items</Filter>
+    </ClCompile>
+    <ClCompile Include="Items\Heart.cpp">
+      <Filter>소스 파일\Items</Filter>
+    </ClCompile>
+    <ClCompile Include="Items\Energy.cpp">
+      <Filter>소스 파일\Items</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Shared\Items\item_balance.cpp">
+      <Filter>소스 파일\Items</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Shared\Skills\skill_balance.cpp">
+      <Filter>소스 파일\Skills</Filter>
+    </ClCompile>
+    <ClCompile Include="EnergyBar.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphic.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="UpgradeOptionList.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -72,9 +99,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Menu.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphic.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Skills\LightsaberSlash.h">
@@ -97,6 +121,24 @@
     </ClInclude>
     <ClInclude Include="Skills\ZweihanderSlash.h">
       <Filter>헤더 파일\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="Items\Item.h">
+      <Filter>헤더 파일\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="Items\Heart.h">
+      <Filter>헤더 파일\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="Items\Energy.h">
+      <Filter>헤더 파일\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="EnergyBar.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphic.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="UpgradeOptionList.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
