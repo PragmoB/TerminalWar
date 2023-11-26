@@ -364,9 +364,11 @@ void send_discontinual_request(SOCKET sock)
 				upgrade_option_list->appear();
 			else
 			{
-				upgradable = false;
 				delete upgrade_option_list;
 				len_upgrade_skill_options = 0;
+				len_evolution_skill_options = 0;
+				upgradable = false;
+				focus_is_on_evolution_option_list = false;
 
 				PDUUpgradeSkill pdu;
 				pdu.skill_is_active = true;
@@ -421,8 +423,10 @@ void send_discontinual_request(SOCKET sock)
 						upgrade_option_list->disappear();
 						delete upgrade_option_list;
 						len_upgrade_skill_options = 0;
-
+						len_evolution_skill_options = 0;
 						upgradable = false;
+						focus_is_on_evolution_option_list = false;
+
 						send(sock, (const char*)&pdu, sizeof(PDUUpgradeSkill), NULL);
 
 					}
@@ -434,8 +438,9 @@ void send_discontinual_request(SOCKET sock)
 					delete upgrade_option_list;
 					len_upgrade_skill_options = 0;
 					len_evolution_skill_options = 0;
-
 					upgradable = false;
+					focus_is_on_evolution_option_list = false;
+
 					send(sock, (const char*)&pdu, sizeof(PDUUpgradeSkill), NULL);
 
 					// 포기
