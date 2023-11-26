@@ -112,10 +112,10 @@ void Shoot::get_level_up_message(char* output, int len) const
 	{
 		sprintf_s(output, len, "[액티브] %-16s : 공격력 %d%% 증가 | 쿨타임 %d%% 감소 | 탄속 %d%% 증가 | 사거리 %d칸 증가",
 			skill_name,
-			100 * (DAMAGE[LEVEL + 1] - DAMAGE[LEVEL]) / DAMAGE[LEVEL],
-			100 * (COOLDOWN[LEVEL] - COOLDOWN[LEVEL + 1]) / COOLDOWN[LEVEL],
-			100 * (BPS[LEVEL + 1] - BPS[LEVEL]) / BPS[LEVEL],
-			DISTANCE[LEVEL + 1] - DISTANCE[LEVEL]);
+			100 * (DAMAGE[LEVEL] - DAMAGE[LEVEL - 1]) / DAMAGE[LEVEL - 1],
+			100 * (COOLDOWN[LEVEL - 1] - COOLDOWN[LEVEL]) / COOLDOWN[LEVEL - 1],
+			100 * (BPS[LEVEL] - BPS[LEVEL - 1]) / BPS[LEVEL - 1],
+			DISTANCE[LEVEL] - DISTANCE[LEVEL - 1]);
 	}
 }
 void Shoot::get_learn_message(char* output, int len) const

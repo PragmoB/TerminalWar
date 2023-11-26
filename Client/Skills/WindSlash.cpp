@@ -54,11 +54,11 @@ void WindSlash::get_level_up_message(char* output, int len) const
 	{
 		sprintf_s(output, len, "[액티브] %-16s : 공격력 %d%% 증가 | 쿨타임 %d%% 감소 | 검기 공격력 %d%% 증가 | 검기 속도 %d%% 증가 | 검기 사거리 %d칸 증가",
 			skill_name,
-			100 * (DAMAGE[LEVEL + 1] - DAMAGE[LEVEL]) / DAMAGE[LEVEL],
-			100 * (COOLDOWN[LEVEL] - COOLDOWN[LEVEL + 1]) / COOLDOWN[LEVEL],
-			100 * (Wind::DAMAGE[LEVEL + 1] - Wind::DAMAGE[LEVEL]) / Wind::DAMAGE[LEVEL],
-			100 * (Wind::BPS[LEVEL + 1] - Wind::BPS[LEVEL]) / Wind::BPS[LEVEL],
-			Wind::DISTANCE[LEVEL + 1] - Wind::DISTANCE[LEVEL]);
+			100 * (DAMAGE[LEVEL] - DAMAGE[LEVEL - 1]) / DAMAGE[LEVEL - 1],
+			100 * (COOLDOWN[LEVEL - 1] - COOLDOWN[LEVEL]) / COOLDOWN[LEVEL - 1],
+			100 * (Wind::DAMAGE[LEVEL] - Wind::DAMAGE[LEVEL - 1]) / Wind::DAMAGE[LEVEL - 1],
+			100 * (Wind::BPS[LEVEL] - Wind::BPS[LEVEL - 1]) / Wind::BPS[LEVEL - 1],
+			Wind::DISTANCE[LEVEL] - Wind::DISTANCE[LEVEL - 1]);
 	}
 }
 void WindSlash::get_learn_message(char* output, int len) const
