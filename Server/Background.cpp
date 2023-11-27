@@ -68,7 +68,11 @@ void Background::generate_item()
 			
 			items.push_back(item);
 		}
-		Sleep(4500);
+		// 클라이언트 수에 따라 생성 속도 조절
+		if (clients.size())
+			Sleep(4000 / clients.size());
+		else
+			Sleep(20);
 	}
 }
 void Background::cast_skill(Skill* skill, DIRECTION dir)
