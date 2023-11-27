@@ -129,7 +129,10 @@ void receive(SOCKET sock)
 				pdu_hello = reinterpret_cast<PDUHello*>(buff + complete_len);
 				
 				if (!my_id) // 첫빠다로 받은 hello 패킷이라면
+				{
 					my_id = pdu_hello->id; // 이 패킷의 id값은 나의 아이디
+					graphic.draw_field();
+				}
 				else
 				{
 					players[pdu_hello->id] = new Player(pdu_hello->pos, pdu_hello->HP, pdu_hello->chracter,
@@ -593,14 +596,14 @@ int main()
 		// 게임 진행 장면 송출 시작
 		graphic.start();
 		graphic.clear_frame();
-		graphic.draw_field();
+		graphic.draw_field("동접자가 많아 접속 대기중입니다. 잠시만 기다려주세요. 또는 다른 서버를 이용해주세요.");
 
 		thread(receive, sock).detach();
 
 		// 영문 문자로 캐릭터 선택
 		PDUHello pdu_hello;
 		pdu_hello.chracter = NULL;
-		while (pdu_hello.chracter < 0x41 || (0x5a < pdu_hello.chracter && pdu_hello.chracter < 0x61) || 0x7a < pdu_hello.chracter)
+		while (!my_id || pdu_hello.chracter < 0x41 || (0x5a < pdu_hello.chracter && pdu_hello.chracter < 0x61) || 0x7a < pdu_hello.chracter)
 			pdu_hello.chracter = _getch();
 
 		// 게임 유저들에게 나의 존재를 알림

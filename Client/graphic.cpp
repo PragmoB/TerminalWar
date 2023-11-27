@@ -174,7 +174,7 @@ void Graphic::clear_frame()
 }
 
 /* 경기장 그리기 */
-void Graphic::draw_field()
+void Graphic::draw_field(const char* message)
 {
 	char buff[600] = "";
 
@@ -200,6 +200,11 @@ void Graphic::draw_field()
 	
 	buff[2 * FIELD_WIDTH + 3] = NULL;
 	draw(COORD{ FIELD.Left - 1, FIELD.Bottom + 1 }, buff, GREEN, GREEN); // FIELD.Bottom + 1 => 체력 상태 표시줄을 고려
+
+	/* 메시지 그려넣기 */
+
+	if (message)
+		draw(COORD{ FIELD.Left + 2, FIELD.Top }, message, BLACK, GREEN);
 }
 
 void Graphic::cast_skill(Skill* skill, DIRECTION dir)

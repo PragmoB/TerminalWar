@@ -65,8 +65,8 @@ public:
 	/* 경기장 화면 초기화 */
 	void clear_frame();
 
-	/* 경기장 그리기 */
-	void draw_field();
+	/* 경기장 그리기, 경기장 위에 메시지도 같이 뿌림 */
+	void draw_field(const char* message = NULL);
 
 	/* 스킬 사용 요청 */
 	void cast_skill(Skill* skill, DIRECTION dir);

@@ -150,6 +150,10 @@ int main()
 	std::cout << " IOCP server is running..." << std::endl << std::endl;
 
 	while (true) {
+		// 최대 동접자 9명으로 제한
+		while (background.clients.size() >= 9)
+			Sleep(1000);
+
 		SOCKET clientSocket = accept(listenSocket, NULL, NULL);
 		if (clientSocket == INVALID_SOCKET) {
 			std::cerr << " Failed to accept client connection." << std::endl;
@@ -164,7 +168,7 @@ int main()
 		client_context.overlapped.hEvent = NULL;
 		Client* client = new Client(client_context,
 									COORD{ (SHORT)(rand() % FIELD_WIDTH + 1), (SHORT)(rand() % FIELD_HEIGHT + 1) });
-		background.clients.push_front(client);
+		background.clients.push_back(client);
 
 		// 클라이언트 소켓을 완료 포트에 연결
 		CreateIoCompletionPort(reinterpret_cast<HANDLE>(clientSocket), completionPort, reinterpret_cast<ULONG_PTR>(client), 0);
@@ -175,6 +179,8 @@ int main()
 			if (WSAGetLastError() != ERROR_IO_PENDING) {
 				// 오류 처리
 				std::cerr << " Failed to recv client : " << WSAGetLastError() << std::endl;
+				background.clients.pop_back();
+				delete client;
 			}
 		}
 	}

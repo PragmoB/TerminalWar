@@ -26,7 +26,7 @@ void Menu::appear()
 	if (cursor_is_visible)
 	{
 		pos_temp.X += 1;
-		pos_temp.Y += 1;
+		pos_temp.Y += 1 + focus;
 		graphic.draw(pos_temp, '>');
 	}
 }
