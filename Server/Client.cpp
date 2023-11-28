@@ -212,6 +212,9 @@ bool Client::move(DIRECTION dir)
 		iter != background.clients.end(); iter++)
 		(*iter)->apply_movement_of(this, dir);
 
+	// 아이템에서 얻은 총 에너지 량
+	int energy_gain = 0;
+
 	// 필드 아이템 획득 검사
 	for (std::list<Item*>::iterator iter = background.items.begin();
 		iter != background.items.end();)
@@ -244,7 +247,7 @@ bool Client::move(DIRECTION dir)
 			{
 				Energy* energy_item = dynamic_cast<Energy*>(item);
 				if (energy_item)
-					earn_energy(energy_item->get_amount());
+					energy_gain += energy_item->get_amount();
 				break;
 			}
 			}
@@ -255,6 +258,8 @@ bool Client::move(DIRECTION dir)
 		else
 			iter++;
 	}
+
+	earn_energy(energy_gain);
 
 	return true;
 }

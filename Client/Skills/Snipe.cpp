@@ -16,7 +16,61 @@ Snipe::Snipe(Player* owner, int level)
 
 bool Snipe::cast(DIRECTION dir)
 {
-	return Shoot::cast(dir);
+	if (!Skill::cast(dir))
+		return false;
+
+	Player* owner = get_owner();
+	COORD pos = owner->get_pos();
+
+	const char shape_horizontal = '-', shape_vertical = '|';
+	const int bps = get_bps();
+	int remain_distance = get_distance();
+	switch (dir)
+	{
+	case UP:
+		// 벽에 닿거나 사정거리가 0이 될 때까지 계속 날아감
+		for (; 0 < remain_distance && FIELD.Top < pos.Y - 1; remain_distance--)
+		{
+			pos.Y--; // 총알이 위로 이동
+			graphic.draw(pos, shape_vertical, SKY_BLUE); // 그래픽에 반영
+
+			Sleep(1000 / bps); // 발사 속도 조절
+			graphic.draw(pos, ' '); // 잔상 지우기
+		}
+		break;
+	case DOWN:
+		for (; 0 < remain_distance && pos.Y < FIELD.Bottom; remain_distance--)
+		{
+			pos.Y++;
+			graphic.draw(pos, shape_vertical, SKY_BLUE); // 그래픽에 반영
+
+			Sleep(1000 / bps);
+			graphic.draw(pos, ' '); // 잔상 지우기
+		}
+		break;
+	case LEFT:
+		for (; 0 < remain_distance && FIELD.Left < pos.X - 2; remain_distance--)
+		{
+			pos.X -= 2;
+			graphic.draw(pos, shape_horizontal, SKY_BLUE); // 그래픽에 반영
+
+			Sleep(1000 / bps);
+			graphic.draw(pos, ' '); // 잔상 지우기
+		}
+		break;
+	case RIGHT:
+		for (; 0 < remain_distance && pos.X + 2 < FIELD.Left + 2 * FIELD_WIDTH; remain_distance--)
+		{
+			pos.X += 2;
+			graphic.draw(pos, shape_horizontal, SKY_BLUE); // 그래픽에 반영
+
+			Sleep(1000 / bps);
+			graphic.draw(pos, ' '); // 잔상 지우기
+		}
+		break;
+	}
+
+	return true;
 }
 
 int Snipe::get_damage() const
@@ -45,7 +99,7 @@ int Snipe::get_max_level() const
 }
 const char* Snipe::get_skill_name() const
 {
-	return "저격";
+	return "고에너지 입자";
 }
 void Snipe::get_level_up_message(char* output, int len) const
 {
@@ -68,7 +122,7 @@ void Snipe::get_learn_message(char* output, int len) const
 {
 	const char* skill_name = Snipe::get_skill_name();
 
-	sprintf_s(output, len, "[액티브] %-16s : 강력한 데미지와 높은 정확성으로 적을 향해 총을 쏩니다. | 공격력 %d | 쿨타임 %d.%d초 | 탄속 %dbps | 사거리 %d칸",
+	sprintf_s(output, len, "[액티브] %-16s : 마력을 압축하여 높은 운동에너지를 가진 입자를 발사합니다. | 공격력 %d | 쿨타임 %d.%d초 | 탄속 %dbps | 사거리 %d칸",
 		skill_name,
 		DAMAGE[0],
 		COOLDOWN[0] / 1000, COOLDOWN[0] % 1000,

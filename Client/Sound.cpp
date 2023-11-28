@@ -29,6 +29,12 @@ void Sound::play_sound()
 
 		switch (param.pdu_type)
 		{
+		case HELLO: // 배경음악 재생
+			mciSendCommand(mci_open_bgm.wDeviceID,
+				MCI_SEEK, MCI_SEEK_TO_START, NULL);
+			mciSendCommand(mci_open_bgm.wDeviceID,
+				MCI_PLAY, MCI_DGV_PLAY_REPEAT, (DWORD_PTR)&mci_play);
+			break;
 
 		case CAST_SKILL:
 			switch (param.skill_type)
@@ -41,6 +47,15 @@ void Sound::play_sound()
 
 				// 사운드채널 돌려가며 쓰기
 				++mci_cur_cast_shoot %= LEN_CAST_SHOOT_SOUNDCHANNELS;
+				break;
+			case SNIPE:
+				mciSendCommand(mci_open_cast_snipe[mci_cur_cast_snipe].wDeviceID,
+					MCI_SEEK, MCI_SEEK_TO_START, NULL);
+				mciSendCommand(mci_open_cast_snipe[mci_cur_cast_snipe].wDeviceID,
+					MCI_PLAY, MCI_NOTIFY, (DWORD_PTR)&mci_play);
+
+				// 사운드채널 돌려가며 쓰기
+				++mci_cur_cast_snipe %= LEN_CAST_SNIPE_SOUNDCHANNELS;
 				break;
 			case SLASH: case WIND_SLASH:
 				mciSendCommand(mci_open_cast_slash[mci_cur_cast_slash].wDeviceID,
@@ -93,6 +108,15 @@ void Sound::play_sound()
 				// 사운드채널 돌려가며 쓰기
 				++mci_cur_hit_shoot %= LEN_HIT_SHOOT_SOUNDCHANNELS;
 				break;
+			case SNIPE:
+				mciSendCommand(mci_open_hit_snipe[mci_cur_hit_snipe].wDeviceID,
+					MCI_SEEK, MCI_SEEK_TO_START, NULL);
+				mciSendCommand(mci_open_hit_snipe[mci_cur_hit_snipe].wDeviceID,
+					MCI_PLAY, MCI_NOTIFY, (DWORD_PTR)&mci_play);
+
+				// 사운드채널 돌려가며 쓰기
+				++mci_cur_hit_snipe %= LEN_HIT_SNIPE_SOUNDCHANNELS;
+				break;
 			case SLASH: case WIND_SLASH:
 				mciSendCommand(mci_open_hit_slash[mci_cur_hit_slash].wDeviceID,
 					MCI_SEEK, MCI_SEEK_TO_START, NULL);
@@ -137,7 +161,15 @@ void Sound::play_sound()
 }
 void Sound::mci_init()
 {
-	// 총쏘기 사운드채널 풀 설정
+	// 배경음악 사운드채널 설정
+	{
+		wchar_t element_name[] = L"soundtracks\\bgm.mp3";
+		mci_open_bgm.lpstrElementName = element_name;
+		mci_open_bgm.lpstrDeviceType = L"mpegvideo";
+		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONGLONG)(LPVOID)&mci_open_bgm);
+	}
+
+	// 스킬 시전 사운드채널 풀 설정
 	for (int i = 0; i < LEN_CAST_SHOOT_SOUNDCHANNELS; i++)
 	{
 		wchar_t element_name[] = L"soundtracks\\cast_shoot0.mp3";
@@ -145,6 +177,14 @@ void Sound::mci_init()
 		mci_open_cast_shoot[i].lpstrElementName = element_name;
 		mci_open_cast_shoot[i].lpstrDeviceType = L"mpegvideo";
 		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONGLONG)(LPVOID)&mci_open_cast_shoot[i]);
+	}
+	for (int i = 0; i < LEN_CAST_SNIPE_SOUNDCHANNELS; i++)
+	{
+		wchar_t element_name[] = L"soundtracks\\cast_snipe0.mp3";
+		element_name[wcslen(element_name) - 5] = '0' + i;
+		mci_open_cast_snipe[i].lpstrElementName = element_name;
+		mci_open_cast_snipe[i].lpstrDeviceType = L"mpegvideo";
+		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONGLONG)(LPVOID)&mci_open_cast_snipe[i]);
 	}
 	for (int i = 0; i < LEN_CAST_SLASH_SOUNDCHANNELS; i++)
 	{
@@ -179,7 +219,7 @@ void Sound::mci_init()
 		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONGLONG)(LPVOID)&mci_open_cast_wind[i]);
 	}
 
-	// 총맞기 사운드채널 풀 설정
+	// 스킬 피격 사운드채널 풀 설정
 	for (int i = 0; i < LEN_HIT_SHOOT_SOUNDCHANNELS; i++)
 	{
 		wchar_t element_name[] = L"soundtracks\\hit_shoot0.mp3";
@@ -187,6 +227,14 @@ void Sound::mci_init()
 		mci_open_hit_shoot[i].lpstrElementName = element_name;
 		mci_open_hit_shoot[i].lpstrDeviceType = L"mpegvideo";
 		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONG_PTR)&mci_open_hit_shoot[i]);
+	}
+	for (int i = 0; i < LEN_HIT_SNIPE_SOUNDCHANNELS; i++)
+	{
+		wchar_t element_name[] = L"soundtracks\\hit_snipe0.mp3";
+		element_name[wcslen(element_name) - 5] = '0' + i;
+		mci_open_hit_snipe[i].lpstrElementName = element_name;
+		mci_open_hit_snipe[i].lpstrDeviceType = L"mpegvideo";
+		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONG_PTR)&mci_open_hit_snipe[i]);
 	}
 	for (int i = 0; i < LEN_HIT_SLASH_SOUNDCHANNELS; i++)
 	{

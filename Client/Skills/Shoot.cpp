@@ -32,40 +32,40 @@ bool Shoot::cast(DIRECTION dir)
 		for (; 0 < remain_distance && FIELD.Top < pos.Y - 1; remain_distance--)
 		{
 			pos.Y--; // 총알이 위로 이동
-			graphic.draw(pos, shape_vertical, SKY_BLUE); // 그래픽에 반영
+			graphic.draw(pos, shape_vertical); // 그래픽에 반영
 
 			Sleep(1000 / bps); // 발사 속도 조절
-			graphic.draw(pos, ' ', SKY_BLUE); // 잔상 지우기
+			graphic.draw(pos, ' '); // 잔상 지우기
 		}
 		break;
 	case DOWN:
 		for (; 0 < remain_distance && pos.Y < FIELD.Bottom; remain_distance--)
 		{
 			pos.Y++;
-			graphic.draw(pos, shape_vertical, SKY_BLUE); // 그래픽에 반영
+			graphic.draw(pos, shape_vertical); // 그래픽에 반영
 
 			Sleep(1000 / bps);
-			graphic.draw(pos, ' ', SKY_BLUE); // 잔상 지우기
+			graphic.draw(pos, ' '); // 잔상 지우기
 		}
 		break;
 	case LEFT:
 		for (; 0 < remain_distance && FIELD.Left < pos.X - 2; remain_distance--)
 		{
 			pos.X -= 2;
-			graphic.draw(pos, shape_horizontal, SKY_BLUE); // 그래픽에 반영
+			graphic.draw(pos, shape_horizontal); // 그래픽에 반영
 
 			Sleep(1000 / bps);
-			graphic.draw(pos, ' ', SKY_BLUE); // 잔상 지우기
+			graphic.draw(pos, ' '); // 잔상 지우기
 		}
 		break;
 	case RIGHT:
 		for (; 0 < remain_distance && pos.X + 2 < FIELD.Left + 2 * FIELD_WIDTH; remain_distance--)
 		{
 			pos.X += 2;
-			graphic.draw(pos, shape_horizontal, SKY_BLUE); // 그래픽에 반영
+			graphic.draw(pos, shape_horizontal); // 그래픽에 반영
 
 			Sleep(1000 / bps);
-			graphic.draw(pos, ' ', SKY_BLUE); // 잔상 지우기
+			graphic.draw(pos, ' '); // 잔상 지우기
 		}
 		break;
 	}
@@ -99,7 +99,7 @@ int Shoot::get_max_level() const
 }
 const char* Shoot::get_skill_name() const
 {
-	return "사격";
+	return "입자 방출";
 }
 void Shoot::get_level_up_message(char* output, int len) const
 {
@@ -122,7 +122,7 @@ void Shoot::get_learn_message(char* output, int len) const
 {
 	const char* skill_name = Shoot::get_skill_name();
 
-	sprintf_s(output, len, "[액티브] %-16s : 전방으로 총을 쏩니다. | 공격력 %d | 쿨타임 %d.%d초 | 탄속 %dbps | 사거리 %d칸",
+	sprintf_s(output, len, "[액티브] %-16s : 잠재된 마력을 끌어내 전방으로 입자를 발사합니다. | 공격력 %d | 쿨타임 %d.%d초 | 탄속 %dbps | 사거리 %d칸",
 		skill_name,
 		DAMAGE[0],
 		COOLDOWN[0] / 1000, COOLDOWN[0] % 1000,

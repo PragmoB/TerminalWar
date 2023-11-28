@@ -131,6 +131,7 @@ void receive(SOCKET sock)
 				if (!my_id) // 첫빠다로 받은 hello 패킷이라면
 				{
 					my_id = pdu_hello->id; // 이 패킷의 id값은 나의 아이디
+					sound.request(HELLO); // 배경음악 재생
 					graphic.draw_field();
 				}
 				else
@@ -165,32 +166,42 @@ void receive(SOCKET sock)
 			case EARN_ITEM:
 				pdu_earn_item = reinterpret_cast<PDUEarnItem*>(buff + complete_len);
 				pdu_earn_item->pos = graphic.get_client_pos_by_server_pos(pdu_earn_item->pos);
-				
-				// items(아이템 목록)을 돌며 일치하는 아이템을 찾음
-				for (list<Item*>::iterator iter = items.begin();
-					iter != items.end();)
+				player = players[pdu_earn_item->id];
+
 				{
-					Item* item = *iter;
-					COORD pos = COORD{ NULL, NULL };
-					
-					if (item)
-						pos = item->get_pos();
+					// 이번 아이템 획득 이벤트에서 얻은 나의 총 경험치량
+					int my_energy_gain = 0;
 
-					// 발견했으면
-					if (pdu_earn_item->pos.X == pos.X && pdu_earn_item->pos.Y == pos.Y)
+					// items(아이템 목록)을 돌며 일치하는 아이템을 찾음
+					for (list<Item*>::iterator iter = items.begin();
+						iter != items.end();)
 					{
-						Energy* energy_item = dynamic_cast<Energy*>(item);
+						Item* item = *iter;
+						COORD pos = COORD{ NULL, NULL };
+					
+						if (item)
+							pos = item->get_pos();
 
-						// item이 경험치 구슬이었고 먹은게 나 이고 스킬 강화 선택이 대기중이 아니라면
-						if (energy_item && pdu_earn_item->id == my_id && !upgradable)
-							energy_bar.earn_energy(energy_item->get_amount()); // 에너지 표시줄에 반영
+						// 발견했으면
+						if (pdu_earn_item->pos.X == pos.X && pdu_earn_item->pos.Y == pos.Y)
+						{
+							Energy* energy_item = dynamic_cast<Energy*>(item);
 
-						// 해당하는 플레이어가 흡수
-						players[pdu_earn_item->id]->earn_item(item);
-						items.erase(iter++);
+							// item이 경험치 구슬이었고 먹은게 나 이고 스킬 강화 선택이 대기중이 아니라면
+							if (energy_item && pdu_earn_item->id == my_id && !upgradable)
+								my_energy_gain += energy_item->get_amount(); // 에너지 표시줄에 반영
+
+							// 해당하는 플레이어가 흡수
+							if(player)
+								player->earn_item(item);
+
+							items.erase(iter++);
+						}
+						else
+							iter++;
 					}
-					else
-						iter++;
+
+					energy_bar.earn_energy(my_energy_gain);
 				}
 				complete_len += sizeof(PDUEarnItem);
 				break;
