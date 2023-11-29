@@ -21,9 +21,16 @@
 #define LEN_HIT_ZWEIHANDER_SLASH_SOUNDCHANNELS 5
 #define LEN_HIT_WIND_SOUNDCHANNELS 5
 
+#define LEN_EARN_ENERGY_SOUNDCHANNELS 6
+#define LEN_EARN_HEART_SOUNDCHANNELS 3
+
 typedef struct {
 	PDU_TYPE pdu_type;
-	SKILL_TYPE skill_type;
+	union
+	{
+		SKILL_TYPE skill_type;
+		ITEM_TYPE item_type;
+	};
 } SOUND_PARAM;
 /*
  * 전역에서 사용하는 오디오 엔진 정의부.
@@ -64,6 +71,14 @@ private:
 	int mci_cur_hit_lightsaber_slash = 0;
 	int mci_cur_hit_zweihander_slash = 0;
 	int mci_cur_hit_wind = 0;
+
+	MCI_OPEN_PARMS mci_open_level_up;
+	MCI_OPEN_PARMS mci_open_earn_energy[LEN_EARN_ENERGY_SOUNDCHANNELS];
+	MCI_OPEN_PARMS mci_open_earn_heart[LEN_EARN_HEART_SOUNDCHANNELS];
+	
+	// 현재 선택된 아이템 획득 사운드채널 번호
+	int mci_cur_earn_energy = 0;
+	int mci_cur_earn_heart = 0;
 	
 	// 사운드 재생 요청 큐
 	BlockingQueue<SOUND_PARAM> sound_queue;
@@ -78,5 +93,6 @@ private:
 public:
 	Sound();
 	void request(PDU_TYPE pdu_type, SKILL_TYPE skill_type = UNKNOWN);
+	void request(PDU_TYPE pdu_type, ITEM_TYPE item_type);
 	~Sound();
 };

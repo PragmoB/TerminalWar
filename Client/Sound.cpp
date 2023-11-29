@@ -155,16 +155,50 @@ void Sound::play_sound()
 				break;
 			}
 			break;
+
+		case EARN_ITEM:
+			switch (param.item_type)
+			{
+			case ENERGY:
+				mciSendCommand(mci_open_earn_energy[mci_cur_earn_energy].wDeviceID,
+					MCI_SEEK, MCI_SEEK_TO_START, NULL);
+				mciSendCommand(mci_open_earn_energy[mci_cur_earn_energy].wDeviceID,
+					MCI_PLAY, MCI_NOTIFY, (DWORD_PTR)&mci_play);
+
+				// 사운드채널 돌려가며 쓰기
+				++mci_cur_earn_energy %= LEN_EARN_ENERGY_SOUNDCHANNELS;
+				break;
+
+			case HEART:
+				mciSendCommand(mci_open_earn_heart[mci_cur_earn_heart].wDeviceID,
+					MCI_SEEK, MCI_SEEK_TO_START, NULL);
+				mciSendCommand(mci_open_earn_heart[mci_cur_earn_heart].wDeviceID,
+					MCI_PLAY, MCI_NOTIFY, (DWORD_PTR)&mci_play);
+
+				// 사운드채널 돌려가며 쓰기
+				++mci_cur_earn_heart %= LEN_EARN_HEART_SOUNDCHANNELS;
+				break;
+			}
+			break;
+
+		case UPGRADE_SKILL_OPTION_INFO:
+			mciSendCommand(mci_open_level_up.wDeviceID, MCI_SEEK, MCI_SEEK_TO_START, NULL);
+			mciSendCommand(mci_open_level_up.wDeviceID, MCI_PLAY, MCI_NOTIFY, (DWORD_PTR)&mci_play);
+			break;
 		}
 
 	}
 }
 void Sound::mci_init()
 {
+	wchar_t soundtrack_root[] = L"soundtracks";
+	wchar_t buff[200];
+
 	// 배경음악 사운드채널 설정
 	{
-		wchar_t element_name[] = L"soundtracks\\bgm.mp3";
-		mci_open_bgm.lpstrElementName = element_name;
+		wcscpy_s(buff, soundtrack_root);
+		wcscat_s(buff, L"\\bgm.mp3");
+		mci_open_bgm.lpstrElementName = buff;
 		mci_open_bgm.lpstrDeviceType = L"mpegvideo";
 		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONGLONG)(LPVOID)&mci_open_bgm);
 	}
@@ -172,49 +206,61 @@ void Sound::mci_init()
 	// 스킬 시전 사운드채널 풀 설정
 	for (int i = 0; i < LEN_CAST_SHOOT_SOUNDCHANNELS; i++)
 	{
-		wchar_t element_name[] = L"soundtracks\\cast_shoot0.mp3";
-		element_name[wcslen(element_name) - 5] = '0' + i;
-		mci_open_cast_shoot[i].lpstrElementName = element_name;
+		wcscpy_s(buff, soundtrack_root);
+		wcscat_s(buff, L"\\cast_shoot0.mp3");
+		buff[wcslen(buff) - 5] = '0' + i;
+
+		mci_open_cast_shoot[i].lpstrElementName = buff;
 		mci_open_cast_shoot[i].lpstrDeviceType = L"mpegvideo";
 		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONGLONG)(LPVOID)&mci_open_cast_shoot[i]);
 	}
 	for (int i = 0; i < LEN_CAST_SNIPE_SOUNDCHANNELS; i++)
 	{
-		wchar_t element_name[] = L"soundtracks\\cast_snipe0.mp3";
-		element_name[wcslen(element_name) - 5] = '0' + i;
-		mci_open_cast_snipe[i].lpstrElementName = element_name;
+		wcscpy_s(buff, soundtrack_root);
+		wcscat_s(buff, L"\\cast_snipe0.mp3");
+		buff[wcslen(buff) - 5] = '0' + i;
+
+		mci_open_cast_snipe[i].lpstrElementName = buff;
 		mci_open_cast_snipe[i].lpstrDeviceType = L"mpegvideo";
 		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONGLONG)(LPVOID)&mci_open_cast_snipe[i]);
 	}
 	for (int i = 0; i < LEN_CAST_SLASH_SOUNDCHANNELS; i++)
 	{
-		wchar_t element_name[] = L"soundtracks\\cast_slash0.mp3";
-		element_name[wcslen(element_name) - 5] = '0' + i;
-		mci_open_cast_slash[i].lpstrElementName = element_name;
+		wcscpy_s(buff, soundtrack_root);
+		wcscat_s(buff, L"\\cast_slash0.mp3");
+		buff[wcslen(buff) - 5] = '0' + i;
+
+		mci_open_cast_slash[i].lpstrElementName = buff;
 		mci_open_cast_slash[i].lpstrDeviceType = L"mpegvideo";
 		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONGLONG)(LPVOID)&mci_open_cast_slash[i]);
 	}
 	for (int i = 0; i < LEN_CAST_LIGHTSABER_SLASH_SOUNDCHANNELS; i++)
 	{
-		wchar_t element_name[] = L"soundtracks\\cast_lightsaber_slash0.wav";
-		element_name[wcslen(element_name) - 5] = '0' + i;
-		mci_open_cast_lightsaber_slash[i].lpstrElementName = element_name;
+		wcscpy_s(buff, soundtrack_root);
+		wcscat_s(buff, L"\\cast_lightsaber_slash0.wav");
+		buff[wcslen(buff) - 5] = '0' + i;
+
+		mci_open_cast_lightsaber_slash[i].lpstrElementName = buff;
 		mci_open_cast_lightsaber_slash[i].lpstrDeviceType = L"waveaudio";
 		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONGLONG)(LPVOID)&mci_open_cast_lightsaber_slash[i]);
 	}
 	for (int i = 0; i < LEN_CAST_ZWEIHANDER_SLASH_SOUNDCHANNELS; i++)
 	{
-		wchar_t element_name[] = L"soundtracks\\cast_zweihander_slash0.mp3";
-		element_name[wcslen(element_name) - 5] = '0' + i;
-		mci_open_cast_zweihander_slash[i].lpstrElementName = element_name;
+		wcscpy_s(buff, soundtrack_root);
+		wcscat_s(buff, L"\\cast_zweihander_slash0.mp3");
+		buff[wcslen(buff) - 5] = '0' + i;
+
+		mci_open_cast_zweihander_slash[i].lpstrElementName = buff;
 		mci_open_cast_zweihander_slash[i].lpstrDeviceType = L"mpegvideo";
 		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONGLONG)(LPVOID)&mci_open_cast_zweihander_slash[i]);
 	}
 	for (int i = 0; i < LEN_CAST_WIND_SOUNDCHANNELS; i++)
 	{
-		wchar_t element_name[] = L"soundtracks\\cast_wind0.wav";
-		element_name[wcslen(element_name) - 5] = '0' + i;
-		mci_open_cast_wind[i].lpstrElementName = element_name;
+		wcscpy_s(buff, soundtrack_root);
+		wcscat_s(buff, L"\\cast_wind0.wav");
+		buff[wcslen(buff) - 5] = '0' + i;
+
+		mci_open_cast_wind[i].lpstrElementName = buff;
 		mci_open_cast_wind[i].lpstrDeviceType = L"waveaudio";
 		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONGLONG)(LPVOID)&mci_open_cast_wind[i]);
 	}
@@ -222,56 +268,110 @@ void Sound::mci_init()
 	// 스킬 피격 사운드채널 풀 설정
 	for (int i = 0; i < LEN_HIT_SHOOT_SOUNDCHANNELS; i++)
 	{
-		wchar_t element_name[] = L"soundtracks\\hit_shoot0.mp3";
-		element_name[wcslen(element_name) - 5] = '0' + i;
-		mci_open_hit_shoot[i].lpstrElementName = element_name;
+		wcscpy_s(buff, soundtrack_root);
+		wcscat_s(buff, L"\\hit_shoot0.mp3");
+		buff[wcslen(buff) - 5] = '0' + i;
+
+		mci_open_hit_shoot[i].lpstrElementName = buff;
 		mci_open_hit_shoot[i].lpstrDeviceType = L"mpegvideo";
 		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONG_PTR)&mci_open_hit_shoot[i]);
 	}
 	for (int i = 0; i < LEN_HIT_SNIPE_SOUNDCHANNELS; i++)
 	{
-		wchar_t element_name[] = L"soundtracks\\hit_snipe0.mp3";
-		element_name[wcslen(element_name) - 5] = '0' + i;
-		mci_open_hit_snipe[i].lpstrElementName = element_name;
+		wcscpy_s(buff, soundtrack_root);
+		wcscat_s(buff, L"\\hit_snipe0.mp3");
+		buff[wcslen(buff) - 5] = '0' + i;
+
+		mci_open_hit_snipe[i].lpstrElementName = buff;
 		mci_open_hit_snipe[i].lpstrDeviceType = L"mpegvideo";
 		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONG_PTR)&mci_open_hit_snipe[i]);
 	}
 	for (int i = 0; i < LEN_HIT_SLASH_SOUNDCHANNELS; i++)
 	{
-		wchar_t element_name[] = L"soundtracks\\hit_slash0.mp3";
-		element_name[wcslen(element_name) - 5] = '0' + i;
-		mci_open_hit_slash[i].lpstrElementName = element_name;
+		wcscpy_s(buff, soundtrack_root);
+		wcscat_s(buff, L"\\hit_slash0.mp3");
+		buff[wcslen(buff) - 5] = '0' + i;
+
+		mci_open_hit_slash[i].lpstrElementName = buff;
 		mci_open_hit_slash[i].lpstrDeviceType = L"mpegvideo";
 		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONGLONG)(LPVOID)&mci_open_hit_slash[i]);
 	}
 	for (int i = 0; i < LEN_HIT_LIGHTSABER_SLASH_SOUNDCHANNELS; i++)
 	{
-		wchar_t element_name[] = L"soundtracks\\hit_lightsaber_slash0.mp3";
-		element_name[wcslen(element_name) - 5] = '0' + i;
-		mci_open_hit_lightsaber_slash[i].lpstrElementName = element_name;
+		wcscpy_s(buff, soundtrack_root);
+		wcscat_s(buff, L"\\hit_lightsaber_slash0.mp3");
+		buff[wcslen(buff) - 5] = '0' + i;
+
+		mci_open_hit_lightsaber_slash[i].lpstrElementName = buff;
 		mci_open_hit_lightsaber_slash[i].lpstrDeviceType = L"mpegvideo";
 		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONGLONG)(LPVOID)&mci_open_hit_lightsaber_slash[i]);
 	}
 	for (int i = 0; i < LEN_HIT_ZWEIHANDER_SLASH_SOUNDCHANNELS; i++)
 	{
-		wchar_t element_name[] = L"soundtracks\\hit_zweihander_slash0.mp3";
-		element_name[wcslen(element_name) - 5] = '0' + i;
-		mci_open_hit_zweihander_slash[i].lpstrElementName = element_name;
+		wcscpy_s(buff, soundtrack_root);
+		wcscat_s(buff, L"\\hit_zweihander_slash0.mp3");
+		buff[wcslen(buff) - 5] = '0' + i;
+
+		mci_open_hit_zweihander_slash[i].lpstrElementName = buff;
 		mci_open_hit_zweihander_slash[i].lpstrDeviceType = L"mpegvideo";
 		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONGLONG)(LPVOID)&mci_open_hit_zweihander_slash[i]);
 	}
 	for (int i = 0; i < LEN_HIT_WIND_SOUNDCHANNELS; i++)
 	{
-		wchar_t element_name[] = L"soundtracks\\hit_wind0.mp3";
-		element_name[wcslen(element_name) - 5] = '0' + i;
-		mci_open_hit_wind[i].lpstrElementName = element_name;
+		wcscpy_s(buff, soundtrack_root);
+		wcscat_s(buff, L"\\hit_wind0.mp3");
+		buff[wcslen(buff) - 5] = '0' + i;
+
+		mci_open_hit_wind[i].lpstrElementName = buff;
 		mci_open_hit_wind[i].lpstrDeviceType = L"mpegvideo";
 		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONGLONG)(LPVOID)&mci_open_hit_wind[i]);
+	}
+	// 레벨업 사운드채널 설정
+	{
+		wchar_t element_name[] = L"\\level_up.mp3";
+		wcscpy_s(buff, soundtrack_root);
+		wcscat_s(buff, element_name);
+
+		mci_open_level_up.lpstrElementName = buff;
+		mci_open_level_up.lpstrDeviceType = L"mpegvideo";
+		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONGLONG)(LPVOID)&mci_open_level_up);
+	}
+	// 아이템 획득 사운드채널 풀 설정
+	for (int i = 0; i < LEN_EARN_ENERGY_SOUNDCHANNELS; i++)
+	{
+		wcscpy_s(buff, soundtrack_root);
+		wcscat_s(buff, L"\\earn_energy0.wav");
+		buff[wcslen(buff) - 5] = '0' + i;
+
+		mci_open_earn_energy[i].lpstrElementName = buff;
+		mci_open_earn_energy[i].lpstrDeviceType = L"waveaudio";
+		int bret = mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONGLONG)(LPVOID)&mci_open_earn_energy[i]);
+		bret = 1;
+	}
+	for (int i = 0; i < LEN_EARN_HEART_SOUNDCHANNELS; i++)
+	{
+		wcscpy_s(buff, soundtrack_root);
+		wcscat_s(buff, L"\\earn_heart0.mp3");
+		buff[wcslen(buff) - 5] = '0' + i;
+
+		mci_open_earn_heart[i].lpstrElementName = buff;
+		mci_open_earn_heart[i].lpstrDeviceType = L"mpegvideo";
+		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONGLONG)(LPVOID)&mci_open_earn_heart[i]);
 	}
 }
 void Sound::request(PDU_TYPE pdu_type, SKILL_TYPE skill_type)
 {
-	sound_queue.Enqueue(SOUND_PARAM{ pdu_type, skill_type });
+	SOUND_PARAM param;
+	param.pdu_type = pdu_type;
+	param.skill_type = skill_type;
+	sound_queue.Enqueue(param);
+}
+void Sound::request(PDU_TYPE pdu_type, ITEM_TYPE item_type)
+{
+	SOUND_PARAM param;
+	param.pdu_type = pdu_type;
+	param.item_type = item_type;
+	sound_queue.Enqueue(param);
 }
 
 Sound::~Sound()

@@ -183,6 +183,8 @@ void Player::earn_item(Item* item)
 	}
 	}
 
+	sound.request(EARN_ITEM, item->get_type());
+
 	delete item;
 }
 

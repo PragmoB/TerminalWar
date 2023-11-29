@@ -233,6 +233,7 @@ void receive(SOCKET sock)
 
 			case UPGRADE_SKILL_OPTION_INFO:
 			{
+				sound.request(UPGRADE_SKILL_OPTION_INFO);
 				pdu_upgrade_skill_option_info = reinterpret_cast<PDUUpgradeSkillOptionInfo*>(buff + complete_len);
 				upgrade_option_list = new UpgradeOptionList(COORD{ FIELD.Left + 1, FIELD.Top - 6 }, "레벨업! 강화할 스킬을 선택하세요");
 				upgrade_option_list->appear();
