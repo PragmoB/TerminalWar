@@ -99,7 +99,7 @@ int Shoot::get_max_level() const
 }
 const char* Shoot::get_skill_name() const
 {
-	return "입자 방출";
+	return "입자방출";
 }
 void Shoot::get_level_up_message(char* output, int len) const
 {

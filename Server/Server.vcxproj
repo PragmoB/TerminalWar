@@ -171,6 +171,7 @@
     <ClCompile Include="Items\Heart.cpp" />
     <ClCompile Include="Items\Item.cpp" />
     <ClCompile Include="Server.cpp" />
+    <ClCompile Include="Skills\LightningStrike.cpp" />
     <ClCompile Include="Skills\LightsaberSlash.cpp" />
     <ClCompile Include="Skills\Shoot.cpp" />
     <ClCompile Include="Skills\Skill.cpp" />
@@ -188,6 +189,7 @@
     <ClInclude Include="Items\Energy.h" />
     <ClInclude Include="Items\Heart.h" />
     <ClInclude Include="Items\Item.h" />
+    <ClInclude Include="Skills\LightningStrike.h" />
     <ClInclude Include="Skills\LightsaberSlash.h" />
     <ClInclude Include="Skills\Shoot.h" />
     <ClInclude Include="Skills\Skill.h" />

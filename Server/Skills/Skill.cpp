@@ -8,6 +8,7 @@
 #include "Skills/ZweihanderSlash.h"
 #include "Skills/Wind.h"
 #include "Skills/WindSlash.h"
+#include "Skills/LightningStrike.h"
 
 #include <ctime>
 
@@ -32,6 +33,7 @@ Skill* Skill::create_object_by_type(SKILL_TYPE type, Client* owner)
 	case ZWEIHANDER_SLASH: skill = new ZweihanderSlash(owner); break;
 	case WIND:			   skill = new Wind(owner);			   break;
 	case WIND_SLASH:	   skill = new WindSlash(owner);	   break;
+	case LIGHTNING_STRIKE: skill = new LightningStrike(owner); break;
 	}
 
 	return skill;

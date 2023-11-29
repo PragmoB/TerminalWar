@@ -75,6 +75,9 @@
     <ClCompile Include="Skills\Snipe.cpp">
       <Filter>소스 파일\Skills</Filter>
     </ClCompile>
+    <ClCompile Include="Skills\LightningStrike.cpp">
+      <Filter>소스 파일\Skills</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -120,6 +123,9 @@
       <Filter>헤더 파일\Items</Filter>
     </ClInclude>
     <ClInclude Include="Skills\Snipe.h">
+      <Filter>헤더 파일\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="Skills\LightningStrike.h">
       <Filter>헤더 파일\Skills</Filter>
     </ClInclude>
   </ItemGroup>

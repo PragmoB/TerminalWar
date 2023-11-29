@@ -98,7 +98,7 @@ public:
 	// time밀리초만큼 발이 묶임(못움직임)
 	void bind(clock_t time);
 	// 움직임
-	bool move(DIRECTION dir);
+	bool move(DIRECTION dir, bool ignore_mov_cooldown = false);
 	// 스킬 사용
 	bool cast_skill(SKILL_TYPE skill_type, DIRECTION dir);
 	// 스킬 업그레이드

@@ -13,6 +13,7 @@
 #include "Skills/ZweihanderSlash.h"
 #include "Skills/Wind.h"
 #include "Skills/WindSlash.h"
+#include "Skills/LightningStrike.h"
 
 extern Sound sound;
 
@@ -35,6 +36,7 @@ Skill* Skill::create_object_by_type(SKILL_TYPE type, Player* owner, int level)
 	case ZWEIHANDER_SLASH: skill = new ZweihanderSlash(owner, level); break;
 	case WIND:			   skill = new Wind(owner, level);			  break;
 	case WIND_SLASH:	   skill = new WindSlash(owner, level);	      break;
+	case LIGHTNING_STRIKE: skill = new LightningStrike(owner, level); break;
 	}
 
 	return skill;

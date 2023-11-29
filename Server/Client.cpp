@@ -183,11 +183,11 @@ void Client::bind(clock_t time)
 	if (next_able_mov_time < now + time)
 		next_able_mov_time = now + time;
 }
-bool Client::move(DIRECTION dir)
+bool Client::move(DIRECTION dir, bool ignore_mov_cooldown)
 {
 	const clock_t now = clock();
 	
-	if (now < next_able_mov_time) // 이동속도 제한
+	if (now < next_able_mov_time && !ignore_mov_cooldown) // 이동속도 제한
 		return false;
 	if (!chracter) // hello를 하기 전이면 움직일 수 없음
 		return false;
@@ -202,10 +202,13 @@ bool Client::move(DIRECTION dir)
 	default: return false; // 방향 값이 잘못된 경우 미승인
 	}
 
-	static std::mutex m;
-	m.lock();
-		next_able_mov_time = now + 80; // 움직임을 80ms마다 한 번으로 제한
-	m.unlock();
+	if (next_able_mov_time < now + 80)
+	{
+		static std::mutex m;
+		m.lock();
+			next_able_mov_time = now + 80; // 움직임을 80ms마다 한 번으로 제한
+		m.unlock();
+	}
 
 	// 고객님들께 반영
 	for (std::list<Client*>::iterator iter = background.clients.begin();
