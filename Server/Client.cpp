@@ -286,16 +286,19 @@ bool Client::cast_skill(SKILL_TYPE skill_type, DIRECTION dir)
 		Skill* skill = active_skills[i];
 		if (skill_type == skill->get_type()) // 대응되는 Skill객체를 찾았다면
 		{
-			// 백그라운드 스레드 풀에서 피격판정 작업 비동기 처리
-			background.cast_skill(skill, dir);
+			if (skill->castable()) // 사용 가능하다면
+			{
+				// 백그라운드 스레드 풀에서 피격판정 작업 비동기 처리
+				background.cast_skill(skill, dir);
+
+				// 고객님들께 반영
+				for (std::list<Client*>::iterator iter = background.clients.begin();
+					iter != background.clients.end(); iter++)
+					(*iter)->apply_cast_skill_of(this, skill_type, dir);
+			}
 			break;
 		}
 	}
-
-	// 고객님들께 반영
-	for (std::list<Client*>::iterator iter = background.clients.begin();
-		iter != background.clients.end(); iter++)
-		(*iter)->apply_cast_skill_of(this, skill_type, dir);
 
 	return true;
 }

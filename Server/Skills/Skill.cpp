@@ -52,16 +52,26 @@ const Skill* Skill::get_object_by_type(SKILL_TYPE type)
 		return skill;
 	}
 }
+bool Skill::castable() const
+{
+	clock_t now = clock();
+
+	if (now < next_able_time)
+		return false;
+
+	return true;
+}
 bool Skill::cast(DIRECTION dir)
 {
 	clock_t now = clock();
-	
-	// 재사용 대기시간 검사
-	if (now < next_able_time)
-		return false; // 실패
 
-	next_able_time = now + get_cooldown();
-	return true; // 성공
+	if (castable())
+	{
+		next_able_time = now + get_cooldown();
+		return true;
+	}
+	else
+		return false;
 }
 int Skill::get_level() const
 {

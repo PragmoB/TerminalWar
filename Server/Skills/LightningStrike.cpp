@@ -35,7 +35,7 @@ bool LightningStrike::cast(DIRECTION dir)
 	case UP:	pos_temp.Y -= 19; break;
 	case DOWN:  pos_temp.Y += 19; break;
 	case LEFT:  pos_temp.X -= 19; break;
-	case RIGHT: pos_temp.X -= 19; break;
+	case RIGHT: pos_temp.X += 19; break;
 	default: return false;
 	}
 

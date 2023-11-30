@@ -57,14 +57,7 @@ const Skill* Skill::get_object_by_type(SKILL_TYPE type)
 }
 bool Skill::cast(DIRECTION dir)
 {
-	clock_t now = clock();
-
-	// 재사용 대기시간 검사
-	if (now < next_able_time)
-		return false; // 실패
-
 	sound.request(CAST_SKILL, get_type());
-	next_able_time = now + get_cooldown();
 	return true; // 성공
 }
 void Skill::level_up()

@@ -31,6 +31,7 @@ public:
 
 	Skill(Client* owner, int level);
 
+	bool castable() const;
 	virtual bool cast(DIRECTION dir);
 	virtual bool level_up();
 	int get_level() const;
