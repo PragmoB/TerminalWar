@@ -111,7 +111,10 @@ int main()
 	sockaddr_in serverAddress;
 	serverAddress.sin_family = AF_INET;
 	serverAddress.sin_addr.s_addr = INADDR_ANY;
-	serverAddress.sin_port = htons(PORT);
+
+	int port;
+	cout << " Port : ";	cin >> port;
+	serverAddress.sin_port = htons(port);
 
 	if (::bind(listenSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR) {
 		std::cerr << " Failed to bind the socket." << std::endl;

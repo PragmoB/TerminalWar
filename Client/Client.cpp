@@ -586,7 +586,6 @@ int main()
 		SOCKADDR_IN recvAddr;
 		memset(&recvAddr, 0, sizeof(recvAddr));
 		recvAddr.sin_family = AF_INET;
-		recvAddr.sin_port = htons(PORT);
 
 		int bRet;
 		do
@@ -594,6 +593,10 @@ int main()
 			char IP[20] = "";
 			cout << " 서버 IP : ";	cin >> IP;
 			inet_pton(AF_INET, IP, &(recvAddr.sin_addr.s_addr));
+
+			int port;
+			cout << " 서버 포트 : ";	cin >> port;
+			recvAddr.sin_port = htons(port);
 
 			bRet = connect(sock, (SOCKADDR*)&recvAddr, sizeof(recvAddr));
 			if (bRet == SOCKET_ERROR)

@@ -34,7 +34,7 @@ No dependencies are required.
 
 ### Initialize
 
-`포트 설정 :`
+`Port : `
 
 Execute Server.exe, then you will see the message above.
 
