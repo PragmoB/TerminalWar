@@ -94,6 +94,15 @@ void Sound::play_sound()
 				++mci_cur_cast_wind %= LEN_CAST_WIND_SOUNDCHANNELS;
 				break;
 
+			case LIGHTNING_STRIKE:
+				mciSendCommand(mci_open_cast_lightning_strike[mci_cur_cast_lightning_strike].wDeviceID,
+					MCI_SEEK, MCI_SEEK_TO_START, NULL);
+				mciSendCommand(mci_open_cast_lightning_strike[mci_cur_cast_lightning_strike].wDeviceID,
+					MCI_PLAY, MCI_NOTIFY, (DWORD_PTR)&mci_play);
+
+				// 사운드채널 돌려가며 쓰기
+				++mci_cur_cast_lightning_strike %= LEN_CAST_LIGHTNING_STRIKE_SOUNDCHANNELS;
+				break;
 			}
 			break;
 		case HIT:
@@ -152,6 +161,15 @@ void Sound::play_sound()
 
 				// 사운드채널 돌려가며 쓰기
 				++mci_cur_hit_wind %= LEN_HIT_WIND_SOUNDCHANNELS;
+				break;
+			case LIGHTNING_STRIKE:
+				mciSendCommand(mci_open_hit_lightning_strike[mci_cur_hit_lightning_strike].wDeviceID,
+					MCI_SEEK, MCI_SEEK_TO_START, NULL);
+				mciSendCommand(mci_open_hit_lightning_strike[mci_cur_hit_lightning_strike].wDeviceID,
+					MCI_PLAY, MCI_NOTIFY, (DWORD_PTR)&mci_play);
+
+				// 사운드채널 돌려가며 쓰기
+				++mci_cur_hit_lightning_strike %= LEN_HIT_LIGHTNING_STRIKE_SOUNDCHANNELS;
 				break;
 			}
 			break;
@@ -264,6 +282,16 @@ void Sound::mci_init()
 		mci_open_cast_wind[i].lpstrDeviceType = L"waveaudio";
 		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONGLONG)(LPVOID)&mci_open_cast_wind[i]);
 	}
+	for (int i = 0; i < LEN_CAST_LIGHTNING_STRIKE_SOUNDCHANNELS; i++)
+	{
+		wcscpy_s(buff, soundtrack_root);
+		wcscat_s(buff, L"\\cast_lightning_strike0.mp3");
+		buff[wcslen(buff) - 5] = '0' + i;
+
+		mci_open_cast_lightning_strike[i].lpstrElementName = buff;
+		mci_open_cast_lightning_strike[i].lpstrDeviceType = L"mpegvideo";
+		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONGLONG)(LPVOID)&mci_open_cast_lightning_strike[i]);
+	}
 
 	// 스킬 피격 사운드채널 풀 설정
 	for (int i = 0; i < LEN_HIT_SHOOT_SOUNDCHANNELS; i++)
@@ -325,6 +353,16 @@ void Sound::mci_init()
 		mci_open_hit_wind[i].lpstrElementName = buff;
 		mci_open_hit_wind[i].lpstrDeviceType = L"mpegvideo";
 		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONGLONG)(LPVOID)&mci_open_hit_wind[i]);
+	}
+	for (int i = 0; i < LEN_HIT_LIGHTNING_STRIKE_SOUNDCHANNELS; i++)
+	{
+		wcscpy_s(buff, soundtrack_root);
+		wcscat_s(buff, L"\\hit_lightning_strike0.mp3");
+		buff[wcslen(buff) - 5] = '0' + i;
+
+		mci_open_hit_lightning_strike[i].lpstrElementName = buff;
+		mci_open_hit_lightning_strike[i].lpstrDeviceType = L"mpegvideo";
+		mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (ULONGLONG)(LPVOID)&mci_open_hit_lightning_strike[i]);
 	}
 	// 레벨업 사운드채널 설정
 	{

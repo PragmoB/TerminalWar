@@ -13,6 +13,7 @@
 #define LEN_CAST_LIGHTSABER_SLASH_SOUNDCHANNELS 5
 #define LEN_CAST_ZWEIHANDER_SLASH_SOUNDCHANNELS 5
 #define LEN_CAST_WIND_SOUNDCHANNELS 5
+#define LEN_CAST_LIGHTNING_STRIKE_SOUNDCHANNELS 4
 
 #define LEN_HIT_SHOOT_SOUNDCHANNELS 3
 #define LEN_HIT_SNIPE_SOUNDCHANNELS 5
@@ -20,6 +21,7 @@
 #define LEN_HIT_LIGHTSABER_SLASH_SOUNDCHANNELS 5
 #define LEN_HIT_ZWEIHANDER_SLASH_SOUNDCHANNELS 5
 #define LEN_HIT_WIND_SOUNDCHANNELS 5
+#define LEN_HIT_LIGHTNING_STRIKE_SOUNDCHANNELS 4
 
 #define LEN_EARN_ENERGY_SOUNDCHANNELS 6
 #define LEN_EARN_HEART_SOUNDCHANNELS 3
@@ -48,6 +50,7 @@ private:
 	MCI_OPEN_PARMS mci_open_cast_lightsaber_slash[LEN_CAST_LIGHTSABER_SLASH_SOUNDCHANNELS];
 	MCI_OPEN_PARMS mci_open_cast_zweihander_slash[LEN_CAST_ZWEIHANDER_SLASH_SOUNDCHANNELS];
 	MCI_OPEN_PARMS mci_open_cast_wind[LEN_CAST_WIND_SOUNDCHANNELS];
+	MCI_OPEN_PARMS mci_open_cast_lightning_strike[LEN_CAST_LIGHTNING_STRIKE_SOUNDCHANNELS];
 
 	// 현재 선택된 스킬 시전 사운드채널 번호
 	int mci_cur_cast_shoot = 0;
@@ -56,6 +59,7 @@ private:
 	int mci_cur_cast_lightsaber_slash = 0;
 	int mci_cur_cast_zweihander_slash = 0;
 	int mci_cur_cast_wind = 0;
+	int mci_cur_cast_lightning_strike = 0;
 
 	MCI_OPEN_PARMS mci_open_hit_shoot[LEN_HIT_SHOOT_SOUNDCHANNELS];
 	MCI_OPEN_PARMS mci_open_hit_snipe[LEN_HIT_SNIPE_SOUNDCHANNELS];
@@ -63,6 +67,7 @@ private:
 	MCI_OPEN_PARMS mci_open_hit_lightsaber_slash[LEN_HIT_LIGHTSABER_SLASH_SOUNDCHANNELS];
 	MCI_OPEN_PARMS mci_open_hit_zweihander_slash[LEN_HIT_ZWEIHANDER_SLASH_SOUNDCHANNELS];
 	MCI_OPEN_PARMS mci_open_hit_wind[LEN_HIT_WIND_SOUNDCHANNELS];
+	MCI_OPEN_PARMS mci_open_hit_lightning_strike[LEN_HIT_LIGHTNING_STRIKE_SOUNDCHANNELS];
 
 	// 현재 선택된 스킬 피격 사운드채널 번호
 	int mci_cur_hit_shoot = 0;
@@ -71,6 +76,7 @@ private:
 	int mci_cur_hit_lightsaber_slash = 0;
 	int mci_cur_hit_zweihander_slash = 0;
 	int mci_cur_hit_wind = 0;
+	int mci_cur_hit_lightning_strike = 0;
 
 	MCI_OPEN_PARMS mci_open_level_up;
 	MCI_OPEN_PARMS mci_open_earn_energy[LEN_EARN_ENERGY_SOUNDCHANNELS];
