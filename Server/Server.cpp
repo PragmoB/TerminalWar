@@ -24,16 +24,16 @@ void worker(HANDLE completion_port)
 {
 	while (1)
 	{
-		DWORD bytesTransferred;
+		DWORD len;
 		ULONG_PTR key;
 		LPOVERLAPPED overlapped;
 
-		BOOL bSuccess = GetQueuedCompletionStatus(completion_port, &bytesTransferred, &key, &overlapped, INFINITE);
+		BOOL bSuccess = GetQueuedCompletionStatus(completion_port, &len, &key, &overlapped, INFINITE);
 
 		// 클라이언트 데이터 처리
 		Client* client = reinterpret_cast<Client*>(overlapped);
 		
-		if (bytesTransferred == 0)
+		if (len == 0)
 		{
 			cout << " Client " << client->context.socket << " died" << endl;
 			closesocket(client->context.socket);
@@ -56,28 +56,43 @@ void worker(HANDLE completion_port)
 		PDUCastSkill* pdu_cast_skill;
 		PDUUpgradeSkill* pdu_upgrade_skill;
 
-		switch (client->context.dataBuffer.buf[0])
+		int complete_len = 0;
+
+		while ((signed)len - complete_len > 0)
 		{
-		case HELLO:
-			pdu_hello = reinterpret_cast<PDUHello*>(client->context.dataBuffer.buf);
-			client->hello(pdu_hello->chracter);
-			break;
+			switch ((client->context.dataBuffer.buf + complete_len)[0])
+			{
+			case HELLO:
+				pdu_hello = reinterpret_cast<PDUHello*>(client->context.dataBuffer.buf + complete_len);
+				client->hello(pdu_hello->chracter);
 
-		case MOV:
-			pdu_mov = reinterpret_cast<PDUMov*>(client->context.dataBuffer.buf);
-			client->move(pdu_mov->dir);
-			break;
+				complete_len += sizeof(PDUHello);
+				break;
 
-		case CAST_SKILL:
-			pdu_cast_skill = reinterpret_cast<PDUCastSkill*>(client->context.dataBuffer.buf);
-			client->cast_skill(pdu_cast_skill->skill_type, pdu_cast_skill->dir);
-			break;
+			case MOV:
+				pdu_mov = reinterpret_cast<PDUMov*>(client->context.dataBuffer.buf + complete_len);
+				client->move(pdu_mov->dir);
+				
+				complete_len += sizeof(PDUMov);
+				break;
 
-		case UPGRADE_SKILL:
-			pdu_upgrade_skill = reinterpret_cast<PDUUpgradeSkill*>(client->context.dataBuffer.buf);
-			if (pdu_upgrade_skill->skill_is_active)
-				client->upgrade_skill(pdu_upgrade_skill->active_skill_type, pdu_upgrade_skill->upgraded_active_skill_type);
-			break;
+			case CAST_SKILL:
+				pdu_cast_skill = reinterpret_cast<PDUCastSkill*>(client->context.dataBuffer.buf + complete_len);
+				client->cast_skill(pdu_cast_skill->skill_type, pdu_cast_skill->dir);
+
+				complete_len += sizeof(PDUCastSkill);
+				break;
+
+			case UPGRADE_SKILL:
+				pdu_upgrade_skill = reinterpret_cast<PDUUpgradeSkill*>(client->context.dataBuffer.buf + complete_len);
+				if (pdu_upgrade_skill->skill_is_active)
+					client->upgrade_skill(pdu_upgrade_skill->active_skill_type, pdu_upgrade_skill->upgraded_active_skill_type);
+				
+				complete_len += sizeof(PDUUpgradeSkill);
+				break;
+			default:
+				complete_len += 400;
+			}
 		}
 
 		// 다음 IO 작업을 시작
