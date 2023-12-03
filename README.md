@@ -2,7 +2,7 @@
 
 # Terminal War
 
-![play_sceen](https://github.com/PragmoB/TerminalWar/assets/67177785/f5fb4ac7-e005-4156-bb41-da903fd40356)
+![sceen](https://github.com/PragmoB/TerminalWar/assets/67177785/ec9af344-3c65-41dd-b6be-eacab60b1497)
 
 Terminal-based, real-time online PvP game
 
