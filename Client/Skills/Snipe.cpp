@@ -22,7 +22,6 @@ bool Snipe::cast(DIRECTION dir)
 	Player* owner = get_owner();
 	COORD pos = owner->get_pos();
 
-	const char shape_horizontal = '-', shape_vertical = '|';
 	const int bps = get_bps();
 	int remain_distance = get_distance();
 	switch (dir)
@@ -32,7 +31,7 @@ bool Snipe::cast(DIRECTION dir)
 		for (; 0 < remain_distance && FIELD.Top < pos.Y - 1; remain_distance--)
 		{
 			pos.Y--; // 총알이 위로 이동
-			graphic.draw(pos, shape_vertical, SKY_BLUE); // 그래픽에 반영
+			graphic.draw(pos, '|', SKY_BLUE); // 그래픽에 반영
 
 			Sleep(1000 / bps); // 발사 속도 조절
 			graphic.draw(pos, ' '); // 잔상 지우기
@@ -42,7 +41,7 @@ bool Snipe::cast(DIRECTION dir)
 		for (; 0 < remain_distance && pos.Y < FIELD.Bottom; remain_distance--)
 		{
 			pos.Y++;
-			graphic.draw(pos, shape_vertical, SKY_BLUE); // 그래픽에 반영
+			graphic.draw(pos, '|', SKY_BLUE); // 그래픽에 반영
 
 			Sleep(1000 / bps);
 			graphic.draw(pos, ' '); // 잔상 지우기
@@ -52,20 +51,21 @@ bool Snipe::cast(DIRECTION dir)
 		for (; 0 < remain_distance && FIELD.Left < pos.X - 2; remain_distance--)
 		{
 			pos.X -= 2;
-			graphic.draw(pos, shape_horizontal, SKY_BLUE); // 그래픽에 반영
+			graphic.draw(pos, "--", SKY_BLUE); // 그래픽에 반영
 
 			Sleep(1000 / bps);
-			graphic.draw(pos, ' '); // 잔상 지우기
+			graphic.draw(pos, "  "); // 잔상 지우기
 		}
 		break;
 	case RIGHT:
+		pos.X--;
 		for (; 0 < remain_distance && pos.X + 2 < FIELD.Left + 2 * FIELD_WIDTH; remain_distance--)
 		{
 			pos.X += 2;
-			graphic.draw(pos, shape_horizontal, SKY_BLUE); // 그래픽에 반영
+			graphic.draw(pos, "--", SKY_BLUE); // 그래픽에 반영
 
 			Sleep(1000 / bps);
-			graphic.draw(pos, ' '); // 잔상 지우기
+			graphic.draw(pos, "  "); // 잔상 지우기
 		}
 		break;
 	}
