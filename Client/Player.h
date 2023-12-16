@@ -26,6 +26,7 @@ public:
 	// 현재 위치에서 모습이 사라짐
 	void disappear();
 	void move(DIRECTION dir);
+	void move(COORD pos);
 	void cast_skill(SKILL_TYPE skill_type, DIRECTION dir);
 	void upgrade_skill(SKILL_TYPE before, SKILL_TYPE after);
 	// player를 skill_type으로 공격

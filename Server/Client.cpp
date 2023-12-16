@@ -106,13 +106,13 @@ void Client::apply_earn_item_of(const Client* client, const Item* item)
 
 	send(context.socket, (const char*)&pdu, sizeof(PDUEarnItem), NULL);
 }
-void Client::apply_movement_of(const Client* client, DIRECTION dir)
+void Client::apply_movement_of(const Client* client)
 {
-	PDUMov pdu;
+	PDUMovRes pdu;
 	pdu.id = (DWORD)client->context.socket;
-	pdu.dir = dir;
+	pdu.pos = client->get_pos();
 	
-	send(context.socket, reinterpret_cast<const char*>(&pdu), sizeof(PDUMov), NULL);
+	send(context.socket, reinterpret_cast<const char*>(&pdu), sizeof(PDUMovRes), NULL);
 }
 void Client::apply_cast_skill_of(const Client* client, SKILL_TYPE skill_type, DIRECTION dir)
 {
@@ -183,6 +183,18 @@ void Client::bind(clock_t time)
 	if (next_able_mov_time < now + time)
 		next_able_mov_time = now + time;
 }
+bool Client::move(COORD pos)
+{
+	this->pos = pos;
+
+	for (std::list<Client*>::iterator iter = background.clients.begin();
+		iter != background.clients.end(); iter++)
+		(*iter)->apply_movement_of(this);
+
+	earn_item(pos);
+
+	return true;
+}
 bool Client::move(DIRECTION dir, bool ignore_mov_cooldown)
 {
 	const clock_t now = clock();
@@ -191,6 +203,14 @@ bool Client::move(DIRECTION dir, bool ignore_mov_cooldown)
 		return false;
 	if (!chracter) // hello를 하기 전이면 움직일 수 없음
 		return false;
+
+	if (next_able_mov_time < now + 80)
+	{
+		static std::mutex m;
+		m.lock();
+			next_able_mov_time = now + 80; // 움직임을 80ms마다 한 번으로 제한
+		m.unlock();
+	}
 
 	// 좌표 반영
 	switch (dir)
@@ -202,20 +222,54 @@ bool Client::move(DIRECTION dir, bool ignore_mov_cooldown)
 	default: return false; // 방향 값이 잘못된 경우 미승인
 	}
 
-	if (next_able_mov_time < now + 80)
-	{
-		static std::mutex m;
-		m.lock();
-			next_able_mov_time = now + 80; // 움직임을 80ms마다 한 번으로 제한
-		m.unlock();
-	}
-
 	// 고객님들께 반영
 	for (std::list<Client*>::iterator iter = background.clients.begin();
 		iter != background.clients.end(); iter++)
-		(*iter)->apply_movement_of(this, dir);
+		(*iter)->apply_movement_of(this);
 
-	// 아이템에서 얻은 총 에너지 량
+	earn_item(pos);
+
+	return true;
+}
+bool Client::cast_skill(SKILL_TYPE skill_type, DIRECTION dir)
+{
+	const uint32_t now = clock();
+
+	if (!chracter) // hello를 하기 전이면 시전할 수 없음
+		return false;
+	switch (dir)
+	{
+	case UP: case DOWN: case LEFT: case RIGHT:
+		break;
+	default :
+		return false; // 방향 값이 잘못된 경우 미승인
+	}
+
+	// 사용 요청받은 skill_type에 대응하는 Skill객체를 찾음(skill_type 유효성 검증도 동시에 됨)
+	for (int i = 0; i < len_active_skills; i++)
+	{
+		Skill* skill = active_skills[i];
+		if (skill_type == skill->get_type()) // 대응되는 Skill객체를 찾았다면
+		{
+			if (skill->castable()) // 사용 가능하다면
+			{
+				// 백그라운드 스레드 풀에서 피격판정 작업 비동기 처리
+				background.cast_skill(skill, dir);
+
+				// 고객님들께 반영
+				for (std::list<Client*>::iterator iter = background.clients.begin();
+					iter != background.clients.end(); iter++)
+					(*iter)->apply_cast_skill_of(this, skill_type, dir);
+			}
+			break;
+		}
+	}
+
+	return true;
+}
+void Client::earn_item(COORD pos)
+{
+	// pos 위치 아이템들에서 얻은 총 에너지 량
 	int energy_gain = 0;
 
 	// 필드 아이템 획득 검사
@@ -263,44 +317,7 @@ bool Client::move(DIRECTION dir, bool ignore_mov_cooldown)
 	}
 
 	earn_energy(energy_gain);
-
-	return true;
-}
-bool Client::cast_skill(SKILL_TYPE skill_type, DIRECTION dir)
-{
-	const uint32_t now = clock();
-
-	if (!chracter) // hello를 하기 전이면 시전할 수 없음
-		return false;
-	switch (dir)
-	{
-	case UP: case DOWN: case LEFT: case RIGHT:
-		break;
-	default :
-		return false; // 방향 값이 잘못된 경우 미승인
-	}
-
-	// 사용 요청받은 skill_type에 대응하는 Skill객체를 찾음(skill_type 유효성 검증도 동시에 됨)
-	for (int i = 0; i < len_active_skills; i++)
-	{
-		Skill* skill = active_skills[i];
-		if (skill_type == skill->get_type()) // 대응되는 Skill객체를 찾았다면
-		{
-			if (skill->castable()) // 사용 가능하다면
-			{
-				// 백그라운드 스레드 풀에서 피격판정 작업 비동기 처리
-				background.cast_skill(skill, dir);
-
-				// 고객님들께 반영
-				for (std::list<Client*>::iterator iter = background.clients.begin();
-					iter != background.clients.end(); iter++)
-					(*iter)->apply_cast_skill_of(this, skill_type, dir);
-			}
-			break;
-		}
-	}
-
-	return true;
+	
 }
 void Client::upgrade_skill(SKILL_TYPE skill_type, SKILL_TYPE upgraded_skill_type)
 {

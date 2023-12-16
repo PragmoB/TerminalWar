@@ -52,7 +52,7 @@ void worker(HANDLE completion_port)
 		}
 
 		PDUHello* pdu_hello;
-		PDUMov* pdu_mov;
+		PDUMovReq* pdu_mov_req;
 		PDUCastSkill* pdu_cast_skill;
 		PDUUpgradeSkill* pdu_upgrade_skill;
 
@@ -70,10 +70,10 @@ void worker(HANDLE completion_port)
 				break;
 
 			case MOV:
-				pdu_mov = reinterpret_cast<PDUMov*>(client->context.dataBuffer.buf + complete_len);
-				client->move(pdu_mov->dir);
+				pdu_mov_req = reinterpret_cast<PDUMovReq*>(client->context.dataBuffer.buf + complete_len);
+				client->move(pdu_mov_req->dir);
 				
-				complete_len += sizeof(PDUMov);
+				complete_len += sizeof(PDUMovReq);
 				break;
 
 			case CAST_SKILL:
@@ -91,7 +91,7 @@ void worker(HANDLE completion_port)
 				complete_len += sizeof(PDUUpgradeSkill);
 				break;
 			default:
-				complete_len += 400;
+				complete_len = len;
 			}
 		}
 

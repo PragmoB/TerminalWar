@@ -84,8 +84,8 @@ public:
 	void apply_item_info_of(const Item* item);
 	// client의 item 획득 반영
 	void apply_earn_item_of(const Client* client, const Item* item);
-	// client가 dir방향으로 움직였음을 반영함
-	void apply_movement_of(const Client* client, DIRECTION dir);
+	// client가 움직였음을 반영함
+	void apply_movement_of(const Client* client);
 	// client가 dir방향으로 스킬 사용을 반영함
 	void apply_cast_skill_of(const Client* client, SKILL_TYPE skill_type, DIRECTION dir);
 	// client의 skill_type이 레벨업 또는 upgraded_skill_type으로 진화했음을 반영함
@@ -97,10 +97,14 @@ public:
 
 	// time밀리초만큼 발이 묶임(못움직임)
 	void bind(clock_t time);
-	// 움직임
+	// pos 위치로 순간이동
+	bool move(COORD pos);
+	// dir 방향으로 움직임
 	bool move(DIRECTION dir, bool ignore_mov_cooldown = false);
 	// 스킬 사용
 	bool cast_skill(SKILL_TYPE skill_type, DIRECTION dir);
+	// pos위치의 아이템 획득
+	void earn_item(COORD pos);
 	// 스킬 업그레이드
 	void upgrade_skill(SKILL_TYPE skill_type, SKILL_TYPE upgraded_skill_type = SKILL_TYPE::UNKNOWN);
 	// 에너지(경험치) 획득

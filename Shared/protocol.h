@@ -43,13 +43,20 @@ typedef struct
 	DWORD id;
 	COORD pos;
 } PDUEarnItem;
-// 캐릭터 무빙, 클라 <=> 서버
+// 캐릭터 무빙, 클라 => 서버
 typedef struct
 {
 	const PDU_TYPE type = MOV;
 	DWORD id;
 	DIRECTION dir;
-} PDUMov;
+} PDUMovReq;
+// 캐릭터 무빙, 클라 <= 서버
+typedef struct
+{
+	const PDU_TYPE type = MOV;
+	DWORD id;
+	COORD pos;
+} PDUMovRes;
 // 스킬 사용, 클라 <=> 서버
 typedef struct
 {

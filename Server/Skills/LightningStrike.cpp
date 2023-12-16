@@ -24,11 +24,8 @@ bool LightningStrike::cast(DIRECTION dir)
 	// 스킬 사용 후 클라이언트의 좌표
 	COORD pos_temp = pos;
 
-	owner->bind(1000);
+	owner->bind(1200);
 	Sleep(350);
-
-	for (int i = 0; i < 19; i++)
-		owner->move(dir, true);
 
 	switch (dir)
 	{
@@ -44,6 +41,7 @@ bool LightningStrike::cast(DIRECTION dir)
 	if ((signed)pos_temp.X > FIELD_WIDTH)  pos_temp.X = FIELD_WIDTH;
 	if ((signed)pos_temp.Y > FIELD_HEIGHT) pos_temp.Y = FIELD_HEIGHT;
 
+	owner->move(pos_temp);
 
 	for (std::list<Client*>::iterator iter = background.clients.begin();
 		iter != background.clients.end(); iter++)

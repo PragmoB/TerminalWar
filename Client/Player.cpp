@@ -113,6 +113,14 @@ void Player::move(DIRECTION dir)
 
 	moving = false;
 }
+void Player::move(COORD pos)
+{
+	moving = true;
+	this->disappear();
+	this->pos = graphic.get_client_pos_by_server_pos(pos);
+	this->appear();
+	moving = false;
+}
 
 void Player::cast_skill(SKILL_TYPE skill_type, DIRECTION dir)
 {

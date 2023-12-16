@@ -100,7 +100,7 @@ void receive(SOCKET sock)
 			PDUHello* pdu_hello;
 			PDUItemInfo* pdu_item_info;
 			PDUEarnItem* pdu_earn_item;
-			PDUMov* pdu_mov;
+			PDUMovRes* pdu_mov_res;
 			PDUCastSkill* pdu_cast_skill;
 			PDUHit* pdu_hit;
 			PDUUpgradeSkillOptionInfo* pdu_upgrade_skill_option_info;
@@ -207,12 +207,12 @@ void receive(SOCKET sock)
 				break;
 		
 			case MOV:
-				pdu_mov = reinterpret_cast<PDUMov*>(buff + complete_len);
-				player = players[pdu_mov->id];
+				pdu_mov_res = reinterpret_cast<PDUMovRes*>(buff + complete_len);
+				player = players[pdu_mov_res->id];
 				// 버그수정 : player 객체 유효성 검사
 				if (player)
-					player->move(pdu_mov->dir);
-				complete_len += sizeof(PDUMov);
+					player->move(pdu_mov_res->pos);
+				complete_len += sizeof(PDUMovRes);
 				break;
 
 			case CAST_SKILL:
@@ -492,7 +492,7 @@ void send_continual_request(SOCKET sock)
 			// 키가 눌려있는 상태라면
 			if (GetKeyState(inputs[i]) & 0x8000)
 			{
-				PDUMov pdu_mov;
+				PDUMovReq pdu_mov_req;
 				PDUCastSkill pdu_cast_skill;
 
 				char* buff = NULL;
@@ -500,10 +500,10 @@ void send_continual_request(SOCKET sock)
 
 				switch (inputs[i])
 				{
-				case 'W': pdu_mov.dir = UP;	break;
-				case 'A': pdu_mov.dir = LEFT; break;
-				case 'S': pdu_mov.dir = DOWN; break;
-				case 'D': pdu_mov.dir = RIGHT; break;
+				case 'W': pdu_mov_req.dir = UP;	break;
+				case 'A': pdu_mov_req.dir = LEFT; break;
+				case 'S': pdu_mov_req.dir = DOWN; break;
+				case 'D': pdu_mov_req.dir = RIGHT; break;
 
 				case VK_UP: pdu_cast_skill.dir = UP; break;
 				case VK_DOWN: pdu_cast_skill.dir = DOWN; break;
@@ -514,8 +514,8 @@ void send_continual_request(SOCKET sock)
 				switch (inputs[i])
 				{
 				case 'W': case 'A': case 'S': case 'D': // 무빙
-					len = sizeof(PDUMov);
-					buff = (char*)&pdu_mov;
+					len = sizeof(PDUMovReq);
+					buff = (char*)&pdu_mov_req;
 					break;
 				case VK_UP: case VK_DOWN: case VK_LEFT: case VK_RIGHT: // 스킬 사용
 					// 사용 스킬 종류는 메뉴에서 선택된 스킬
