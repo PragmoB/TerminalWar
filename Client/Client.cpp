@@ -100,7 +100,6 @@ void receive(SOCKET sock)
 			PDUHello* pdu_hello;
 			PDUItemInfo* pdu_item_info;
 			PDUEarnItem* pdu_earn_item;
-			PDUMovRes* pdu_mov_res;
 			PDUCastSkill* pdu_cast_skill;
 			PDUHit* pdu_hit;
 			PDUUpgradeSkillOptionInfo* pdu_upgrade_skill_option_info;
@@ -204,15 +203,6 @@ void receive(SOCKET sock)
 					energy_bar.earn_energy(my_energy_gain);
 				}
 				complete_len += sizeof(PDUEarnItem);
-				break;
-		
-			case MOV:
-				pdu_mov_res = reinterpret_cast<PDUMovRes*>(buff + complete_len);
-				player = players[pdu_mov_res->id];
-				// 버그수정 : player 객체 유효성 검사
-				if (player)
-					player->move(pdu_mov_res->pos);
-				complete_len += sizeof(PDUMovRes);
 				break;
 
 			case CAST_SKILL:
@@ -353,6 +343,34 @@ void receive(SOCKET sock)
 	}
 }
 
+void receive_udp(SOCKET udp_sock)
+{
+	while (graphic.is_started())
+	{
+		char buff[1000];
+		recv(udp_sock, buff, sizeof(buff), NULL);
+
+		Player* player = NULL;
+		
+		union
+		{
+			PDUMovRes* pdu_mov_res;
+		};
+
+		switch (buff[0])
+		{
+		case MOV:
+			pdu_mov_res = reinterpret_cast<PDUMovRes*>(buff);
+			player = players[pdu_mov_res->id];
+			if (player)
+				player->move(pdu_mov_res->pos);
+			break;
+		default :
+			break;
+		}
+	}
+}
+
 
 // 불연속적 유저 입력(메뉴 선택, 스킬 선택 등) 처리
 void send_discontinual_request(SOCKET sock)
@@ -478,9 +496,8 @@ void send_discontinual_request(SOCKET sock)
 	active_skill_menu.disappear();
 	active_skill_menu.clear();
 }
-
 // 연속적 유저 입력(움직임, 스킬 사용 등) 처리
-void send_continual_request(SOCKET sock)
+void send_continual_request(SOCKET udp_sock)
 {
 	unsigned char inputs[] = { 'W', 'A', 'S', 'D', VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, NULL };
 
@@ -514,18 +531,20 @@ void send_continual_request(SOCKET sock)
 				switch (inputs[i])
 				{
 				case 'W': case 'A': case 'S': case 'D': // 무빙
+					pdu_mov_req.id = my_id;
 					len = sizeof(PDUMovReq);
 					buff = (char*)&pdu_mov_req;
 					break;
 				case VK_UP: case VK_DOWN: case VK_LEFT: case VK_RIGHT: // 스킬 사용
 					// 사용 스킬 종류는 메뉴에서 선택된 스킬
+					pdu_cast_skill.id = my_id;
 					pdu_cast_skill.skill_type = active_skills[active_skill_menu.get_focus()];
 					len = sizeof(PDUCastSkill);
 					buff = (char*)&pdu_cast_skill;
 					break;
 				}
 
-				send(sock, buff, len, NULL);
+				send(udp_sock, buff, len, NULL);
 			}
 
 		Sleep(30);
@@ -570,10 +589,18 @@ int main()
 		SOCKET sock = WSASocket(PF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 		if (sock == INVALID_SOCKET)
 		{
-			cerr << " socket error : " << WSAGetLastError() << endl;
+			cerr << " stream socket error : " << WSAGetLastError() << endl;
 			_getch();
 			return 1;
 		}
+		SOCKET udpSock = WSASocket(PF_INET, SOCK_DGRAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+		if (sock == INVALID_SOCKET)
+		{
+			cerr << " udp socket error : " << WSAGetLastError() << endl;
+			_getch();
+			return 1;
+		}
+
 		unsigned long mode = 0; // 0은 블로킹 모드, 1은 논블로킹 모드
 		int result = ioctlsocket(sock, FIONBIO, &mode);
 		if (result != NO_ERROR)
@@ -583,9 +610,10 @@ int main()
 			return 1;
 		}
 
-		SOCKADDR_IN recvAddr;
+		SOCKADDR_IN recvAddr, udpAddr;
 		memset(&recvAddr, 0, sizeof(recvAddr));
-		recvAddr.sin_family = AF_INET;
+		memset(&udpAddr, 0, sizeof(udpAddr));
+		recvAddr.sin_family = udpAddr.sin_family = AF_INET;
 
 		int bRet;
 		do
@@ -593,11 +621,22 @@ int main()
 			char IP[20] = "";
 			cout << " 서버 IP : ";	cin >> IP;
 			inet_pton(AF_INET, IP, &(recvAddr.sin_addr.s_addr));
+			inet_pton(AF_INET, IP, &(udpAddr.sin_addr.s_addr));
 
 			int port;
 			cout << " 서버 포트 : ";	cin >> port;
+			udpAddr.sin_port = htons(port);
 			recvAddr.sin_port = htons(port);
 
+			bRet = connect(udpSock, (SOCKADDR*)&udpAddr, sizeof(udpAddr));
+			if (bRet == SOCKET_ERROR)
+			{
+				cerr << " udp connect error : " << WSAGetLastError() << endl;
+				_getch();
+				system("cls");
+				cout << endl;
+				continue;
+			}
 			bRet = connect(sock, (SOCKADDR*)&recvAddr, sizeof(recvAddr));
 			if (bRet == SOCKET_ERROR)
 			{
@@ -614,6 +653,7 @@ int main()
 		graphic.draw_field("동접자가 많아 접속 대기중입니다. 잠시만 기다려주세요. 또는 다른 서버를 이용해주세요.");
 
 		thread(receive, sock).detach();
+		thread(receive_udp, udpSock).detach();
 
 		// 영문 문자로 캐릭터 선택
 		PDUHello pdu_hello;
@@ -625,7 +665,7 @@ int main()
 		send(sock, reinterpret_cast<const char*>(&pdu_hello), sizeof(PDUHello), NULL);
 
 		thread(send_discontinual_request, sock).detach();
-		send_continual_request(sock);
+		send_continual_request(udpSock);
 	}
 }
 

@@ -21,7 +21,6 @@ class Client;
 // IOCP 데이터 구조체
 typedef struct {
 	OVERLAPPED overlapped;
-	Client* client;
 	SOCKET socket;
 	WSABUF dataBuffer;
 	char buffer[1024];
@@ -31,7 +30,10 @@ class Client
 {
 public:
 	ClientContext context;
+	static SOCKET udp_socket;
+	sockaddr_in addr;
 private:
+
 
 	// 체력
 	int HP = 999;
@@ -69,7 +71,7 @@ private:
 	};
 	bool skill_option_is_active[NUM_UPGRADE_SKILL_OPTIONS];
 public:
-	Client(ClientContext context, COORD pos);
+	Client(ClientContext context, sockaddr_in IP, COORD pos);
 
 	int get_level() const;
 	int get_HP() const;

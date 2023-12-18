@@ -51,10 +51,13 @@ void worker(HANDLE completion_port)
 			continue;
 		}
 
-		PDUHello* pdu_hello;
-		PDUMovReq* pdu_mov_req;
-		PDUCastSkill* pdu_cast_skill;
-		PDUUpgradeSkill* pdu_upgrade_skill;
+		union
+		{
+			PDUHello* pdu_hello;
+			PDUMovReq* pdu_mov_req;
+			PDUCastSkill* pdu_cast_skill;
+			PDUUpgradeSkill* pdu_upgrade_skill;
+		};
 
 		int complete_len = 0;
 
@@ -67,20 +70,6 @@ void worker(HANDLE completion_port)
 				client->hello(pdu_hello->chracter);
 
 				complete_len += sizeof(PDUHello);
-				break;
-
-			case MOV:
-				pdu_mov_req = reinterpret_cast<PDUMovReq*>(client->context.dataBuffer.buf + complete_len);
-				client->move(pdu_mov_req->dir);
-				
-				complete_len += sizeof(PDUMovReq);
-				break;
-
-			case CAST_SKILL:
-				pdu_cast_skill = reinterpret_cast<PDUCastSkill*>(client->context.dataBuffer.buf + complete_len);
-				client->cast_skill(pdu_cast_skill->skill_type, pdu_cast_skill->dir);
-
-				complete_len += sizeof(PDUCastSkill);
 				break;
 
 			case UPGRADE_SKILL:
@@ -101,6 +90,59 @@ void worker(HANDLE completion_port)
 			1, NULL, &flags, &client->context.overlapped, NULL);
 	}
 }
+void workerUDP(SOCKET sock)
+{
+	while (1)
+	{
+		sockaddr_in peer_addr;
+		int peer_addr_len = sizeof(peer_addr);
+		char buff[2000] = "";
+		recvfrom(sock, buff, sizeof(buff), NULL, (struct sockaddr*)&peer_addr, &peer_addr_len);
+		union
+		{
+			PDUMovReq* pdu_mov_req;
+			PDUCastSkill* pdu_cast_skill;
+		};
+		pdu_mov_req = reinterpret_cast<PDUMovReq*>(buff);
+
+		// 요청 클라이언트의 client 객체 결정하기
+		Client* client = NULL;
+		DWORD client_id = NULL;
+		switch (buff[0])
+		{
+		case MOV: client_id = pdu_mov_req->id;
+		case CAST_SKILL: client_id = pdu_cast_skill->id;
+		}
+		for (list<Client*>::iterator iter = background.clients.begin();
+			iter != background.clients.end();
+			iter++)
+		{
+			client = *iter;
+			if (client->addr.sin_addr.S_un.S_addr == peer_addr.sin_addr.S_un.S_addr &&
+				client->context.socket == client_id)
+			{
+				client->addr = peer_addr;
+				break;
+			}
+		}
+
+		switch (buff[0])
+		{
+		case MOV:
+			pdu_mov_req = reinterpret_cast<PDUMovReq*>(buff);
+			if (client)
+				client->move(pdu_mov_req->dir);
+			break;
+		case CAST_SKILL:
+			pdu_cast_skill = reinterpret_cast<PDUCastSkill*>(buff);
+			if (client)
+				client->cast_skill(pdu_cast_skill->skill_type, pdu_cast_skill->dir);
+		default:
+			break;
+		}
+
+	}
+}
 int main()
 {
 	srand(time(NULL));
@@ -114,6 +156,17 @@ int main()
 	}
 	cout << " Succeed to initialize Winsock." << endl;
 
+	SOCKET udpSocket = socket(AF_INET, SOCK_DGRAM, 0);
+	if (udpSocket == INVALID_SOCKET)
+	{
+		cerr << " Failed to create UDP socket." << endl;
+		WSACleanup();
+		_getch();
+		return 1;
+	}
+	cout << " Succeed to create UDP socket." << endl;
+
+
 	SOCKET listenSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (listenSocket == INVALID_SOCKET) {
 		std::cerr << " Failed to create listen socket." << std::endl;
@@ -123,12 +176,26 @@ int main()
 	}
 	cout << " Succeed to create listen socket." << endl;
 
+	int port;
+	cout << " Port : ";	cin >> port;
+	sockaddr_in udpServerAddress;
+	udpServerAddress.sin_family  = AF_INET;
+	udpServerAddress.sin_addr.s_addr = INADDR_ANY;
+	udpServerAddress.sin_port = htons(port);
+	if (::bind(udpSocket, (struct sockaddr*)&udpServerAddress, sizeof(udpServerAddress)) == SOCKET_ERROR)
+	{
+		cerr << " Failed to bind UDP socket." << endl;
+		closesocket(udpSocket);
+		WSACleanup();
+		_getch();
+		return 1;
+	}
+	cout << " Succeed to bind UDP socket." << endl;
+	Client::udp_socket = udpSocket;
+
 	sockaddr_in serverAddress;
 	serverAddress.sin_family = AF_INET;
 	serverAddress.sin_addr.s_addr = INADDR_ANY;
-
-	int port;
-	cout << " Port : ";	cin >> port;
 	serverAddress.sin_port = htons(port);
 
 	if (::bind(listenSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR) {
@@ -161,9 +228,10 @@ int main()
 
 	// IOCP 작업자 스레드를 생성
 	
-	for (unsigned int i = 0; i < std::thread::hardware_concurrency(); i++) {
+	for (int i = 0; i < 2; i++)
 		thread(worker, completionPort).detach();
-	}
+	for (int i = 0; i < 4; i++)
+		thread(workerUDP, udpSocket).detach();
 
 	std::cout << " IOCP server is running..." << std::endl << std::endl;
 
@@ -172,7 +240,11 @@ int main()
 		while (background.clients.size() >= 9)
 			Sleep(1000);
 
-		SOCKET clientSocket = accept(listenSocket, NULL, NULL);
+		sockaddr_in client_addr;
+		int client_addr_size = sizeof(client_addr);
+
+		SOCKET clientSocket = accept(listenSocket, (struct sockaddr*)&client_addr, &client_addr_size);
+
 		if (clientSocket == INVALID_SOCKET) {
 			std::cerr << " Failed to accept client connection." << std::endl;
 			continue;
@@ -184,7 +256,7 @@ int main()
 		client_context.socket = clientSocket;
 		client_context.dataBuffer.len = 1024;
 		client_context.overlapped.hEvent = NULL;
-		Client* client = new Client(client_context,
+		Client* client = new Client(client_context, client_addr,
 									COORD{ (SHORT)(rand() % FIELD_WIDTH + 1), (SHORT)(rand() % FIELD_HEIGHT + 1) });
 		background.clients.push_back(client);
 

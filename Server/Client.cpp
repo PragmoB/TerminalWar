@@ -21,10 +21,13 @@
 
 extern Background background;
 
-Client::Client(ClientContext context, COORD pos)
+SOCKET Client::udp_socket = 0;
+
+Client::Client(ClientContext context, sockaddr_in addr, COORD pos)
 : context(context), pos(pos)
 {
 	this->context.dataBuffer.buf = this->context.buffer;
+	this->addr = addr;
 
 	// 자기자신을 인식함
 	apply_hello_of(this);
@@ -112,7 +115,7 @@ void Client::apply_movement_of(const Client* client)
 	pdu.id = (DWORD)client->context.socket;
 	pdu.pos = client->get_pos();
 	
-	send(context.socket, reinterpret_cast<const char*>(&pdu), sizeof(PDUMovRes), NULL);
+	sendto(udp_socket, reinterpret_cast<const char*>(&pdu), sizeof(PDUMovRes), NULL, (struct sockaddr*)&addr, sizeof(addr));
 }
 void Client::apply_cast_skill_of(const Client* client, SKILL_TYPE skill_type, DIRECTION dir)
 {

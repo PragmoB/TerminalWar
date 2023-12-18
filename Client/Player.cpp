@@ -115,6 +115,11 @@ void Player::move(DIRECTION dir)
 }
 void Player::move(COORD pos)
 {
+	// pos 유효성 검사
+	if (pos.X < 1 || FIELD_WIDTH < pos.X ||
+		pos.Y < 1 || FIELD_HEIGHT < pos.Y)
+		return;
+
 	moving = true;
 	this->disappear();
 	this->pos = graphic.get_client_pos_by_server_pos(pos);
