@@ -28,7 +28,7 @@ bool Wind::cast(DIRECTION dir)
 		// [i] = i번째 이펙트의 상대 좌표.
 		// 상대 좌표라 함은 COORD{0, 0}이 중심인 좌표계에서 표현된 좌표값이다.
 		static const COORD up_effects_pos[] = {
-		   COORD{0, -3}, COORD{-3, -2}, COORD{-4, -1}, COORD{-5, 0}, COORD{1, 0}, COORD{-5, 1}, COORD{1, 1}, COORD{-5, 2}, COORD{4, 2}
+		   COORD{0, -5}, COORD{-3, -4}, COORD{-4, -3}, COORD{-5, -2}, COORD{1, -2}, COORD{-5, -1}, COORD{1, -1}, COORD{-5, 0}, COORD{4, 0}
 		};
 
 		// 스킬 이펙트 출력
@@ -68,7 +68,7 @@ bool Wind::cast(DIRECTION dir)
 		// [i] = i번째 이펙트의 상대 좌표.
 		// 상대 좌표라 함은 COORD{0, 0}이 중심인 좌표계에서 표현된 좌표값이다.
 		static const COORD down_effects_pos[] = {
-		   COORD{0, 3}, COORD{-3, 2}, COORD{-4, 1}, COORD{-5, 0}, COORD{1, 0}, COORD{-5, -1}, COORD{1, -1}, COORD{-5, -2}, COORD{4, -2}
+		   COORD{0, 5}, COORD{-3, 4}, COORD{-4, 3}, COORD{-5, 2}, COORD{1, 2}, COORD{-5, 1}, COORD{1, 1}, COORD{-5, 0}, COORD{4, 0}
 		};
 
 		// 스킬 이펙트 출력

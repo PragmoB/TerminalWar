@@ -20,16 +20,20 @@ bool Wind::cast(DIRECTION dir)
 	const COORD pos = owner->get_pos();
 
 	static const COORD up_hitting_box[] = {
-		COORD{-2, -1}, COORD{-1, -2}, COORD{ 0, -2}, COORD{ 1, -2}, COORD{ 2, -1}, COORD{NULL, NULL}
+		COORD{-2, -3}, COORD{-1, -4}, COORD{ 0, -4}, COORD{ 1, -4}, COORD{ 2, -3},
+		COORD{-2, -2}, COORD{-1, -3}, COORD{ 0, -3}, COORD{ 1, -3}, COORD{ 2, -2}, COORD{NULL, NULL}
 	};
 	static const COORD down_hitting_box[] = {
-		COORD{-2,  1}, COORD{-1,  2}, COORD{ 0,  2}, COORD{ 1,  2}, COORD{ 2,  1}, COORD{NULL, NULL}
+		COORD{-2,  3}, COORD{-1,  4}, COORD{ 0,  4}, COORD{ 1,  4}, COORD{ 2,  3},
+		COORD{-2,  2}, COORD{-1,  3}, COORD{ 0,  3}, COORD{ 1,  3}, COORD{ 2,  2}, COORD{NULL, NULL}
 	};
 	static const COORD left_hitting_box[] = {
-		COORD{-1, -2}, COORD{-2, -1}, COORD{-2,  0}, COORD{-2,  1}, COORD{-2,  2}, COORD{NULL, NULL}
+		COORD{-1, -2}, COORD{-2, -1}, COORD{-2,  0}, COORD{-2,  1}, COORD{-2,  2},
+		COORD{ 0, -2}, COORD{-1, -1}, COORD{-1,  0}, COORD{-1,  1}, COORD{-1,  2}, COORD{NULL, NULL}
 	};
 	static const COORD right_hitting_box[] = {
-		COORD{ 1, -2}, COORD{ 2, -1}, COORD{ 2,  0}, COORD{ 2,  1}, COORD{ 2,  2}, COORD{NULL, NULL}
+		COORD{ 1, -2}, COORD{ 2, -1}, COORD{ 2,  0}, COORD{ 2,  1}, COORD{ 2,  2},
+		COORD{ 0, -2}, COORD{ 1, -1}, COORD{ 1,  0}, COORD{ 1,  1}, COORD{ 1,  2}, COORD{NULL, NULL}
 	};
 
 	/* 피격 범위 결정 */
