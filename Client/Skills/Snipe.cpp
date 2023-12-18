@@ -31,10 +31,10 @@ bool Snipe::cast(DIRECTION dir)
 		for (; 0 < remain_distance && FIELD.Top < pos.Y - 1; remain_distance--)
 		{
 			pos.Y--; // 총알이 위로 이동
-			graphic.draw(pos, '|', SKY_BLUE); // 그래픽에 반영
+			graphic.draw(pos, '|', SKY_BLUE, graphic.FIELD_BACKGROUND_COLOR); // 그래픽에 반영
 
 			Sleep(1000 / bps); // 발사 속도 조절
-			graphic.draw(pos, ' '); // 잔상 지우기
+			graphic.draw(pos, ':', graphic.FIELD_BACKGROUND_COLOR, graphic.FIELD_BACKGROUND_COLOR); // 잔상 지우기
 		}
 		break;
 	case DOWN:
@@ -44,7 +44,7 @@ bool Snipe::cast(DIRECTION dir)
 			graphic.draw(pos, '|', SKY_BLUE); // 그래픽에 반영
 
 			Sleep(1000 / bps);
-			graphic.draw(pos, ' '); // 잔상 지우기
+			graphic.draw(pos, ':', graphic.FIELD_BACKGROUND_COLOR, graphic.FIELD_BACKGROUND_COLOR); // 잔상 지우기
 		}
 		break;
 	case LEFT:
@@ -54,7 +54,7 @@ bool Snipe::cast(DIRECTION dir)
 			graphic.draw(pos, "--", SKY_BLUE); // 그래픽에 반영
 
 			Sleep(1000 / bps);
-			graphic.draw(pos, "  "); // 잔상 지우기
+			graphic.draw(pos, "::", graphic.FIELD_BACKGROUND_COLOR, graphic.FIELD_BACKGROUND_COLOR); // 잔상 지우기
 		}
 		break;
 	case RIGHT:
@@ -65,7 +65,7 @@ bool Snipe::cast(DIRECTION dir)
 			graphic.draw(pos, "--", SKY_BLUE); // 그래픽에 반영
 
 			Sleep(1000 / bps);
-			graphic.draw(pos, "  "); // 잔상 지우기
+			graphic.draw(pos, "::", graphic.FIELD_BACKGROUND_COLOR, graphic.FIELD_BACKGROUND_COLOR); // 잔상 지우기
 		}
 		break;
 	}

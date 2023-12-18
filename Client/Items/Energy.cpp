@@ -25,7 +25,7 @@ void Energy::appear() const
 	case 3: color = PURPLE;   break;
 	}
 
-	graphic.draw(get_pos(), ':', color, color);
+	graphic.draw(graphic.get_client_pos_by_server_pos(get_pos()), ':', color, color);
 }
 int Energy::get_amount() const
 {

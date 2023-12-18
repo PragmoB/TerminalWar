@@ -56,7 +56,7 @@ bool LightsaberSlash::cast(DIRECTION dir)
 				pos_temp.X = pos.X + up_frames_pos[i][j].X;
 				pos_temp.Y = pos.Y + up_frames_pos[i][j].Y;
 
-				graphic.draw_in_field(pos_temp, up_frames[i][j], color);
+				graphic.draw_in_field(pos_temp, up_frames[i][j], color, graphic.FIELD_BACKGROUND_COLOR);
 			}
 
 			Sleep(frames_delay[i]);
@@ -97,7 +97,7 @@ bool LightsaberSlash::cast(DIRECTION dir)
 				pos_temp.X = pos.X + down_frames_pos[i][j].X;
 				pos_temp.Y = pos.Y + down_frames_pos[i][j].Y;
 
-				graphic.draw_in_field(pos_temp, down_frames[i][j], color);
+				graphic.draw_in_field(pos_temp, down_frames[i][j], color, graphic.FIELD_BACKGROUND_COLOR);
 			}
 
 			Sleep(frames_delay[i]);
@@ -141,7 +141,7 @@ bool LightsaberSlash::cast(DIRECTION dir)
 				pos_temp.X = pos.X + left_frames_pos[i][j].X;
 				pos_temp.Y = pos.Y + left_frames_pos[i][j].Y;
 
-				graphic.draw_in_field(pos_temp, left_frames[i][j], color);
+				graphic.draw_in_field(pos_temp, left_frames[i][j], color, graphic.FIELD_BACKGROUND_COLOR);
 			}
 
 			Sleep(frames_delay[i]);
@@ -179,7 +179,7 @@ bool LightsaberSlash::cast(DIRECTION dir)
 				pos_temp.X = pos.X + right_frames_pos[i][j].X;
 				pos_temp.Y = pos.Y + right_frames_pos[i][j].Y;
 
-				graphic.draw_in_field(pos_temp, right_frames[i][j], color);
+				graphic.draw_in_field(pos_temp, right_frames[i][j], color, graphic.FIELD_BACKGROUND_COLOR);
 			}
 
 			Sleep(frames_delay[i]);

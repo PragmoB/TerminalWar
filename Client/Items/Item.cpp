@@ -8,19 +8,19 @@ extern Graphic graphic;
 
 std::list<Item*> items;
 
-Item::Item(COORD pos) : pos(pos)
+Item::Item(COORD pos)
 {
-
+	this->pos = graphic.get_client_pos_by_server_pos(pos);
 }
 
 COORD Item::get_pos() const
 {
-	return pos;
+	return graphic.get_server_pos_by_client_pos(pos);
 }
 
 void Item::disappear() const
 {
-	graphic.draw(get_pos(), ' ');
+	graphic.draw(pos, ':', graphic.FIELD_BACKGROUND_COLOR, graphic.FIELD_BACKGROUND_COLOR);
 }
 
 Item::~Item()

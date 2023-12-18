@@ -144,7 +144,6 @@ void receive(SOCKET sock)
 			case ITEM_INFO:
 			{
 				pdu_item_info = reinterpret_cast<PDUItemInfo*>(buff + complete_len);
-				pdu_item_info->pos = graphic.get_client_pos_by_server_pos(pdu_item_info->pos);
 				Item* item = NULL;
 
 				// 아이템 종류에 따라 아이템 객체 생성
@@ -164,7 +163,6 @@ void receive(SOCKET sock)
 			}
 			case EARN_ITEM:
 				pdu_earn_item = reinterpret_cast<PDUEarnItem*>(buff + complete_len);
-				pdu_earn_item->pos = graphic.get_client_pos_by_server_pos(pdu_earn_item->pos);
 				player = players[pdu_earn_item->id];
 
 				{
@@ -190,11 +188,11 @@ void receive(SOCKET sock)
 							if (energy_item && pdu_earn_item->id == my_id && !upgradable)
 								my_energy_gain += energy_item->get_amount(); // 에너지 표시줄에 반영
 
+							items.erase(iter++);
+
 							// 해당하는 플레이어가 흡수
 							if(player)
 								player->earn_item(item);
-
-							items.erase(iter++);
 						}
 						else
 							iter++;

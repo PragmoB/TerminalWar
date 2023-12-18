@@ -42,7 +42,7 @@ bool Wind::cast(DIRECTION dir)
 				pos_temp.X = pos.X + up_effects_pos[j].X;
 				pos_temp.Y = pos.Y + up_effects_pos[j].Y - i;
 
-				graphic.draw_in_field(pos_temp, up_effects[j]);
+				graphic.draw_in_field(pos_temp, up_effects[j], WHITE, graphic.FIELD_BACKGROUND_COLOR);
 			}
 
 			Sleep(1000 / bps);
@@ -57,7 +57,7 @@ bool Wind::cast(DIRECTION dir)
 			pos_temp.X = pos.X + up_effects_pos[j].X;
 			pos_temp.Y = pos.Y + up_effects_pos[j].Y - distance + 1;
 
-			graphic.draw_in_field(pos_temp, up_erase_effects[j]);
+			graphic.draw_in_field(pos_temp, up_erase_effects[j], WHITE, graphic.FIELD_BACKGROUND_COLOR);
 		}
 
 		break;
@@ -82,7 +82,7 @@ bool Wind::cast(DIRECTION dir)
 				pos_temp.X = pos.X + down_effects_pos[j].X;
 				pos_temp.Y = pos.Y + down_effects_pos[j].Y + i;
 
-				graphic.draw_in_field(pos_temp, down_effects[j]);
+				graphic.draw_in_field(pos_temp, down_effects[j], WHITE, graphic.FIELD_BACKGROUND_COLOR);
 			}
 
 			Sleep(1000 / bps);
@@ -97,7 +97,7 @@ bool Wind::cast(DIRECTION dir)
 			pos_temp.X = pos.X + down_effects_pos[j].X;
 			pos_temp.Y = pos.Y + down_effects_pos[j].Y + distance - 1;
 
-			graphic.draw_in_field(pos_temp, down_erase_effects[j]);
+			graphic.draw_in_field(pos_temp, down_erase_effects[j], WHITE, graphic.FIELD_BACKGROUND_COLOR);
 		}
 		break;
 
@@ -121,7 +121,7 @@ bool Wind::cast(DIRECTION dir)
 				pos_temp.X = pos.X + left_effects_pos[j].X - i;
 				pos_temp.Y = pos.Y + left_effects_pos[j].Y;
 
-				graphic.draw_in_field(pos_temp, left_effects[j]);
+				graphic.draw_in_field(pos_temp, left_effects[j], WHITE, graphic.FIELD_BACKGROUND_COLOR);
 			}
 
 			Sleep(500 / bps);
@@ -136,7 +136,7 @@ bool Wind::cast(DIRECTION dir)
 			pos_temp.X = pos.X + left_effects_pos[j].X - distance * 2 + 1;
 			pos_temp.Y = pos.Y + left_effects_pos[j].Y;
 
-			graphic.draw_in_field(pos_temp, left_erase_effects[j]);
+			graphic.draw_in_field(pos_temp, left_erase_effects[j], WHITE, graphic.FIELD_BACKGROUND_COLOR);
 		}
 		break;
 	}
@@ -159,7 +159,7 @@ bool Wind::cast(DIRECTION dir)
 				pos_temp.X = pos.X + right_effects_pos[j].X + i;
 				pos_temp.Y = pos.Y + right_effects_pos[j].Y;
 
-				graphic.draw_in_field(pos_temp, right_effects[j]);
+				graphic.draw_in_field(pos_temp, right_effects[j], WHITE, graphic.FIELD_BACKGROUND_COLOR);
 			}
 
 			Sleep(500 / bps);
@@ -174,7 +174,7 @@ bool Wind::cast(DIRECTION dir)
 			pos_temp.X = pos.X + right_effects_pos[j].X + distance * 2 - 1;
 			pos_temp.Y = pos.Y + right_effects_pos[j].Y;
 
-			graphic.draw_in_field(pos_temp, right_erase_effects[j]);
+			graphic.draw_in_field(pos_temp, right_erase_effects[j], WHITE, graphic.FIELD_BACKGROUND_COLOR);
 		}
 		break;
 	}

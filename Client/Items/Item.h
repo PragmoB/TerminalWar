@@ -15,7 +15,7 @@ public:
 	Item(COORD pos);
 	virtual ITEM_TYPE get_type() const = 0;
 	virtual void appear() const = 0;
-	void disappear() const;
+	virtual void disappear() const;
 	COORD get_pos() const;
 	~Item();
 };

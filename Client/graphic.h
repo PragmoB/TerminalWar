@@ -25,6 +25,10 @@ typedef struct {
 
 class Graphic
 {
+public :
+	static const COLOR FIELD_FRAME_COLOR;
+	static const COLOR FIELD_BACKGROUND_COLOR;
+
 private:
 	BlockingQueue<SkillParam> skill_queue;
 	bool started;
@@ -73,4 +77,6 @@ public:
 
 	/* 서버의 좌표값을 클라이언트 좌표(화면상 좌표)로 바꿈 */
 	COORD get_client_pos_by_server_pos(COORD server_pos);
+	/* 클라이언트 좌표(화면상 좌표)값을 서버의 좌표값으로 바꿈 */
+	COORD get_server_pos_by_client_pos(COORD client_pos);
 };

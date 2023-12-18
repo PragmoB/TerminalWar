@@ -68,13 +68,13 @@ void Player::appear()
 	/* 출력 */
 
 	if (me)
-		graphic.draw(pos, chracter, GREEN);
+		graphic.draw(pos, chracter, GREEN, graphic.FIELD_BACKGROUND_COLOR);
 	else
-		graphic.draw(pos, chracter);
+		graphic.draw(pos, chracter, WHITE, graphic.FIELD_BACKGROUND_COLOR);
 
-	graphic.draw(pos_temp, "\u2665", DARK_RED); // 빨간색 하트
+	graphic.draw(pos_temp, "\u2665", DARK_RED, graphic.FIELD_BACKGROUND_COLOR); // 빨간색 하트
 	pos_temp.X += 2;
-	graphic.draw(pos_temp, HP_str, SKY_BLUE);
+	graphic.draw(pos_temp, HP_str, SKY_BLUE, graphic.FIELD_BACKGROUND_COLOR);
 }
 void Player::disappear()
 {
@@ -91,8 +91,8 @@ void Player::disappear()
 
 	/* 지우기 */
 	
-	graphic.draw(pos, ' ');
-	graphic.draw(pos_temp, "       ");
+	graphic.draw(pos, ':', graphic.FIELD_BACKGROUND_COLOR, graphic.FIELD_BACKGROUND_COLOR);
+	graphic.draw(pos_temp, ":::::::", graphic.FIELD_BACKGROUND_COLOR,  graphic.FIELD_BACKGROUND_COLOR);
 }
 void Player::move(DIRECTION dir)
 {
@@ -178,7 +178,7 @@ void Player::hit(const Skill* skill)
 	sound.request(HIT, skill->get_type());
 
 	HP -= skill->get_damage();
-	graphic.draw(pos, '*', RED);
+	graphic.draw(pos, '*', RED, graphic.FIELD_BACKGROUND_COLOR);
 }
 
 void Player::earn_item(Item* item)
@@ -198,6 +198,7 @@ void Player::earn_item(Item* item)
 
 	sound.request(EARN_ITEM, item->get_type());
 
+	item->disappear();
 	delete item;
 }
 

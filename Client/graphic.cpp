@@ -21,6 +21,9 @@ Graphic graphic;
 extern map<DWORD, Player*> players;
 extern list<Item*> items;
 
+const COLOR Graphic::FIELD_FRAME_COLOR = GREEN;
+const COLOR Graphic::FIELD_BACKGROUND_COLOR = BLACK;
+
 Graphic::Graphic() : skill_queue(50), started(false)
 {
 	console_buffer = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE,
@@ -183,14 +186,14 @@ void Graphic::draw_field(const char* message)
 	for (int i = 0; i < 2 * FIELD_WIDTH + 3; i++)
 		buff[i] = ':';
 	buff[2 * FIELD_WIDTH + 3] = NULL;
-	draw(COORD{ FIELD.Left - 1, FIELD.Top }, buff, GREEN, GREEN);
+	draw(COORD{ FIELD.Left - 1, FIELD.Top }, buff, FIELD_FRAME_COLOR, FIELD_FRAME_COLOR);
 
 	/* 왼쪽, 오른쪽 변 그리기 */
 
 	for (SHORT i = FIELD.Top + 1; i < FIELD.Bottom + 1; i++)
 	{
-		draw(COORD{ FIELD.Left - 1, i }, "::", GREEN, GREEN);
-		draw(COORD{ FIELD.Left + 2 * FIELD_WIDTH, i }, "::", GREEN, GREEN);
+		draw(COORD{ FIELD.Left - 1, i }, "::", FIELD_FRAME_COLOR, FIELD_FRAME_COLOR);
+		draw(COORD{ FIELD.Left + 2 * FIELD_WIDTH, i }, "::", FIELD_FRAME_COLOR, FIELD_FRAME_COLOR);
 	}
 
 	/* 아랫변 그리기 */
@@ -199,12 +202,20 @@ void Graphic::draw_field(const char* message)
 		buff[i] = ':';
 	
 	buff[2 * FIELD_WIDTH + 3] = NULL;
-	draw(COORD{ FIELD.Left - 1, FIELD.Bottom + 1 }, buff, GREEN, GREEN); // FIELD.Bottom + 1 => 체력 상태 표시줄을 고려
+	draw(COORD{ FIELD.Left - 1, FIELD.Bottom + 1 }, buff, FIELD_FRAME_COLOR, FIELD_FRAME_COLOR); // FIELD.Bottom + 1 => 체력 상태 표시줄을 고려
+
+	/* 배경 채우기 */
+	
+	for (SHORT i = 0; i < 2 * FIELD_WIDTH - 1; i++)
+		buff[i] = ':';
+	buff[2 * FIELD_WIDTH - 1] = NULL;
+	for (SHORT i = FIELD.Top + 1; i < FIELD.Bottom + 1; i++)
+		graphic.draw(COORD{ FIELD.Left + 1, i }, buff, FIELD_BACKGROUND_COLOR, FIELD_BACKGROUND_COLOR);
 
 	/* 메시지 그려넣기 */
 
 	if (message)
-		draw(COORD{ FIELD.Left + 2, FIELD.Top }, message, BLACK, GREEN);
+		draw(COORD{ FIELD.Left + 2, FIELD.Top }, message, BLACK, FIELD_FRAME_COLOR);
 }
 
 void Graphic::cast_skill(Skill* skill, DIRECTION dir)
@@ -221,4 +232,11 @@ COORD Graphic::get_client_pos_by_server_pos(COORD server_pos)
 	server_pos.X += FIELD.Left - 1;
 	server_pos.Y += FIELD.Top;
 	return server_pos;
+}
+COORD Graphic::get_server_pos_by_client_pos(COORD client_pos)
+{
+	client_pos.X -= FIELD.Left - 1;
+	client_pos.X /= 2; // 가로방향 이동은 2칸씩임을 고려함
+	client_pos.Y -= FIELD.Top;
+	return client_pos;
 }
