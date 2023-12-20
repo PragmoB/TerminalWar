@@ -10,7 +10,14 @@
 const int PORT = 44400;
 
 enum PDU_TYPE
-{	HELLO = 1, ITEM_INFO, EARN_ITEM, MOV, CAST_SKILL, HIT, UPGRADE_SKILL_OPTION_INFO, UPGRADE_SKILL, DIE	};
+{	UDP_HELLO = 1, HELLO, ITEM_INFO, EARN_ITEM, MOV, CAST_SKILL, HIT, UPGRADE_SKILL_OPTION_INFO, UPGRADE_SKILL, DIE	};
+
+// 클라이언트 측 UDP 포트 알림, 클라 => 서버
+typedef struct
+{
+	const PDU_TYPE type = UDP_HELLO;
+	DWORD id;
+} PDUUDPHello;
 
 // 유저접속, 클라 <=> 서버
 typedef struct

@@ -100,6 +100,7 @@ void workerUDP(SOCKET sock)
 		recvfrom(sock, buff, sizeof(buff), NULL, (struct sockaddr*)&peer_addr, &peer_addr_len);
 		union
 		{
+			PDUUDPHello* pdu_udp_hello;
 			PDUMovReq* pdu_mov_req;
 			PDUCastSkill* pdu_cast_skill;
 		};
@@ -110,6 +111,7 @@ void workerUDP(SOCKET sock)
 		DWORD client_id = NULL;
 		switch (buff[0])
 		{
+		case UDP_HELLO: client_id = pdu_udp_hello->id;
 		case MOV: client_id = pdu_mov_req->id;
 		case CAST_SKILL: client_id = pdu_cast_skill->id;
 		}
@@ -121,9 +123,12 @@ void workerUDP(SOCKET sock)
 			if (client->addr.sin_addr.S_un.S_addr == peer_addr.sin_addr.S_un.S_addr &&
 				client->context.socket == client_id)
 			{
+				// 클라이언트 측 UDP 포트 초기화
 				client->addr = peer_addr;
 				break;
 			}
+			else
+				client = NULL;
 		}
 
 		switch (buff[0])

@@ -653,6 +653,16 @@ int main()
 		thread(receive, sock).detach();
 		thread(receive_udp, udpSock).detach();
 
+		// 서버로부터 클라이언트 id를 할당받을때 까지 대기
+		while (!my_id)
+			Sleep(10);
+
+		// UDP 포트 알림
+		PDUUDPHello pdu_UDP_hello;
+		pdu_UDP_hello.id = my_id;
+		for (int i = 0; i < 10; i++)
+			send(udpSock, (const char*)&pdu_UDP_hello, sizeof(PDUUDPHello), 0);
+
 		// 영문 문자로 캐릭터 선택
 		PDUHello pdu_hello;
 		pdu_hello.chracter = NULL;
