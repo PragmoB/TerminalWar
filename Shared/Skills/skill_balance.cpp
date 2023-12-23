@@ -6,6 +6,7 @@
 #include "Skills/Wind.h"
 #include "Skills/WindSlash.h"
 #include "Skills/LightningStrike.h"
+#include "Skills//Shoes.h"
 
 const int Shoot::MAX_LEVEL = 5;
 const int Shoot::DAMAGE[] = { 100, 105, 110, 115, 120 };
@@ -44,3 +45,6 @@ const int WindSlash::COOLDOWN[] = { 788, 710, 639, 576, 519, 468, 422, 380, 342,
 const int LightningStrike::MAX_LEVEL = 7;
 const int LightningStrike::DAMAGE[] = { 400, 440, 484, 532, 585, 643, 707 };
 const int LightningStrike::COOLDOWN[] = { 30000, 27000, 24300, 21870, 19683, 17715, 15944 };
+
+const int Shoes::MAX_LEVEL = 4;
+const int Shoes::SPEED_RATE[] = { 7, 14, 21, 28 };

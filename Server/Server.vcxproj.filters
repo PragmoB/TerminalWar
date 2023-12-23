@@ -78,6 +78,15 @@
     <ClCompile Include="Skills\LightningStrike.cpp">
       <Filter>소스 파일\Skills</Filter>
     </ClCompile>
+    <ClCompile Include="Skills\ActiveSkill.cpp">
+      <Filter>소스 파일\Skills</Filter>
+    </ClCompile>
+    <ClCompile Include="Skills\PassiveSkill.cpp">
+      <Filter>소스 파일\Skills</Filter>
+    </ClCompile>
+    <ClCompile Include="Skills\Shoes.cpp">
+      <Filter>소스 파일\Skills</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -126,6 +135,15 @@
       <Filter>헤더 파일\Skills</Filter>
     </ClInclude>
     <ClInclude Include="Skills\LightningStrike.h">
+      <Filter>헤더 파일\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="Skills\ActiveSkill.h">
+      <Filter>헤더 파일\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="Skills\PassiveSkill.h">
+      <Filter>헤더 파일\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="Skills\Shoes.h">
       <Filter>헤더 파일\Skills</Filter>
     </ClInclude>
   </ItemGroup>

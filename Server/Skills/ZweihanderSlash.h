@@ -1,8 +1,5 @@
 #pragma once
 
-#include <windows.h>
-
-#include "protocol.h"
 #include "Skills/Slash.h"
 
 class ZweihanderSlash : public Slash

@@ -6,10 +6,12 @@ const SMALL_RECT FIELD = { 4, 7, 60, 34 };
 const SHORT FIELD_WIDTH = FIELD.Right - FIELD.Left - 1;
 const SHORT FIELD_HEIGHT = FIELD.Bottom - FIELD.Top - 1;
 
-// 보유 가능한 최대 액티브 스킬 수
-const int MAX_ACTIVE_SKILL = 5;
+// 보유 가능한 최대 스킬 수
+const int MAX_SKILL = 5;
+
 // 플레이어 최대 레벨
 const int MAX_LEVEL = 50;
+
 // 플레이어 레벨 별 레벨업 에너지 요구량
 const int REQUIRED_ENERGY[] = { 40, 60, 80, 100, 120, 140, 160, 180, 200, 220,
 										   240, 260, 280, 300, 320, 340, 360, 380, 400, 440,

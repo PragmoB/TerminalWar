@@ -3,8 +3,8 @@
 #include <windows.h>
 
 #include "interface.h"
-#include "Skills/Slash.h"
-#include "Skills/Wind.h"
+#include "Slash.h"
+#include "Wind.h"
 
 class WindSlash : public Slash
 {

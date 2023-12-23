@@ -1,12 +1,8 @@
 #pragma once
 
-#include <iostream>
-#include <windows.h>
+#include "ActiveSkill.h"
 
-#include "protocol.h"
-#include "Skills/Skill.h"
-
-class Shoot : public Skill
+class Shoot : public ActiveSkill
 {
 public:
 	static const int MAX_LEVEL;

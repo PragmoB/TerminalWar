@@ -13,7 +13,7 @@ ZweihanderSlash::ZweihanderSlash(Client* owner, int level)
 
 bool ZweihanderSlash::cast(DIRECTION dir)
 {
-	if (!Skill::cast(dir))
+	if (!ActiveSkill::cast(dir))
 		return false;
 
 	Client* owner = get_owner();

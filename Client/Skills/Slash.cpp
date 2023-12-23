@@ -9,13 +9,13 @@
 extern Graphic graphic;
 
 Slash::Slash(Player* owner, int level)
-	: Skill(owner, level)
+	: ActiveSkill(owner, level)
 {
 }
 
 bool Slash::cast(DIRECTION dir)
 {
-	if (!Skill::cast(dir))
+	if (!ActiveSkill::cast(dir))
 		return false;
 
 	Player* owner = get_owner();

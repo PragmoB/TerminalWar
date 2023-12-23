@@ -9,6 +9,7 @@
 #include "Skills/Wind.h"
 #include "Skills/WindSlash.h"
 #include "Skills/LightningStrike.h"
+#include "Skills/Shoes.h"
 
 #include <ctime>
 
@@ -34,6 +35,7 @@ Skill* Skill::create_object_by_type(SKILL_TYPE type, Client* owner)
 	case WIND:			   skill = new Wind(owner);			   break;
 	case WIND_SLASH:	   skill = new WindSlash(owner);	   break;
 	case LIGHTNING_STRIKE: skill = new LightningStrike(owner); break;
+	case SHOES:			   skill = new Shoes(owner);		   break;
 	}
 
 	return skill;
@@ -51,27 +53,6 @@ const Skill* Skill::get_object_by_type(SKILL_TYPE type)
 		data[type] = skill = create_object_by_type(type, NULL);
 		return skill;
 	}
-}
-bool Skill::castable() const
-{
-	clock_t now = clock();
-
-	if (now < next_able_time)
-		return false;
-
-	return true;
-}
-bool Skill::cast(DIRECTION dir)
-{
-	clock_t now = clock();
-
-	if (castable())
-	{
-		next_able_time = now + get_cooldown();
-		return true;
-	}
-	else
-		return false;
 }
 int Skill::get_level() const
 {

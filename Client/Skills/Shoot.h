@@ -5,9 +5,9 @@
 
 #include "protocol.h"
 #include "interface.h"
-#include "Skills/Skill.h"
+#include "ActiveSkill.h"
 
-class Shoot : public Skill
+class Shoot : public ActiveSkill
 {
 public:
 

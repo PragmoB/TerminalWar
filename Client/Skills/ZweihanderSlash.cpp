@@ -12,7 +12,7 @@ ZweihanderSlash::ZweihanderSlash(Player* owner, int level)
 
 bool ZweihanderSlash::cast(DIRECTION dir)
 {
-	if (!Skill::cast(dir))
+	if (!ActiveSkill::cast(dir))
 		return false;
 
 	Player* owner = get_owner();

@@ -6,13 +6,13 @@
 extern Background background;
 
 LightningStrike::LightningStrike(Client* owner, int level)
-	: Skill(owner, level)
+	: ActiveSkill(owner, level)
 {
 }
 
 bool LightningStrike::cast(DIRECTION dir)
 {
-	if (!Skill::cast(dir))
+	if (!ActiveSkill::cast(dir))
 		return false;
 
 	// 시전 방향 양 옆으로의 피격 범위

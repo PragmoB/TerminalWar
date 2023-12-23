@@ -1,10 +1,5 @@
 #pragma once
 
-#include <iostream>
-#include <windows.h>
-
-#include "protocol.h"
-#include "Skills/Skill.h"
 #include "Skills/Shoot.h"
 
 class Snipe : public Shoot

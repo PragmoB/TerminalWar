@@ -26,13 +26,6 @@
 #include "Items/Heart.h"
 #include "Items/Energy.h"
 
-#include "Skills/Skill.h"
-#include "Skills/Shoot.h"
-#include "Skills/Slash.h"
-#include "Skills/LightsaberSlash.h"
-#include "Skills/ZweihanderSlash.h"
-#include "Skills/WindSlash.h"
-
 using namespace std;
 
 extern Graphic graphic;
@@ -46,14 +39,8 @@ DWORD my_id = NULL;
 UpgradeOptionList* upgrade_option_list;
 UpgradeOptionList* evolution_option_list;
 
-static union
-{
-	SKILL_TYPE upgrade_active_skill_options[NUM_UPGRADE_SKILL_OPTIONS + 1];
-};
-static union
-{
-	SKILL_TYPE evolution_active_skill_options[10];
-};
+SKILL_TYPE upgrade_skill_options[NUM_UPGRADE_SKILL_OPTIONS + 1];
+SKILL_TYPE evolution_skill_options[10];
 
 SKILL_TYPE upgrade_skill_type;
 int len_upgrade_skill_options = 0;
@@ -63,9 +50,10 @@ int focus_is_on_evolution_option_list = false;
 
 EnergyBar energy_bar;
 
-Menu active_skill_menu(COORD{ FIELD.Left + 2 * FIELD_WIDTH + 7, FIELD.Top + 2 },
+Menu<SKILL_TYPE> active_skill_menu(COORD{ FIELD.Left + 2 * FIELD_WIDTH + 7, FIELD.Top + 2 },
 	"액티브 스킬", true);
-SKILL_TYPE active_skills[MAX_ACTIVE_SKILL];
+Menu<SKILL_TYPE> passive_skill_menu(COORD{ FIELD.Left + 2 * FIELD_WIDTH + 7, FIELD.Top + 11 },
+	"패시브 스킬", false);
 
 // 서버 응답 수신 후 반영
 void receive(SOCKET sock)
@@ -215,7 +203,7 @@ void receive(SOCKET sock)
 				pdu_hit = reinterpret_cast<PDUHit*>(buff + complete_len);
 				player = players[pdu_hit->attacker_id];
 				if (player)
-					player->attack(players[pdu_hit->victim_id], pdu_hit->skill_type);
+					player->attack(players[pdu_hit->victim_id], pdu_hit->skill_type, pdu_hit->evaded);
 				complete_len += sizeof(PDUHit);
 				break;
 
@@ -230,22 +218,22 @@ void receive(SOCKET sock)
 				char content[200] = "";
 
 				for (i = 0; i < NUM_UPGRADE_SKILL_OPTIONS &&
-					pdu_upgrade_skill_option_info->active_skill_types[i] != SKILL_TYPE::UNKNOWN; i++)
+					pdu_upgrade_skill_option_info->skill_types[i] != SKILL_TYPE::UNKNOWN; i++)
 				{
 					// 스킬 강화 옵션 등록
-					upgrade_active_skill_options[i] = pdu_upgrade_skill_option_info->active_skill_types[i];
+					upgrade_skill_options[i] = pdu_upgrade_skill_option_info->skill_types[i];
 
 					// 스킬 강화 메시지(content) 구성후 강화 옵션 리스트에 출력
 					player = players[my_id];
-					Skill* skill = player->get_active_skill(pdu_upgrade_skill_option_info->active_skill_types[i]);
+					Skill* skill = player->get_skill(pdu_upgrade_skill_option_info->skill_types[i]);
 					if (skill)
 						skill->get_level_up_message(content, sizeof(content));
 					else
-						Skill::get_object_by_type(pdu_upgrade_skill_option_info->active_skill_types[i])->get_learn_message(content, sizeof(content));
+						Skill::get_object_by_type(pdu_upgrade_skill_option_info->skill_types[i])->get_learn_message(content, sizeof(content));
 
 					upgrade_option_list->push_content(content);
 				}
-				upgrade_active_skill_options[i] = SKILL_TYPE::UNKNOWN;
+				upgrade_skill_options[i] = SKILL_TYPE::UNKNOWN;
 				len_upgrade_skill_options = i;
 				sprintf_s(content, "선택 포기, 경험치 %d%% 환수", ENERGY_REFUND_RATE);
 				upgrade_option_list->push_content(content);
@@ -259,66 +247,87 @@ void receive(SOCKET sock)
 				player = players[pdu_upgrade_skill->id];
 				if (player)
 				{
-					player->upgrade_skill(pdu_upgrade_skill->active_skill_type, pdu_upgrade_skill->upgraded_active_skill_type);
+					player->upgrade_skill(pdu_upgrade_skill->skill_type, pdu_upgrade_skill->upgraded_skill_type);
 					
 					// 업그레이드 대상이 나 일경우 액티브 스킬 목록 업데이트
 					if (pdu_upgrade_skill->id == my_id)
 					{
-						int i;
-						for (i = 0; i < MAX_ACTIVE_SKILL && active_skills[i] != SKILL_TYPE::UNKNOWN; i++)
-						{
-							if (active_skills[i] == pdu_upgrade_skill->active_skill_type)
-								break;
-						}
-						
-						Skill* skill = player->get_active_skill(pdu_upgrade_skill->active_skill_type);
+						Skill* skill = player->get_skill(pdu_upgrade_skill->skill_type);
 						char buff[100] = "";
 						if (skill)
 						{
+							PassiveSkill* passive_skill = dynamic_cast<PassiveSkill*>(skill);
 
 							// 진화 가능 표시
 							if (skill->get_level() >= skill->get_max_level())
 							{
 								sprintf_s(buff, "Lv.%2d", skill->get_level());
-								active_skill_menu.update_menu(i, 0, buff, GREEN);
+								if (passive_skill)
+									passive_skill_menu.update_menu(skill->get_type(), 0, buff, GREEN);
+								else
+									active_skill_menu.update_menu(skill->get_type(), 0, buff, GREEN);
 							}
 							// 새로운 스킬이 추가됨
 							else if (skill->get_level() == 1)
 							{
 								sprintf_s(buff, "Lv.%2d %s", skill->get_level(), skill->get_skill_name());
-								active_skills[active_skill_menu.get_num_contents()] = pdu_upgrade_skill->active_skill_type;
-								active_skill_menu.insert_menu(buff);
+								if (passive_skill)
+									passive_skill_menu.insert_menu(buff, skill->get_type());
+								else
+									active_skill_menu.insert_menu(buff, skill->get_type());
 
 								sprintf_s(buff, "Lv.%2d", skill->get_level());
-								active_skill_menu.update_menu(active_skill_menu.get_num_contents() - 1, 0, buff, DARK_YELLOW);
+								if (passive_skill)
+									passive_skill_menu.update_menu(passive_skill_menu.get_num_contents() - 1, 0, buff, DARK_YELLOW);
+								else
+									active_skill_menu.update_menu(active_skill_menu.get_num_contents() - 1, 0, buff, DARK_YELLOW);
 							}
 							// 레벨업
 							else
 							{
 								sprintf_s(buff, "Lv.%2d", skill->get_level());
-								active_skill_menu.update_menu(i, 0, buff, DARK_YELLOW);
+								if (passive_skill)
+									passive_skill_menu.update_menu(skill->get_type(), 0, buff, DARK_YELLOW);
+								else
+									active_skill_menu.update_menu(skill->get_type(), 0, buff, DARK_YELLOW);
 							}
 						}
 						// 진화됨
 						else
 						{
-							skill = player->get_active_skill(pdu_upgrade_skill->upgraded_active_skill_type);
-							if (skill)
-								for (int i = 0; i < active_skill_menu.get_num_contents(); i++)
-								{
-									if (Skill::get_object_by_type(active_skills[i])->upgradable_to(skill->get_type()))
-									{
-										active_skills[i] = skill->get_type();
+							skill = player->get_skill(pdu_upgrade_skill->upgraded_skill_type);
+							PassiveSkill* passive_skill = dynamic_cast<PassiveSkill*>(skill);
+							if (passive_skill)
+								passive_skill_menu.update_menu(pdu_upgrade_skill->skill_type, skill->get_type());
+							else
+								active_skill_menu.update_menu(pdu_upgrade_skill->skill_type, skill->get_type());
 
-										sprintf_s(buff, "Lv.%2d %s", skill->get_level(), skill->get_skill_name());
-										active_skill_menu.disappear();
-										active_skill_menu.update_menu(i, 0, buff);
-										sprintf_s(buff, "Lv.%2d", skill->get_level());
-										active_skill_menu.update_menu(i, 0, buff, DARK_YELLOW);
-										active_skill_menu.appear();
-										break;
-									}
+							if (skill)
+							{
+								sprintf_s(buff, "Lv.%2d %s", skill->get_level(), skill->get_skill_name());
+								if (passive_skill)
+								{
+									passive_skill_menu.disappear();
+									passive_skill_menu.update_menu(skill->get_type(), 0, buff);
 								}
+								else
+								{
+									active_skill_menu.disappear();
+									active_skill_menu.update_menu(skill->get_type(), 0, buff);
+								}
+								sprintf_s(buff, "Lv.%2d", skill->get_level());
+								if (passive_skill)
+								{
+									passive_skill_menu.update_menu(skill->get_type(), 0, buff, DARK_YELLOW);
+									passive_skill_menu.appear();
+								}
+								else
+								{
+									active_skill_menu.update_menu(skill->get_type(), 0, buff, DARK_YELLOW);
+									active_skill_menu.appear();
+								}
+
+							}
 						}
 					}
 				}
@@ -375,9 +384,6 @@ void send_discontinual_request(SOCKET sock)
 {
 	active_skill_menu.appear();
 
-	for (int i = 0; i < MAX_ACTIVE_SKILL; i++)
-		active_skills[i] = SKILL_TYPE::UNKNOWN;
-
 	while (graphic.is_started()) // 게임이 진행되는 도중에 반복
 	{
 		char user_input = toupper(_getch());
@@ -391,7 +397,7 @@ void send_discontinual_request(SOCKET sock)
 			len_evolution_skill_options = 0;
 
 			// 뒤로가기
-			if (evolution_active_skill_options[user_input - '1'] == SKILL_TYPE::UNKNOWN)
+			if (evolution_skill_options[user_input - '1'] == SKILL_TYPE::UNKNOWN)
 				upgrade_option_list->appear();
 			else
 			{
@@ -402,9 +408,8 @@ void send_discontinual_request(SOCKET sock)
 				focus_is_on_evolution_option_list = false;
 
 				PDUUpgradeSkill pdu;
-				pdu.skill_is_active = true;
-				pdu.active_skill_type = upgrade_skill_type;
-				pdu.upgraded_active_skill_type = evolution_active_skill_options[user_input - '1'];
+				pdu.skill_type = upgrade_skill_type;
+				pdu.upgraded_skill_type = evolution_skill_options[user_input - '1'];
 				send(sock, (const char*)&pdu, sizeof(PDUUpgradeSkill), NULL);
 
 			}
@@ -418,9 +423,8 @@ void send_discontinual_request(SOCKET sock)
 				upgrade_option_list->disappear();
 
 				PDUUpgradeSkill pdu;
-				pdu.skill_is_active = true;
-				pdu.active_skill_type = upgrade_active_skill_options[user_input - '1'];
-				Skill* my_skill = me->get_active_skill(pdu.active_skill_type);
+				pdu.skill_type = upgrade_skill_options[user_input - '1'];
+				Skill* my_skill = me->get_skill(pdu.skill_type);
 
 				if (my_skill)
 				{
@@ -438,13 +442,13 @@ void send_discontinual_request(SOCKET sock)
 							{
 								Skill::get_object_by_type(SKILL_TYPE_LIST[i])->get_learn_message(buff, sizeof(buff));
 								evolution_option_list->push_content(buff);
-								evolution_active_skill_options[len_evolution_skill_options++] = SKILL_TYPE_LIST[i];
+								evolution_skill_options[len_evolution_skill_options++] = SKILL_TYPE_LIST[i];
 							}
 						}
 						evolution_option_list->push_content("돌아가기");
-						evolution_active_skill_options[len_evolution_skill_options] = SKILL_TYPE::UNKNOWN;
+						evolution_skill_options[len_evolution_skill_options] = SKILL_TYPE::UNKNOWN;
 
-						upgrade_skill_type = pdu.active_skill_type;
+						upgrade_skill_type = pdu.skill_type;
 						evolution_option_list->appear();
 						focus_is_on_evolution_option_list = true;
 					}
@@ -475,7 +479,7 @@ void send_discontinual_request(SOCKET sock)
 					send(sock, (const char*)&pdu, sizeof(PDUUpgradeSkill), NULL);
 
 					// 포기
-					if (pdu.active_skill_type == SKILL_TYPE::UNKNOWN)
+					if (pdu.skill_type == SKILL_TYPE::UNKNOWN)
 						energy_bar.earn_energy(REQUIRED_ENERGY[energy_bar.get_level() - 1] * ENERGY_REFUND_RATE / 100);
 				}
 			}
@@ -536,7 +540,7 @@ void send_continual_request(SOCKET udp_sock)
 				case VK_UP: case VK_DOWN: case VK_LEFT: case VK_RIGHT: // 스킬 사용
 					// 사용 스킬 종류는 메뉴에서 선택된 스킬
 					pdu_cast_skill.id = my_id;
-					pdu_cast_skill.skill_type = active_skills[active_skill_menu.get_focus()];
+					pdu_cast_skill.skill_type = active_skill_menu.get_element();
 					len = sizeof(PDUCastSkill);
 					buff = (char*)&pdu_cast_skill;
 					break;
@@ -673,7 +677,10 @@ int main()
 		send(sock, reinterpret_cast<const char*>(&pdu_hello), sizeof(PDUHello), NULL);
 
 		thread(send_discontinual_request, sock).detach();
+		passive_skill_menu.appear();
 		send_continual_request(udpSock);
+		passive_skill_menu.disappear();
+		passive_skill_menu.clear();
 	}
 }
 

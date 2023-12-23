@@ -6,11 +6,11 @@
 #include "blocking_queue.h"
 
 #include "Client.h"
-#include "Skills/Skill.h"
+#include "Skills/ActiveSkill.h"
 #include "Items/Item.h"
 
 typedef struct {
-	Skill* skill;
+	ActiveSkill* skill;
 	DIRECTION dir;
 } SkillParam;
 
@@ -33,5 +33,5 @@ public:
 	Background();
 
 	// 스킬 피격판정 요청
-	void cast_skill(Skill* skill, DIRECTION dir);
+	void cast_skill(ActiveSkill* skill, DIRECTION dir);
 };

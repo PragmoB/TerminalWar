@@ -7,13 +7,13 @@
 extern Background background;
 
 Slash::Slash(Client* owner, int level)
-	: Skill(owner, level)
+	: ActiveSkill(owner, level)
 {
 }
 
 bool Slash::cast(DIRECTION dir)
 {
-	if (!Skill::cast(dir))
+	if (!ActiveSkill::cast(dir))
 		return false;
 
 	Client* owner = get_owner();

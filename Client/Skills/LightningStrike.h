@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Skills/Skill.h"
+#include "ActiveSkill.h"
 
 
-class LightningStrike : public Skill
+class LightningStrike : public ActiveSkill
 {
 public:
 	static const int MAX_LEVEL;

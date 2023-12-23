@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Skills/Skill.h"
-#include "Skills/Shoot.h"
+#include "Shoot.h"
 
 class Snipe : public Shoot
 {

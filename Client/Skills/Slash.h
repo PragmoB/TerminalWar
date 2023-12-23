@@ -3,9 +3,9 @@
 #include <windows.h>
 
 #include "interface.h"
-#include "Skills/Skill.h"
+#include "ActiveSkill.h"
 
-class Slash : public Skill
+class Slash : public ActiveSkill
 {
 public:
 	static const int MAX_LEVEL;

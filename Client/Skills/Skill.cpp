@@ -14,6 +14,7 @@
 #include "Skills/Wind.h"
 #include "Skills/WindSlash.h"
 #include "Skills/LightningStrike.h"
+#include "Skills/Shoes.h"
 
 extern Sound sound;
 
@@ -37,6 +38,7 @@ Skill* Skill::create_object_by_type(SKILL_TYPE type, Player* owner, int level)
 	case WIND:			   skill = new Wind(owner, level);			  break;
 	case WIND_SLASH:	   skill = new WindSlash(owner, level);	      break;
 	case LIGHTNING_STRIKE: skill = new LightningStrike(owner, level); break;
+	case SHOES:			   skill = new Shoes(owner, level);			  break;
 	}
 
 	return skill;
@@ -54,11 +56,6 @@ const Skill* Skill::get_object_by_type(SKILL_TYPE type)
 		data[type] = skill = create_object_by_type(type, NULL);
 		return skill;
 	}
-}
-bool Skill::cast(DIRECTION dir)
-{
-	sound.request(CAST_SKILL, get_type());
-	return true; // ¼º°ø
 }
 void Skill::level_up()
 {

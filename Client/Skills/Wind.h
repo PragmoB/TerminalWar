@@ -3,9 +3,9 @@
 #include <windows.h>
 
 #include "interface.h"
-#include "Skills/Skill.h"
+#include "ActiveSkill.h"
 
-class Wind : public Skill
+class Wind : public ActiveSkill
 {
 public:
 	static const int MAX_LEVEL;

@@ -6,13 +6,13 @@
 extern Graphic graphic;
 
 LightningStrike::LightningStrike(Player* owner, int level)
-	: Skill(owner, level)
+	: ActiveSkill(owner, level)
 {
 }
 
 bool LightningStrike::cast(DIRECTION dir)
 {
-	if (!Skill::cast(dir))
+	if (!ActiveSkill::cast(dir))
 		return false;
 
 	const COORD pos = get_owner()->get_pos();

@@ -6,13 +6,13 @@
 extern Graphic graphic;
 
 Wind::Wind(Player* owner, int level)
-	: Skill(owner, level)
+	: ActiveSkill(owner, level)
 {
 }
 
 bool Wind::cast(DIRECTION dir)
 {
-	if (!Skill::cast(dir))
+	if (!ActiveSkill::cast(dir))
 		return false;
 
 	Player* owner = get_owner();

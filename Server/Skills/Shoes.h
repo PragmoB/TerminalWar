@@ -1,19 +1,16 @@
 #pragma once
 
-#include "ActiveSkill.h"
+#include "PassiveSkill.h"
 
-class Slash : public ActiveSkill
+class Shoes : public PassiveSkill
 {
-public:
+private:
 	static const int MAX_LEVEL;
-	static const int DAMAGE[];
-	static const int COOLDOWN[];
+	static const int SPEED_RATE[];
 public:
-	Slash(Client* owner, int level = 1);
-	virtual bool cast(DIRECTION dir);
+	Shoes(Client* owner, int level = 1);
+	virtual int get_speed_rate();
 
-	virtual int get_damage() const;
-	virtual int get_cooldown() const;
 	virtual SKILL_TYPE get_type() const;
 	virtual int get_max_level() const;
 	virtual int get_ordinal() const;

@@ -7,7 +7,7 @@
 extern Background background;
 
 Shoot::Shoot(Client* owner, int level)
-	: Skill(owner, level)
+	: ActiveSkill(owner, level)
 {
 
 }
@@ -29,7 +29,7 @@ Client* get_client_at_pos(COORD pos)
 // 클라이언트 피격판정
 bool Shoot::cast(DIRECTION dir)
 {
-	if (!Skill::cast(dir))
+	if (!ActiveSkill::cast(dir))
 		return false;
 
 	Client* owner = get_owner();

@@ -74,8 +74,7 @@ void worker(HANDLE completion_port)
 
 			case UPGRADE_SKILL:
 				pdu_upgrade_skill = reinterpret_cast<PDUUpgradeSkill*>(client->context.dataBuffer.buf + complete_len);
-				if (pdu_upgrade_skill->skill_is_active)
-					client->upgrade_skill(pdu_upgrade_skill->active_skill_type, pdu_upgrade_skill->upgraded_active_skill_type);
+				client->upgrade_skill(pdu_upgrade_skill->skill_type, pdu_upgrade_skill->upgraded_skill_type);
 				
 				complete_len += sizeof(PDUUpgradeSkill);
 				break;

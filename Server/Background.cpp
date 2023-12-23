@@ -5,6 +5,8 @@
 
 #include "Background.h"
 
+#include "Skills/ActiveSkill.h"
+
 #include "Items/Heart.h"
 #include "Items/Energy.h"
 
@@ -77,7 +79,7 @@ void Background::generate_item()
 			Sleep(20);
 	}
 }
-void Background::cast_skill(Skill* skill, DIRECTION dir)
+void Background::cast_skill(ActiveSkill* skill, DIRECTION dir)
 {
 	skill_queue.Enqueue(SkillParam{ skill, dir });
 }

@@ -6,7 +6,7 @@
 
 #include "protocol.h"
 #include "blocking_queue.h"
-#include "Skills/Skill.h"
+#include "Skills/ActiveSkill.h"
 
 
 /*
@@ -19,7 +19,7 @@ enum COLOR {
 	RED, PURPLE, YELLOW, WHITE
 };
 typedef struct {
-	Skill* skill;
+	ActiveSkill* skill;
 	DIRECTION dir;
 } SkillParam;
 
@@ -73,7 +73,7 @@ public:
 	void draw_field(const char* message = NULL);
 
 	/* 스킬 사용 요청 */
-	void cast_skill(Skill* skill, DIRECTION dir);
+	void cast_skill(ActiveSkill* skill, DIRECTION dir);
 
 	/* 서버의 좌표값을 클라이언트 좌표(화면상 좌표)로 바꿈 */
 	COORD get_client_pos_by_server_pos(COORD server_pos);

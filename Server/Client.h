@@ -9,10 +9,11 @@
 #include <vector>
 #include <mutex>
 
-#include "interface.h"
 #include "protocol.h"
 #include "Items/Item.h"
-#include "Skills/Skill.h"
+#include "Skills/ActiveSkill.h"
+
+#include "interface.h"
 
 using namespace std;
 
@@ -32,9 +33,21 @@ public:
 	ClientContext context;
 	static SOCKET udp_socket;
 	sockaddr_in addr;
+// 캐릭터 능력치
 private:
-
-
+	// 이동 쿨타임 기본값
+	static const int MOV_DELAY;
+	// 이동 쿨타임 값
+	int mov_delay = MOV_DELAY;
+	// 이동속도 증가율(백분율)
+	int speed_increase_rate = 0;
+	// 방어율
+	int defense_rate = 0;
+	// 데미지 증가율
+	int damage_increase_rate = 0;
+	// 회피율
+	int evasion_rate = 0;
+private:
 	// 체력
 	int HP = 999;
 	std::mutex m_HP;
@@ -56,19 +69,16 @@ private:
 	clock_t next_able_mov_time = 0;
 
 	// 가지고 있는 액티브 스킬
-	Skill* active_skills[MAX_ACTIVE_SKILL];
+	Skill* skills[MAX_SKILL];
 
-	// 가지고 있는 액티브 스킬 수
-	int len_active_skills = 0;
+	// 가지고 있는 스킬 수
+	int len_skills = 0;
 
 	// 스킬 강화 가능 여부
 	bool skill_is_upgradable = false;
 
 	// 스킬 강화 선택지
-	union
-	{
-		SKILL_TYPE active_skill_options[NUM_UPGRADE_SKILL_OPTIONS];
-	};
+	SKILL_TYPE skill_options[NUM_UPGRADE_SKILL_OPTIONS];
 	bool skill_option_is_active[NUM_UPGRADE_SKILL_OPTIONS];
 public:
 	Client(ClientContext context, sockaddr_in IP, COORD pos);
@@ -77,8 +87,9 @@ public:
 	int get_HP() const;
 	char get_chracter() const;
 	COORD get_pos() const;
-	const Skill* get_active_skill(int idx) const;
-	int get_len_active_skills() const;
+	const Skill* get_skill(int idx) const;
+	int get_len_skills() const;
+	int get_damage_increase_rate() const;
 	
 	// client가 접속했음을 반영함
 	void apply_hello_of(const Client* client);
@@ -93,7 +104,7 @@ public:
 	// client의 skill_type이 레벨업 또는 upgraded_skill_type으로 진화했음을 반영함
 	void apply_upgrade_skill_of(const Client* client, SKILL_TYPE skill_type, SKILL_TYPE upgraded_skill_type = SKILL_TYPE::UNKNOWN);
 	// client가 skill에 처맞았음을 반영함
-	void apply_hit_of(const Client* client, const Skill* skill);
+	void apply_hit_of(const Client* client, const Skill* skill, bool evaded);
 	// client가 attacker에게 죽었음을 반영함
 	void apply_die_of(const Client* client, const Client* attacker = NULL);
 
@@ -114,7 +125,7 @@ public:
 	// 다른 클라이언트들에게 전입신고함
 	void hello(char chracter);
 	// skill에 맞음
-	void hit(const Skill* skill);
+	void hit(const ActiveSkill* skill);
 	// attacker에게 죽음, 사냥 경험치를 리턴값으로 뱉음
 	int die(const Client* attacker = NULL);
 	// client를 죽임

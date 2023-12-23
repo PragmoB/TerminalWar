@@ -16,7 +16,7 @@ Snipe::Snipe(Player* owner, int level)
 
 bool Snipe::cast(DIRECTION dir)
 {
-	if (!Skill::cast(dir))
+	if (!ActiveSkill::cast(dir))
 		return false;
 
 	Player* owner = get_owner();

@@ -1,11 +1,8 @@
 #pragma once
 
-#include <windows.h>
+#include "ActiveSkill.h"
 
-#include "interface.h"
-#include "Skills/Skill.h"
-
-class Wind : public Skill
+class Wind : public ActiveSkill
 {
 public:
 	static const int MAX_LEVEL;

@@ -29,8 +29,8 @@ typedef struct
 	COORD pos;
 
 	int len_skills;
-	SKILL_TYPE skills[MAX_ACTIVE_SKILL + 1];
-	int skill_levels[MAX_ACTIVE_SKILL + 1];
+	SKILL_TYPE skills[MAX_SKILL + 1];
+	int skill_levels[MAX_SKILL + 1];
 } PDUHello;
 // 아이템 존재 알림, 클라 <= 서버
 typedef struct
@@ -79,33 +79,21 @@ typedef struct
 	DWORD attacker_id;
 	DWORD victim_id;
 	SKILL_TYPE skill_type;
+	bool evaded;
 } PDUHit;
 // 스킬 강화 선택지 정보 알림, 클라 <= 서버
 typedef struct
 {
 	const PDU_TYPE type = UPGRADE_SKILL_OPTION_INFO;
-	union
-	{
-		int skill_types[NUM_UPGRADE_SKILL_OPTIONS];
-		SKILL_TYPE active_skill_types[NUM_UPGRADE_SKILL_OPTIONS];
-	};
-	bool skill_is_active[NUM_UPGRADE_SKILL_OPTIONS];
+	SKILL_TYPE skill_types[NUM_UPGRADE_SKILL_OPTIONS];
 } PDUUpgradeSkillOptionInfo;
 // 스킬 강화 요청, 클라 <=> 서버
 typedef struct
 {
 	const PDU_TYPE type = UPGRADE_SKILL;
 	DWORD id;
-	union
-	{
-		SKILL_TYPE active_skill_type;
-	};
-	union
-	{
-		SKILL_TYPE upgraded_active_skill_type;
-	};
-	bool skill_is_active;
-	
+	SKILL_TYPE skill_type;
+	SKILL_TYPE upgraded_skill_type;
 } PDUUpgradeSkill;
 // 접속 끊어짐 또는 죽음, 클라 <= 서버
 typedef struct

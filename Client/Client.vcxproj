@@ -175,10 +175,13 @@
     <ClCompile Include="Items\Energy.cpp" />
     <ClCompile Include="Items\Heart.cpp" />
     <ClCompile Include="Items\Item.cpp" />
-    <ClCompile Include="Menu.cpp" />
+    <ClCompile Include="Menu.hpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Skills\ActiveSkill.cpp" />
     <ClCompile Include="Skills\LightningStrike.cpp" />
     <ClCompile Include="Skills\LightsaberSlash.cpp" />
+    <ClCompile Include="Skills\PassiveSkill.cpp" />
+    <ClCompile Include="Skills\Shoes.cpp" />
     <ClCompile Include="Skills\Shoot.cpp" />
     <ClCompile Include="Skills\Skill.cpp" />
     <ClCompile Include="Skills\Slash.cpp" />
@@ -199,8 +202,11 @@
     <ClInclude Include="Items\Item.h" />
     <ClInclude Include="Menu.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Skills\ActiveSkill.h" />
     <ClInclude Include="Skills\LightningStrike.h" />
     <ClInclude Include="Skills\LightsaberSlash.h" />
+    <ClInclude Include="Skills\PassiveSkill.h" />
+    <ClInclude Include="Skills\Shoes.h" />
     <ClInclude Include="Skills\Shoot.h" />
     <ClInclude Include="Skills\Skill.h" />
     <ClInclude Include="Skills\Slash.h" />

@@ -218,7 +218,7 @@ void Graphic::draw_field(const char* message)
 		draw(COORD{ FIELD.Left + 2, FIELD.Top }, message, BLACK, FIELD_FRAME_COLOR);
 }
 
-void Graphic::cast_skill(Skill* skill, DIRECTION dir)
+void Graphic::cast_skill(ActiveSkill* skill, DIRECTION dir)
 {
 	SkillParam skill_param;
 	skill_param.skill = skill;

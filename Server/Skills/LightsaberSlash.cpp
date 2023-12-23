@@ -14,7 +14,7 @@ LightsaberSlash::LightsaberSlash(Client* owner, int level)
 
 bool LightsaberSlash::cast(DIRECTION dir)
 {
-	if (!Skill::cast(dir))
+	if (!ActiveSkill::cast(dir))
 		return false;
 
 	Client* owner = get_owner();

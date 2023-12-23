@@ -13,15 +13,14 @@
 #include "Items/Heart.h"
 #include "Items/Energy.h"
 
-#include "Skills/Skill.h"
-#include "Skills/Shoot.h"
-#include "Skills/LightsaberSlash.h"
-#include "Skills/ZweihanderSlash.h"
-#include "Skills/WindSlash.h"
+#include "Skills/ActiveSkill.h"
+#include "Skills/PassiveSkill.h"
+
 
 extern Background background;
 
 SOCKET Client::udp_socket = 0;
+const int Client::MOV_DELAY = 100;
 
 Client::Client(ClientContext context, sockaddr_in addr, COORD pos)
 : context(context), pos(pos)
@@ -63,13 +62,17 @@ COORD Client::get_pos() const
 {	
 	return pos;
 }
-const Skill* Client::get_active_skill(int idx) const
+const Skill* Client::get_skill(int idx) const
 {
-	return active_skills[idx];
+	return skills[idx];
 }
-int Client::get_len_active_skills() const
+int Client::get_len_skills() const
 {
-	return len_active_skills;
+	return len_skills;
+}
+int Client::get_damage_increase_rate() const
+{
+	return damage_increase_rate;
 }
 
 void Client::apply_hello_of(const Client* client)
@@ -79,12 +82,12 @@ void Client::apply_hello_of(const Client* client)
 	pdu.HP = client->get_HP();
 	pdu.chracter = client->get_chracter();
 	pdu.pos = client->get_pos();
-	pdu.len_skills = client->get_len_active_skills();
+	pdu.len_skills = client->get_len_skills();
 
 	for (int i = 0; i < pdu.len_skills; i++)
 	{
-		pdu.skills[i] = client->get_active_skill(i)->get_type();
-		pdu.skill_levels[i] = client->get_active_skill(i)->get_level();
+		pdu.skills[i] = client->get_skill(i)->get_type();
+		pdu.skill_levels[i] = client->get_skill(i)->get_level();
 	}
 
 	send(context.socket, reinterpret_cast<const char*>(&pdu), sizeof(PDUHello), NULL);
@@ -130,18 +133,18 @@ void Client::apply_upgrade_skill_of(const Client* client, SKILL_TYPE skill_type,
 {
 	PDUUpgradeSkill pdu;
 	pdu.id = client->context.socket;
-	pdu.skill_is_active = true;
-	pdu.active_skill_type = skill_type;
-	pdu.upgraded_active_skill_type = upgraded_skill_type;
+	pdu.skill_type = skill_type;
+	pdu.upgraded_skill_type = upgraded_skill_type;
 
 	send(context.socket, reinterpret_cast<const char*>(&pdu), sizeof(PDUUpgradeSkill), NULL);
 }
-void Client::apply_hit_of(const Client* client, const Skill* skill)
+void Client::apply_hit_of(const Client* client, const Skill* skill, bool evaded)
 {
 	PDUHit pdu;
 	pdu.attacker_id = (DWORD)skill->get_owner()->context.socket;
 	pdu.victim_id = (DWORD)client->context.socket;
 	pdu.skill_type = skill->get_type();
+	pdu.evaded = evaded;
 	
 	send(context.socket, reinterpret_cast<const char*>(&pdu), sizeof(PDUHit), NULL);
 }
@@ -207,11 +210,11 @@ bool Client::move(DIRECTION dir, bool ignore_mov_cooldown)
 	if (!chracter) // hello를 하기 전이면 움직일 수 없음
 		return false;
 
-	if (next_able_mov_time < now + 80)
+	if (next_able_mov_time < now + mov_delay)
 	{
 		static std::mutex m;
 		m.lock();
-			next_able_mov_time = now + 80; // 움직임을 80ms마다 한 번으로 제한
+			next_able_mov_time = now + mov_delay; // 움직임을 정해진 시간 마다 한 번으로 제한
 		m.unlock();
 	}
 
@@ -249,23 +252,24 @@ bool Client::cast_skill(SKILL_TYPE skill_type, DIRECTION dir)
 	}
 
 	// 사용 요청받은 skill_type에 대응하는 Skill객체를 찾음(skill_type 유효성 검증도 동시에 됨)
-	for (int i = 0; i < len_active_skills; i++)
+	for (int i = 0; i < len_skills; i++)
 	{
-		Skill* skill = active_skills[i];
-		if (skill_type == skill->get_type()) // 대응되는 Skill객체를 찾았다면
-		{
-			if (skill->castable()) // 사용 가능하다면
+		ActiveSkill* skill = dynamic_cast<ActiveSkill*>(skills[i]);
+		if (skill)
+			if (skill_type == skill->get_type()) // 대응되는 Skill객체를 찾았다면
 			{
-				// 백그라운드 스레드 풀에서 피격판정 작업 비동기 처리
-				background.cast_skill(skill, dir);
+				if (skill->castable()) // 사용 가능하다면
+				{
+					// 백그라운드 스레드 풀에서 피격판정 작업 비동기 처리
+					background.cast_skill(skill, dir);
 
-				// 고객님들께 반영
-				for (std::list<Client*>::iterator iter = background.clients.begin();
-					iter != background.clients.end(); iter++)
-					(*iter)->apply_cast_skill_of(this, skill_type, dir);
+					// 고객님들께 반영
+					for (std::list<Client*>::iterator iter = background.clients.begin();
+						iter != background.clients.end(); iter++)
+						(*iter)->apply_cast_skill_of(this, skill_type, dir);
+				}
+				break;
 			}
-			break;
-		}
 	}
 
 	return true;
@@ -339,11 +343,11 @@ void Client::upgrade_skill(SKILL_TYPE skill_type, SKILL_TYPE upgraded_skill_type
 
 	Skill* skill = NULL;
 	int idx_skill;
-	for (idx_skill = 0; idx_skill < len_active_skills; idx_skill++)
+	for (idx_skill = 0; idx_skill < len_skills; idx_skill++)
 	{
-		if (active_skills[idx_skill]->get_type() == skill_type)
+		if (skills[idx_skill]->get_type() == skill_type)
 		{
-			skill = active_skills[idx_skill];
+			skill = skills[idx_skill];
 			break;
 		}
 	}
@@ -351,6 +355,14 @@ void Client::upgrade_skill(SKILL_TYPE skill_type, SKILL_TYPE upgraded_skill_type
 	// 원래 있던 스킬 레벨업 또는 진화
 	if (skill)
 	{
+		// 원래 있던 스킬이 패시브 스킬이면
+		PassiveSkill* passive_skill = dynamic_cast<PassiveSkill*>(skill);
+		if (passive_skill)
+		{
+			// 플레이어에게 적용되어 있던 해당 레벨의 패시브 스킬 능력치 초기화
+			speed_increase_rate = 100 * (speed_increase_rate + 100) / (passive_skill->get_speed_rate() + 100) - 100;
+		}
+
 		if (skill->level_up())
 		{
 			// 클라이언트들에게 반영
@@ -366,21 +378,29 @@ void Client::upgrade_skill(SKILL_TYPE skill_type, SKILL_TYPE upgraded_skill_type
 				(*iter)->apply_upgrade_skill_of(this, skill_type, upgraded_skill_type);
 
 			delete skill;
-			active_skills[idx_skill] = skill = Skill::create_object_by_type(upgraded_skill_type, this);
+			skills[idx_skill] = skill = Skill::create_object_by_type(upgraded_skill_type, this);
 		}
 	}
 	// 새로운 스킬 습득
 	else if (Skill::get_object_by_type(skill_type)->get_ordinal() == 1 &&
-		len_active_skills < MAX_ACTIVE_SKILL)
+		len_skills < MAX_SKILL)
 	{
+		skills[len_skills++] = skill = Skill::create_object_by_type(skill_type, this);
+
 		// 클라이언트들에게 반영
 		for (list<Client*>::iterator iter = background.clients.begin();
 			iter != background.clients.end(); iter++)
 			(*iter)->apply_upgrade_skill_of(this, skill_type, upgraded_skill_type);
-
-		active_skills[len_active_skills++] = skill = Skill::create_object_by_type(skill_type, this);
 	}
 
+	// 패시브 스킬이면
+	PassiveSkill* passive_skill = dynamic_cast<PassiveSkill*>(skill);
+	if (passive_skill)
+	{
+		// 플레이어에게 해당 레벨의 패시브 스킬 능력치 적용
+		speed_increase_rate = (speed_increase_rate + 100) * (passive_skill->get_speed_rate() + 100) / 100 - 100;
+		mov_delay = MOV_DELAY * 100 / (speed_increase_rate + 100);
+	}
 }
 void Client::earn_energy(int amount)
 {
@@ -392,12 +412,11 @@ void Client::earn_energy(int amount)
 
 	level_up();
 }
-void Client::hit(const Skill* skill)
+void Client::hit(const ActiveSkill* skill)
 {
 	// NULL ptr check
 	if (!skill)
 		return;
-
 	// hello 하기 전이면 안맞음
 	if (!chracter)
 		return;
@@ -405,13 +424,25 @@ void Client::hit(const Skill* skill)
 	if (this == skill->get_owner())
 		return;
 
-	m_HP.lock();
-	HP -= skill->get_damage(); // 맞아서 체력 감소
-	m_HP.unlock();
+	// evasion_rate 확률로 회피
+	bool evaded = false;
+	if (rand() % 100 < evasion_rate)
+		evaded = true;
+	else
+	{
+		// 피해입을 데미지 값을 능력치에 따라 연산
+		int damage = skill->get_damage();
+		damage = damage * (skill->get_owner()->get_damage_increase_rate() + 100) * (100 - defense_rate) / 10000;
+		if (damage < 0)
+			damage = 0;
+		m_HP.lock();
+		HP -= damage; // 맞아서 체력 감소
+		m_HP.unlock();
+	}
 
 	for (std::list<Client*>::iterator iter = background.clients.begin();
 		iter != background.clients.end(); iter++)
-		(*iter)->apply_hit_of(this, skill);
+		(*iter)->apply_hit_of(this, skill, evaded);
 
 	if (HP <= 0)
 		skill->get_owner()->kill(this);
@@ -445,18 +476,19 @@ void Client::level_up()
 		m_energy.unlock();
 
 		// 강화 가능한 스킬 목록들 추려내기
-		int len_skill_type_list = sizeof(SKILL_TYPE_LIST) / sizeof(SKILL_TYPE);
 		SKILL_TYPE skill_type_list[sizeof(SKILL_TYPE_LIST) / sizeof(SKILL_TYPE)];
+		int len_skill_type_list = sizeof(skill_type_list) / sizeof(SKILL_TYPE);
+
 		for (int i = 0; i < len_skill_type_list; i++)
 			skill_type_list[i] = SKILL_TYPE_LIST[i];
 
 		for (int i = 0; i < len_skill_type_list; i++)
 		{
 			Skill* skill = NULL;
-			for (int j = 0; j < len_active_skills; j++)
+			for (int j = 0; j < len_skills; j++)
 			{
-				if (skill_type_list[i] == active_skills[j]->get_type())
-					skill = active_skills[j];
+				if (skill_type_list[i] == skills[j]->get_type())
+					skill = skills[j];
 			}
 
 			// 가지고 있으며 (MAX레벨이 아니거나 다음 단계가 있는) 스킬인 경우 : 강화 가능
@@ -470,12 +502,12 @@ void Client::level_up()
 			else if (Skill::get_object_by_type(skill_type_list[i])->get_ordinal() == 1)
 			{
 				int j;
-				for (j = 0; j < len_active_skills; j++)
+				for (j = 0; j < len_skills; j++)
 				{
-					if (active_skills[j]->downgradable_to(skill_type_list[i]))
+					if (skills[j]->downgradable_to(skill_type_list[i]))
 						break;
 				}
-				if (j >= len_active_skills)
+				if (j >= len_skills)
 					continue;
 			}
 
@@ -493,18 +525,18 @@ void Client::level_up()
 		for (int i = 0; i < NUM_UPGRADE_SKILL_OPTIONS; i++)
 		{
 			skill_option_is_active[i] = false;
-			active_skill_options[i] = SKILL_TYPE::UNKNOWN;
+			skill_options[i] = SKILL_TYPE::UNKNOWN;
 		}
 		for (int i = 0; i < num_upgrade_skill_options; i++)
 		{
 			skill_option_is_active[i] = true;
 
 			// 스킬 강화 옵션 산정
-			active_skill_options[i] = skill_type_list[rand() % len_skill_type_list];
+			skill_options[i] = skill_type_list[rand() % len_skill_type_list];
 
 			// 스킬 강화 옵션 중복검사
 			for (int j = 0; j < i; j++)
-				if (active_skill_options[i] == active_skill_options[j])
+				if (skill_options[i] == skill_options[j])
 				{
 					i--;
 					break;
@@ -514,10 +546,8 @@ void Client::level_up()
 		// PDU 구성 후 전송
 		PDUUpgradeSkillOptionInfo pdu;
 		for (int i = 0; i < NUM_UPGRADE_SKILL_OPTIONS; i++)
-		{
-			pdu.skill_is_active[i] = true;
-			pdu.active_skill_types[i] = active_skill_options[i];
-		}
+			pdu.skill_types[i] = skill_options[i];
+
 		send(context.socket, (const char*)&pdu, sizeof(PDUUpgradeSkillOptionInfo), NULL);
 	}
 	else
@@ -529,6 +559,6 @@ Client::~Client()
 	if (HP > 0)
 		die();
 
-	for (int i = 0; i < len_active_skills; i++)
-		delete active_skills[i];
+	for (int i = 0; i < len_skills; i++)
+		delete skills[i];
 }

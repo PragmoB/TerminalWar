@@ -8,7 +8,7 @@
 extern Graphic graphic;
 
 Shoot::Shoot(Player* owner, int level)
-	: Skill(owner, level)
+	: ActiveSkill(owner, level)
 {
 }
 
@@ -16,7 +16,7 @@ Shoot::Shoot(Player* owner, int level)
 
 bool Shoot::cast(DIRECTION dir)
 {
-	if (!Skill::cast(dir))
+	if (!ActiveSkill::cast(dir))
 		return false;
 
 	Player* owner = get_owner();

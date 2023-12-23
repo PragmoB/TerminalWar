@@ -1,8 +1,5 @@
 #pragma once
 
-#include <windows.h>
-
-#include "interface.h"
 #include "Skills/Slash.h"
 #include "Skills/Wind.h"
 
