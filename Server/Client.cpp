@@ -285,10 +285,13 @@ void Client::earn_item(COORD pos)
 	{
 		Item* item = *iter;
 		COORD item_pos = item->get_pos();
+		
 
 		// 아이템 획득
 		if (item_pos.X == pos.X && item_pos.Y == pos.Y)
 		{
+			background.items.erase(iter++);
+
 			// 플레이어들에게 반영
 			for (std::list<Client*>::iterator c_iter = background.clients.begin();
 				c_iter != background.clients.end(); c_iter++)
@@ -315,9 +318,7 @@ void Client::earn_item(COORD pos)
 				break;
 			}
 			}
-
 			delete item;
-			background.items.erase(iter++);
 		}
 		else
 			iter++;
