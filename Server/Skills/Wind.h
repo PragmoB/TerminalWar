@@ -11,7 +11,7 @@ public:
 	static const int BPS[];
 	static const int DISTANCE[];
 public:
-	Wind(Client* owner, int level = 1);
+	Wind(Player* owner, int level = 1);
 	virtual bool cast(DIRECTION dir);
 
 	virtual int get_damage() const;

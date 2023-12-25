@@ -1,5 +1,6 @@
 #pragma once
 
+#define _WINSOCKAPI_
 #include <windows.h>
 
 enum ITEM_TYPE

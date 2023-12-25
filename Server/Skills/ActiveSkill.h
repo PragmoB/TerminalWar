@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Skill.h"
+#include "Direction.h"
 
 class ActiveSkill : public Skill
 {
@@ -8,7 +9,7 @@ private:
 	// 다음 스킬 사용 가능시간
 	clock_t next_able_time = 0;
 public:
-	ActiveSkill(Client* owner, int level);
+	ActiveSkill(Player* owner, int level);
 	bool castable() const;
 	virtual bool cast(DIRECTION dir);
 	virtual int get_damage() const = 0;

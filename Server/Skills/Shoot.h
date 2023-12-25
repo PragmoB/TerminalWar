@@ -11,7 +11,7 @@ public:
 	static const int BPS[]; // [i] = (i + 1)레벨에서 총알의 속도
 	static const int DISTANCE[]; // [i] = (i + 1)레벨에서 날아갈 거리
 public:
-	Shoot(Client* owner, int level = 1);
+	Shoot(Player* owner, int level = 1);
 	virtual bool cast(DIRECTION dir);
 
 	virtual int get_damage() const;

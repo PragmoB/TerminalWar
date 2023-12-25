@@ -1,6 +1,6 @@
 #include "HermesStep.h"
 
-HermesStep::HermesStep(Client* owner, int level) : WindStep(owner, level)
+HermesStep::HermesStep(Player* owner, int level) : WindStep(owner, level)
 {
 
 }

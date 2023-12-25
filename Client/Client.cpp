@@ -6,7 +6,6 @@
 #include <WS2tcpip.h>
 #include <WinSock2.h>
 #include <windows.h>
-#include <cctype>
 #include <conio.h>
 
 #include <list>
@@ -16,7 +15,7 @@
 #include "Graphic.h"
 #include "Menu.h"
 #include "Sound.h"
-#include "interface.h"
+#include "Values/interface.h"
 #include "protocol.h"
 #include "Player.h"
 #include "EnergyBar.h"
@@ -65,20 +64,6 @@ void receive(SOCKET sock)
 		int len = recv(sock, buff, 4000, NULL);
 		if (len <= 0)
 		{
-			for (map<DWORD, Player*>::iterator iter = players.begin(); iter != players.end();)
-			{
-				delete iter->second;
-				players.erase(iter++);
-			}
-			for (list<Item*>::iterator iter = items.begin(); iter != items.end();)
-			{
-				(*iter)->disappear();
-				delete (*iter);
-				items.erase(iter++);
-			}
-
-			my_id = NULL;
-			energy_bar.clear();
 			graphic.stop();
 			return;
 		}
@@ -503,9 +488,6 @@ void send_discontinual_request(SOCKET sock)
 			break;
 		}
 	}
-
-	active_skill_menu.disappear();
-	active_skill_menu.clear();
 }
 // 연속적 유저 입력(움직임, 스킬 사용 등) 처리
 void send_continual_request(SOCKET udp_sock)
@@ -591,12 +573,36 @@ int main()
 			FillConsoleOutputCharacter(console_buffer, ' ', dwConSize, coordScreen, &cCharsWritten);
 			SetConsoleCursorPosition(console_buffer, coordScreen);
 		}
-		cout << endl;
 
 		// 입력버퍼 비우기
 		while (_kbhit())
 			_getch();
 
+		// 전역변수 초기화
+		active_skill_menu.disappear();
+		active_skill_menu.clear();
+		passive_skill_menu.disappear();
+		passive_skill_menu.clear();
+		energy_bar.clear();
+		my_id = NULL;
+		len_upgrade_skill_options = 0;
+		len_evolution_skill_options = 0;
+		upgradable = false;
+		focus_is_on_evolution_option_list = false;
+		for (map<DWORD, Player*>::iterator iter = players.begin(); iter != players.end();)
+		{
+			delete iter->second;
+			players.erase(iter++);
+		}
+		for (list<Item*>::iterator iter = items.begin(); iter != items.end();)
+		{
+			(*iter)->disappear();
+			delete (*iter);
+			items.erase(iter++);
+		}
+
+		// 서버와 연결 준비 시작
+		cout << endl;
 		SOCKET sock = WSASocket(PF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 		if (sock == INVALID_SOCKET)
 		{
@@ -688,8 +694,6 @@ int main()
 		thread(send_discontinual_request, sock).detach();
 		passive_skill_menu.appear();
 		send_continual_request(udpSock);
-		passive_skill_menu.disappear();
-		passive_skill_menu.clear();
 	}
 }
 

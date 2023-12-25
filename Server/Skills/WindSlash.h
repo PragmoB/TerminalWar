@@ -11,7 +11,7 @@ public:
 	static const int COOLDOWN[];
 public:
 	Wind wind;
-	WindSlash(Client* owner, int level = 1);
+	WindSlash(Player* owner, int level = 1);
 	virtual bool cast(DIRECTION dir);
 	virtual bool level_up();
 

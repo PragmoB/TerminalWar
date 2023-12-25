@@ -10,7 +10,7 @@ public:
 	static const int DAMAGE[];
 	static const int COOLDOWN[];
 public:
-	LightningStrike(Client* owner, int level = 1);
+	LightningStrike(Player* owner, int level = 1);
 
 	virtual bool cast(DIRECTION dir);
 

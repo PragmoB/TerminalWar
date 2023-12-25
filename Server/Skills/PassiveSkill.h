@@ -24,7 +24,7 @@
 class PassiveSkill : public Skill
 {
 public:
-	PassiveSkill(Client* owner, int level);
+	PassiveSkill(Player* owner, int level);
 
 	virtual int get_speed_rate();
 	virtual int get_defense_rate();

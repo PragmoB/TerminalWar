@@ -5,7 +5,7 @@
 
 #include "blocking_queue.h"
 
-#include "Client.h"
+#include "Player.h"
 #include "Skills/ActiveSkill.h"
 #include "Items/Item.h"
 
@@ -27,7 +27,7 @@ private:
 	// 아이템 생성 스레드
 	void generate_item();
 public:
-	std::list<Client*> clients;
+	std::list<Player*> players;
 	std::list<Item*> items;
 
 	Background();

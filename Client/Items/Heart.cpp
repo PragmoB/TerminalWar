@@ -1,6 +1,7 @@
 #include "Heart.h"
 
 #include "graphic.h"
+#include "Values/interface.h"
 
 extern Graphic graphic;
 

@@ -1,11 +1,12 @@
-#include "Background.h"
-#include "Client.h"
-
 #include "LightningStrike.h"
+
+#include "Background.h"
+
+#include "Values/interface.h"
 
 extern Background background;
 
-LightningStrike::LightningStrike(Client* owner, int level)
+LightningStrike::LightningStrike(Player* owner, int level)
 	: ActiveSkill(owner, level)
 {
 }
@@ -18,7 +19,7 @@ bool LightningStrike::cast(DIRECTION dir)
 	// 시전 방향 양 옆으로의 피격 범위
 	const int RANGE = 2;
 
-	Client* owner = get_owner();
+	Player* owner = get_owner();
 	const COORD pos = owner->get_pos();
 
 	// 스킬 사용 후 클라이언트의 좌표
@@ -43,10 +44,10 @@ bool LightningStrike::cast(DIRECTION dir)
 
 	owner->move(pos_temp);
 
-	for (std::list<Client*>::iterator iter = background.clients.begin();
-		iter != background.clients.end(); iter++)
+	for (std::list<Player*>::iterator iter = background.players.begin();
+		iter != background.players.end(); iter++)
 	{
-		Client* victim = (*iter);
+		Player* victim = (*iter);
 		COORD victim_pos = (*iter)->get_pos();
 
 		switch (dir)

@@ -3,7 +3,8 @@
 #include "Skills/Shoot.h"
 #include "Player.h"
 #include "Graphic.h"
-#include "interface.h"
+
+#include "Values/interface.h"
 
 extern Graphic graphic;
 

@@ -10,7 +10,7 @@ private:
 	static const int DEFENSE_RATE[];
 	static const int EVASION_RATE[];
 public:
-	WindShield(Client* owner, int level = 1);
+	WindShield(Player* owner, int level = 1);
 	virtual int get_speed_rate();
 	virtual int get_defense_rate();
 	virtual int get_evasion_rate();

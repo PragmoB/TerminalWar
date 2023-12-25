@@ -1,11 +1,14 @@
 #pragma once
 
+#define _WINSOCKAPI_
 #include <windows.h>
-#include <mmsystem.h>
 
-#include "protocol.h"
 #include "Skills/ActiveSkill.h"
 #include "Skills/PassiveSkill.h"
+
+#include "Values/player_values.h"
+
+#include "Items/Item.h"
 
 class Player
 {

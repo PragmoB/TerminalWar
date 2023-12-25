@@ -1,11 +1,10 @@
 #pragma once
 
+#define _WINSOCKAPI_
 #include <windows.h>
 #include <ctime>
 
-#include "interface.h"
-
-class Client;
+class Player;
 
 enum SKILL_TYPE
 {
@@ -32,16 +31,16 @@ class Skill
 {
 private:
 	int level;
-	Client* owner;
+	Player* owner;
 public:
-	static Skill* create_object_by_type(SKILL_TYPE type, Client* owner);
+	static Skill* create_object_by_type(SKILL_TYPE type, Player* owner);
 	static const Skill* get_object_by_type(SKILL_TYPE type);
 
-	Skill(Client* owner, int level);
+	Skill(Player* owner, int level);
 
 	virtual bool level_up();
 	int get_level() const;
-	Client* get_owner() const;
+	Player* get_owner() const;
 
 	virtual SKILL_TYPE get_type() const = 0;
 	virtual int get_max_level() const = 0;

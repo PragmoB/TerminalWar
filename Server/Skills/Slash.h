@@ -9,7 +9,7 @@ public:
 	static const int DAMAGE[];
 	static const int COOLDOWN[];
 public:
-	Slash(Client* owner, int level = 1);
+	Slash(Player* owner, int level = 1);
 	virtual bool cast(DIRECTION dir);
 
 	virtual int get_damage() const;

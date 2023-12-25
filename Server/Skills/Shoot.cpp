@@ -1,24 +1,25 @@
 #include <list>
 
-#include "Client.h"
+#include "Shoot.h"
 #include "Background.h"
-#include "Skills/Shoot.h"
+
+#include "Values/interface.h"
 
 extern Background background;
 
-Shoot::Shoot(Client* owner, int level)
+Shoot::Shoot(Player* owner, int level)
 	: ActiveSkill(owner, level)
 {
 
 }
 
 // pos 위치의 클라이언트를 하나만 찾아오기
-Client* get_client_at_pos(COORD pos)
+Player* get_player_at_pos(COORD pos)
 {
-	for (std::list<Client*>::iterator iter = background.clients.begin();
-		iter != background.clients.end(); iter++)
+	for (std::list<Player*>::iterator iter = background.players.begin();
+		iter != background.players.end(); iter++)
 	{
-		Client* cur = *iter;
+		Player* cur = *iter;
 		COORD cur_pos = cur->get_pos();
 
 		if (cur_pos.X == pos.X && cur_pos.Y == pos.Y)
@@ -32,7 +33,7 @@ bool Shoot::cast(DIRECTION dir)
 	if (!ActiveSkill::cast(dir))
 		return false;
 
-	Client* owner = get_owner();
+	Player* owner = get_owner();
 	COORD pos = owner->get_pos();
 	owner->bind(40);
 
@@ -46,7 +47,7 @@ bool Shoot::cast(DIRECTION dir)
 		for (; 0 < remain_distance && 1 < pos.Y; remain_distance--)
 		{
 			pos.Y--; // 총알이 위로 이동
-			Client* victim = get_client_at_pos(pos);
+			Player* victim = get_player_at_pos(pos);
 			if (victim) // 맞은 놈이 있다면
 				victim->hit(this); // 처맞는 동작함
 
@@ -57,7 +58,7 @@ bool Shoot::cast(DIRECTION dir)
 		for (; 0 < remain_distance && pos.Y < FIELD_HEIGHT; remain_distance--)
 		{
 			pos.Y++;
-			Client* victim = get_client_at_pos(pos);
+			Player* victim = get_player_at_pos(pos);
 			if (victim) // 맞은 놈이 있다면
 				victim->hit(this); // 처맞는 동작함
 
@@ -68,7 +69,7 @@ bool Shoot::cast(DIRECTION dir)
 		for (; 0 < remain_distance && 1 < pos.X; remain_distance--)
 		{
 			pos.X--;
-			Client* victim = get_client_at_pos(pos);
+			Player* victim = get_player_at_pos(pos);
 			if (victim) // 맞은 놈이 있다면
 				victim->hit(this); // 처맞는 동작함
 
@@ -79,7 +80,7 @@ bool Shoot::cast(DIRECTION dir)
 		for (; 0 < remain_distance && pos.X < FIELD_WIDTH; remain_distance--)
 		{
 			pos.X++;
-			Client* victim = get_client_at_pos(pos);
+			Player* victim = get_player_at_pos(pos);
 			if (victim) // 맞은 놈이 있다면
 				victim->hit(this); // 처맞는 동작함
 

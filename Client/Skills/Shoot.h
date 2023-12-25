@@ -1,10 +1,5 @@
 #pragma once
 
-#include <iostream>
-#include <windows.h>
-
-#include "protocol.h"
-#include "interface.h"
 #include "ActiveSkill.h"
 
 class Shoot : public ActiveSkill

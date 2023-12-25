@@ -1,6 +1,6 @@
 #include "WindShield.h"
 
-WindShield::WindShield(Client* owner, int level) : WindStep(owner, level)
+WindShield::WindShield(Player* owner, int level) : WindStep(owner, level)
 {
 
 }

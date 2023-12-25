@@ -1,9 +1,8 @@
 #pragma once
 
+#define _WINSOCKAPI_
 #include <windows.h>
 #include <ctime>
-
-#include "interface.h"
 
 class Player;
 

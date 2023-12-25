@@ -1,11 +1,13 @@
 #pragma once
 
+#define _WINSOCKAPI_
 #include <windows.h>
 
 #include "Items/Item.h"
 #include "Skills/Skill.h"
+#include "Values/player_values.h"
 
-#include "interface.h"
+#include "Direction.h"
 
 const int PORT = 44400;
 

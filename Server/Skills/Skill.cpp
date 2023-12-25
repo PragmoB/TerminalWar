@@ -1,4 +1,4 @@
-#include "Client.h"
+#include "Player.h"
 
 #include "Skills/Skill.h"
 #include "Skills/Shoot.h"
@@ -14,17 +14,15 @@
 #include "Skills/HermesStep.h"
 #include "Skills/WindShield.h"
 
-#include <ctime>
-
 #include <map>
 
-Skill::Skill(Client* owner, int level)
+Skill::Skill(Player* owner, int level)
 	: owner(owner), level(level)
 {
 
 }
 
-Skill* Skill::create_object_by_type(SKILL_TYPE type, Client* owner)
+Skill* Skill::create_object_by_type(SKILL_TYPE type, Player* owner)
 {
 	Skill* skill = NULL;
 
@@ -65,7 +63,7 @@ int Skill::get_level() const
 	return level;
 }
 
-Client* Skill::get_owner() const
+Player* Skill::get_owner() const
 {
 	return owner;
 }

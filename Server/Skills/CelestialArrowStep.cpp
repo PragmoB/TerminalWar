@@ -1,6 +1,6 @@
 #include "CelestialArrowStep.h"
 
-CelestialArrowStep::CelestialArrowStep(Client* owner, int level) : WindStep(owner, level)
+CelestialArrowStep::CelestialArrowStep(Player* owner, int level) : WindStep(owner, level)
 {
 
 }

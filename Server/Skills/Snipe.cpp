@@ -1,13 +1,9 @@
-#include <list>
-
-#include "Client.h"
 #include "Background.h"
-#include "Skills/Skill.h"
-#include "Skills/Snipe.h"
+#include "Snipe.h"
 
 extern Background background;
 
-Snipe::Snipe(Client* owner, int level)
+Snipe::Snipe(Player* owner, int level)
 	: Shoot(owner, level)
 {
 

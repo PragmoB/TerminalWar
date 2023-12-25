@@ -9,12 +9,12 @@
 
 #include <vector>
 #include <thread>
-#include <exception>
 
-#include "Client.h"
+#include "Player.h"
 #include "Background.h"
 #include "protocol.h"
-#include "interface.h"
+
+#include "Values/interface.h"
 
 using namespace std;
 
@@ -31,20 +31,20 @@ void worker(HANDLE completion_port)
 		BOOL bSuccess = GetQueuedCompletionStatus(completion_port, &len, &key, &overlapped, INFINITE);
 
 		// 클라이언트 데이터 처리
-		Client* client = reinterpret_cast<Client*>(overlapped);
+		Player* player = reinterpret_cast<Player*>(overlapped);
 		
 		if (len == 0)
 		{
-			cout << " Client " << client->context.socket << " died" << endl;
-			closesocket(client->context.socket);
+			cout << " Player " << player->context.socket << " died" << endl;
+			closesocket(player->context.socket);
 
-			// 클라이언트 리스트에서 client 삭제
-			for (list<Client*>::iterator iter = background.clients.begin();
-				iter != background.clients.end(); iter++)
-				if (*iter == client)
+			// 클라이언트 리스트에서 player 삭제
+			for (list<Player*>::iterator iter = background.players.begin();
+				iter != background.players.end(); iter++)
+				if (*iter == player)
 				{
-					delete client;
-					background.clients.erase(iter);
+					delete player;
+					background.players.erase(iter);
 					break;
 				}
 			
@@ -63,18 +63,18 @@ void worker(HANDLE completion_port)
 
 		while ((signed)len - complete_len > 0)
 		{
-			switch ((client->context.dataBuffer.buf + complete_len)[0])
+			switch ((player->context.dataBuffer.buf + complete_len)[0])
 			{
 			case HELLO:
-				pdu_hello = reinterpret_cast<PDUHello*>(client->context.dataBuffer.buf + complete_len);
-				client->hello(pdu_hello->chracter);
+				pdu_hello = reinterpret_cast<PDUHello*>(player->context.dataBuffer.buf + complete_len);
+				player->hello(pdu_hello->chracter);
 
 				complete_len += sizeof(PDUHello);
 				break;
 
 			case UPGRADE_SKILL:
-				pdu_upgrade_skill = reinterpret_cast<PDUUpgradeSkill*>(client->context.dataBuffer.buf + complete_len);
-				client->upgrade_skill(pdu_upgrade_skill->skill_type, pdu_upgrade_skill->upgraded_skill_type);
+				pdu_upgrade_skill = reinterpret_cast<PDUUpgradeSkill*>(player->context.dataBuffer.buf + complete_len);
+				player->upgrade_skill(pdu_upgrade_skill->skill_type, pdu_upgrade_skill->upgraded_skill_type);
 				
 				complete_len += sizeof(PDUUpgradeSkill);
 				break;
@@ -85,8 +85,8 @@ void worker(HANDLE completion_port)
 
 		// 다음 IO 작업을 시작
 		DWORD flags = 0;
-		WSARecv(client->context.socket, &client->context.dataBuffer, 
-			1, NULL, &flags, &client->context.overlapped, NULL);
+		WSARecv(player->context.socket, &player->context.dataBuffer, 
+			1, NULL, &flags, &player->context.overlapped, NULL);
 	}
 }
 void workerUDP(SOCKET sock)
@@ -105,42 +105,42 @@ void workerUDP(SOCKET sock)
 		};
 		pdu_mov_req = reinterpret_cast<PDUMovReq*>(buff);
 
-		// 요청 클라이언트의 client 객체 결정하기
-		Client* client = NULL;
-		DWORD client_id = NULL;
+		// 요청 클라이언트의 player 객체 결정하기
+		Player* player = NULL;
+		DWORD player_id = NULL;
 		switch (buff[0])
 		{
-		case UDP_HELLO: client_id = pdu_udp_hello->id;
-		case MOV: client_id = pdu_mov_req->id;
-		case CAST_SKILL: client_id = pdu_cast_skill->id;
+		case UDP_HELLO: player_id = pdu_udp_hello->id;
+		case MOV: player_id = pdu_mov_req->id;
+		case CAST_SKILL: player_id = pdu_cast_skill->id;
 		}
-		for (list<Client*>::iterator iter = background.clients.begin();
-			iter != background.clients.end();
+		for (list<Player*>::iterator iter = background.players.begin();
+			iter != background.players.end();
 			iter++)
 		{
-			client = *iter;
-			if (client->addr.sin_addr.S_un.S_addr == peer_addr.sin_addr.S_un.S_addr &&
-				client->context.socket == client_id)
+			player = *iter;
+			if (player->addr.sin_addr.S_un.S_addr == peer_addr.sin_addr.S_un.S_addr &&
+				player->context.socket == player_id)
 			{
 				// 클라이언트 측 UDP 포트 초기화
-				client->addr = peer_addr;
+				player->addr = peer_addr;
 				break;
 			}
 			else
-				client = NULL;
+				player = NULL;
 		}
 
 		switch (buff[0])
 		{
 		case MOV:
 			pdu_mov_req = reinterpret_cast<PDUMovReq*>(buff);
-			if (client)
-				client->move(pdu_mov_req->dir);
+			if (player)
+				player->move(pdu_mov_req->dir);
 			break;
 		case CAST_SKILL:
 			pdu_cast_skill = reinterpret_cast<PDUCastSkill*>(buff);
-			if (client)
-				client->cast_skill(pdu_cast_skill->skill_type, pdu_cast_skill->dir);
+			if (player)
+				player->cast_skill(pdu_cast_skill->skill_type, pdu_cast_skill->dir);
 		default:
 			break;
 		}
@@ -195,7 +195,7 @@ int main()
 		return 1;
 	}
 	cout << " Succeed to bind UDP socket." << endl;
-	Client::udp_socket = udpSocket;
+	Player::udp_socket = udpSocket;
 
 	sockaddr_in serverAddress;
 	serverAddress.sin_family = AF_INET;
@@ -241,7 +241,7 @@ int main()
 
 	while (true) {
 		// 최대 동접자 9명으로 제한
-		while (background.clients.size() >= 9)
+		while (background.players.size() >= 9)
 			Sleep(1000);
 
 		sockaddr_in client_addr;
@@ -253,28 +253,28 @@ int main()
 			std::cerr << " Failed to accept client connection." << std::endl;
 			continue;
 		}
-		cout << " Client " << clientSocket << " accepted" << endl;
+		cout << " Player " << clientSocket << " accepted" << endl;
 
 		// 클라이언트 생성 후 리스트에 등록
 		ClientContext client_context;
 		client_context.socket = clientSocket;
 		client_context.dataBuffer.len = 1024;
 		client_context.overlapped.hEvent = NULL;
-		Client* client = new Client(client_context, client_addr,
+		Player* player = new Player(client_context, client_addr,
 									COORD{ (SHORT)(rand() % FIELD_WIDTH + 1), (SHORT)(rand() % FIELD_HEIGHT + 1) });
-		background.clients.push_back(client);
+		background.players.push_back(player);
 
 		// 클라이언트 소켓을 완료 포트에 연결
-		CreateIoCompletionPort(reinterpret_cast<HANDLE>(clientSocket), completionPort, reinterpret_cast<ULONG_PTR>(client), 0);
+		CreateIoCompletionPort(reinterpret_cast<HANDLE>(clientSocket), completionPort, reinterpret_cast<ULONG_PTR>(player), 0);
 
 		// 비동기 데이터 수신 시작
 		DWORD flags = 0;
-		if (WSARecv(clientSocket, &client->context.dataBuffer, 1, NULL, &flags, &client->context.overlapped, NULL) == SOCKET_ERROR) {
+		if (WSARecv(clientSocket, &player->context.dataBuffer, 1, NULL, &flags, &player->context.overlapped, NULL) == SOCKET_ERROR) {
 			if (WSAGetLastError() != ERROR_IO_PENDING) {
 				// 오류 처리
 				std::cerr << " Failed to recv client : " << WSAGetLastError() << std::endl;
-				background.clients.pop_back();
-				delete client;
+				background.players.pop_back();
+				delete player;
 			}
 		}
 	}

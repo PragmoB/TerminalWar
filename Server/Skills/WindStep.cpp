@@ -1,6 +1,6 @@
 #include "WindStep.h"
 
-WindStep::WindStep(Client* owner, int level) : PassiveSkill(owner, level)
+WindStep::WindStep(Player* owner, int level) : PassiveSkill(owner, level)
 {
 
 }

@@ -2,7 +2,7 @@
 
 #include "Graphic.h"
 #include "EnergyBar.h"
-#include "interface.h"
+#include "Values/interface.h"
 
 extern Graphic graphic;
 

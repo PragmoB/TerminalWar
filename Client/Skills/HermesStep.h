@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Skills/WindStep.h"
+#include "WindStep.h"
 
 class HermesStep : public WindStep
 {

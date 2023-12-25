@@ -1,8 +1,5 @@
 #pragma once
 
-#include <windows.h>
-
-#include "interface.h"
 #include "ActiveSkill.h"
 
 class Wind : public ActiveSkill

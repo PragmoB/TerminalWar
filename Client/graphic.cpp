@@ -7,7 +7,7 @@
 #include "blocking_queue.h"
 
 #include "Graphic.h"
-#include "interface.h"
+#include "Values/interface.h"
 #include "protocol.h"
 
 #include "Player.h"

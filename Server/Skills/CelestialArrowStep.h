@@ -10,7 +10,7 @@ private:
 	static const int MOV_ATTACK_DAMAGE[];
 	static const int MOV_ATTACK_RANGE;
 public:
-	CelestialArrowStep(Client* owner, int level = 1);
+	CelestialArrowStep(Player* owner, int level = 1);
 	virtual int get_speed_rate();
 	virtual int get_mov_attack_damage();
 	virtual int get_mov_attack_range();

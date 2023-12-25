@@ -1,12 +1,11 @@
 #include <list>
 
-#include "Client.h"
 #include "Background.h"
-#include "Skills/Slash.h"
+#include "Slash.h"
 
 extern Background background;
 
-Slash::Slash(Client* owner, int level)
+Slash::Slash(Player* owner, int level)
 	: ActiveSkill(owner, level)
 {
 }
@@ -16,7 +15,7 @@ bool Slash::cast(DIRECTION dir)
 	if (!ActiveSkill::cast(dir))
 		return false;
 
-	Client* owner = get_owner();
+	Player* owner = get_owner();
 	const COORD pos = owner->get_pos();
 
 	static const int delay[] = { 50, 20, 20, 10, 10, 10, 0, NULL };
@@ -83,11 +82,11 @@ bool Slash::cast(DIRECTION dir)
 	for (int i = 0; (hitting_box + i)->X | (hitting_box + i)->Y; i += 5)
 	{
 		// 플레이어를 하나씩 선택
-		for (std::list<Client*>::iterator iter = background.clients.begin();
-			iter != background.clients.end(); iter++)
+		for (std::list<Player*>::iterator iter = background.players.begin();
+			iter != background.players.end(); iter++)
 		{
-			Client* client = (*iter);
-			COORD client_pos = client->get_pos();
+			Player* player = (*iter);
+			COORD player_pos = player->get_pos();
 
 			// i번째 동작의 피격지점들을 하나씩 선택하며 플레이어의 위치좌표값을 비교
 			for (int j = 0; (hitting_box + i)[j].X | (hitting_box + i)[j].Y; j++)
@@ -95,9 +94,9 @@ bool Slash::cast(DIRECTION dir)
 				COORD hitting_pos = pos;
 				hitting_pos.X += (hitting_box + i)[j].X; hitting_pos.Y += (hitting_box + i)[j].Y;
 
-				if (client_pos.X == hitting_pos.X &&
-					client_pos.Y == hitting_pos.Y)
-					client->hit(this);
+				if (player_pos.X == hitting_pos.X &&
+					player_pos.Y == hitting_pos.Y)
+					player->hit(this);
 			}
 		}
 

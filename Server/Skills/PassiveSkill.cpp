@@ -1,6 +1,6 @@
 #include "PassiveSkill.h"
 
-PassiveSkill::PassiveSkill(Client* owner, int level) : Skill(owner, level)
+PassiveSkill::PassiveSkill(Player* owner, int level) : Skill(owner, level)
 {
 
 }

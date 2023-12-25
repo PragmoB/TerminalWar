@@ -1,6 +1,6 @@
 #include "ActiveSkill.h"
 
-ActiveSkill::ActiveSkill(Client* owner, int level) : Skill(owner, level)
+ActiveSkill::ActiveSkill(Player* owner, int level) : Skill(owner, level)
 {
 	
 }

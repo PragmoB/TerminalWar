@@ -163,10 +163,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\Shared\Items\item_balance.cpp" />
-    <ClCompile Include="..\Shared\Skills\skill_balance.cpp" />
+    <ClCompile Include="..\Shared\Values\item_values.cpp" />
+    <ClCompile Include="..\Shared\Values\skill_values.cpp" />
     <ClCompile Include="Background.cpp" />
-    <ClCompile Include="Client.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Items\Energy.cpp" />
     <ClCompile Include="Items\Heart.cpp" />
     <ClCompile Include="Items\Item.cpp" />
@@ -188,10 +188,12 @@
     <ClCompile Include="Skills\ZweihanderSlash.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Shared\interface.h" />
+    <ClInclude Include="..\Shared\Direction.h" />
     <ClInclude Include="..\Shared\protocol.h" />
+    <ClInclude Include="..\Shared\Values\interface.h" />
+    <ClInclude Include="..\Shared\Values\player_values.h" />
     <ClInclude Include="Background.h" />
-    <ClInclude Include="Client.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="Items\Energy.h" />
     <ClInclude Include="Items\Heart.h" />
     <ClInclude Include="Items\Item.h" />

@@ -2,6 +2,8 @@
 
 #include "Skill.h"
 
+#include "Direction.h"
+
 class ActiveSkill : public Skill
 {
 private:

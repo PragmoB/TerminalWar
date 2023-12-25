@@ -1,13 +1,13 @@
 #include <WinSock2.h>
-#include <ctime>
 
 #include <list>
 #include <mutex>
 
 #include "Background.h"
-#include "Client.h"
+#include "Player.h"
 #include "protocol.h"
-#include "interface.h"
+
+#include "Values/interface.h"
 
 #include "Items/Item.h"
 #include "Items/Heart.h"
@@ -19,10 +19,10 @@
 
 extern Background background;
 
-SOCKET Client::udp_socket = 0;
-const int Client::MOV_DELAY = 100;
+SOCKET Player::udp_socket = 0;
+const int Player::MOV_DELAY = 100;
 
-Client::Client(ClientContext context, sockaddr_in addr, COORD pos)
+Player::Player(ClientContext context, sockaddr_in addr, COORD pos)
 : context(context), pos(pos)
 {
 	this->context.dataBuffer.buf = this->context.buffer;
@@ -31,8 +31,8 @@ Client::Client(ClientContext context, sockaddr_in addr, COORD pos)
 	// 자기자신을 인식함
 	apply_hello_of(this);
 
-	for (std::list<Client*>::iterator iter = background.clients.begin();
-		iter != background.clients.end(); iter++)
+	for (std::list<Player*>::iterator iter = background.players.begin();
+		iter != background.players.end(); iter++)
 	{
 		// 유저들에게 인사를 받음
 		apply_hello_of(*iter);
@@ -46,57 +46,57 @@ Client::Client(ClientContext context, sockaddr_in addr, COORD pos)
 		apply_item_info_of(*iter);
 }
 
-int Client::get_level() const
+int Player::get_level() const
 {
 	return level;
 }
-int Client::get_HP() const
+int Player::get_HP() const
 {
 	return HP;
 }
-char Client::get_chracter() const
+char Player::get_chracter() const
 {
 	return chracter;
 }
-COORD Client::get_pos() const
+COORD Player::get_pos() const
 {	
 	return pos;
 }
-const Skill* Client::get_skill(int idx) const
+const Skill* Player::get_skill(int idx) const
 {
 	return skills[idx];
 }
-int Client::get_len_skills() const
+int Player::get_len_skills() const
 {
 	return len_skills;
 }
-int Client::get_damage_increase_rate() const
+int Player::get_damage_increase_rate() const
 {
 	return damage_increase_rate;
 }
-int Client::get_mov_attack_damage() const
+int Player::get_mov_attack_damage() const
 {
 	return mov_attack_damage;
 }
 
-void Client::apply_hello_of(const Client* client)
+void Player::apply_hello_of(const Player* player)
 {
 	PDUHello pdu;
-	pdu.id = (DWORD)client->context.socket;
-	pdu.HP = client->get_HP();
-	pdu.chracter = client->get_chracter();
-	pdu.pos = client->get_pos();
-	pdu.len_skills = client->get_len_skills();
+	pdu.id = (DWORD)player->context.socket;
+	pdu.HP = player->get_HP();
+	pdu.chracter = player->get_chracter();
+	pdu.pos = player->get_pos();
+	pdu.len_skills = player->get_len_skills();
 
 	for (int i = 0; i < pdu.len_skills; i++)
 	{
-		pdu.skills[i] = client->get_skill(i)->get_type();
-		pdu.skill_levels[i] = client->get_skill(i)->get_level();
+		pdu.skills[i] = player->get_skill(i)->get_type();
+		pdu.skill_levels[i] = player->get_skill(i)->get_level();
 	}
 
 	send(context.socket, reinterpret_cast<const char*>(&pdu), sizeof(PDUHello), NULL);
 }
-void Client::apply_item_info_of(const Item* item)
+void Player::apply_item_info_of(const Item* item)
 {
 	PDUItemInfo pdu;
 	pdu.item_type = item->get_type();
@@ -108,67 +108,67 @@ void Client::apply_item_info_of(const Item* item)
 
 	send(context.socket, (const char*)&pdu, sizeof(PDUItemInfo), NULL);
 }
-void Client::apply_earn_item_of(const Client* client, const Item* item)
+void Player::apply_earn_item_of(const Player* player, const Item* item)
 {
 	PDUEarnItem pdu;
-	pdu.id = client->context.socket;
+	pdu.id = player->context.socket;
 	pdu.pos = item->get_pos();
 
 	send(context.socket, (const char*)&pdu, sizeof(PDUEarnItem), NULL);
 }
-void Client::apply_movement_of(const Client* client)
+void Player::apply_movement_of(const Player* player)
 {
 	PDUMovRes pdu;
-	pdu.id = (DWORD)client->context.socket;
-	pdu.pos = client->get_pos();
+	pdu.id = (DWORD)player->context.socket;
+	pdu.pos = player->get_pos();
 	
 	sendto(udp_socket, reinterpret_cast<const char*>(&pdu), sizeof(PDUMovRes), NULL, (struct sockaddr*)&addr, sizeof(addr));
 }
-void Client::apply_cast_skill_of(const Client* client, SKILL_TYPE skill_type, DIRECTION dir)
+void Player::apply_cast_skill_of(const Player* player, SKILL_TYPE skill_type, DIRECTION dir)
 {
 	PDUCastSkill pdu;
-	pdu.id = (DWORD)client->context.socket;
+	pdu.id = (DWORD)player->context.socket;
 	pdu.skill_type = skill_type;
 	pdu.dir = dir;
 
 	send(context.socket, reinterpret_cast<const char*>(&pdu), sizeof(PDUCastSkill), NULL);
 }
-void Client::apply_upgrade_skill_of(const Client* client, SKILL_TYPE skill_type, SKILL_TYPE upgraded_skill_type)
+void Player::apply_upgrade_skill_of(const Player* player, SKILL_TYPE skill_type, SKILL_TYPE upgraded_skill_type)
 {
 	PDUUpgradeSkill pdu;
-	pdu.id = client->context.socket;
+	pdu.id = player->context.socket;
 	pdu.skill_type = skill_type;
 	pdu.upgraded_skill_type = upgraded_skill_type;
 
 	send(context.socket, reinterpret_cast<const char*>(&pdu), sizeof(PDUUpgradeSkill), NULL);
 }
-void Client::apply_hit_of(const Client* client, const Skill* skill, bool evaded)
+void Player::apply_hit_of(const Player* player, const Skill* skill, bool evaded)
 {
 	PDUHit pdu;
 	pdu.attacker_id = (DWORD)skill->get_owner()->context.socket;
-	pdu.victim_id = (DWORD)client->context.socket;
+	pdu.victim_id = (DWORD)player->context.socket;
 	pdu.skill_type = skill->get_type();
 	pdu.evaded = evaded;
 	
 	send(context.socket, reinterpret_cast<const char*>(&pdu), sizeof(PDUHit), NULL);
 }
-void Client::apply_hit_mov_attack_of(const Client* client, const Client* attacker, bool evaded)
+void Player::apply_hit_mov_attack_of(const Player* player, const Player* attacker, bool evaded)
 {
 	PDUHitMovAttack pdu;
 	pdu.attacker_id = (DWORD)attacker->context.socket;
-	pdu.victim_id = (DWORD)client->context.socket;
+	pdu.victim_id = (DWORD)player->context.socket;
 	pdu.evaded = evaded;
 	
 	send(context.socket, reinterpret_cast<const char*>(&pdu), sizeof(PDUHitMovAttack), NULL);
 	
 }
-void Client::apply_die_of(const Client* client, const Client* attacker)
+void Player::apply_die_of(const Player* player, const Player* attacker)
 {
 	PDUDie pdu;
-	if (client)
+	if (player)
 	{
-		pdu.id = (DWORD)client->context.socket;
-		pdu.level = client->get_level();
+		pdu.id = (DWORD)player->context.socket;
+		pdu.level = player->get_level();
 	}
 	if (attacker)
 		pdu.attacker_id = (DWORD)attacker->context.socket;
@@ -176,7 +176,7 @@ void Client::apply_die_of(const Client* client, const Client* attacker)
 	send(context.socket, reinterpret_cast<const char*>(&pdu), sizeof(PDUDie), NULL);
 }
 
-void Client::hello(char chracter)
+void Player::hello(char chracter)
 {
 	// hello는 접속 후 한 번만 허용함
 	if (this->chracter)
@@ -187,15 +187,15 @@ void Client::hello(char chracter)
 
 	this->chracter = chracter;
 
-	for (std::list<Client*>::iterator iter = background.clients.begin();
-		iter != background.clients.end(); iter++)
+	for (std::list<Player*>::iterator iter = background.players.begin();
+		iter != background.players.end(); iter++)
 	{
 		// 유저들에게 인사함
 		(*iter)->apply_hello_of(this);
 	}
 }
 
-void Client::bind(clock_t time)
+void Player::bind(clock_t time)
 {
 	const clock_t now = clock();
 
@@ -203,19 +203,19 @@ void Client::bind(clock_t time)
 	if (next_able_mov_time < now + time)
 		next_able_mov_time = now + time;
 }
-bool Client::move(COORD pos)
+bool Player::move(COORD pos)
 {
 	this->pos = pos;
 
-	for (std::list<Client*>::iterator iter = background.clients.begin();
-		iter != background.clients.end(); iter++)
+	for (std::list<Player*>::iterator iter = background.players.begin();
+		iter != background.players.end(); iter++)
 		(*iter)->apply_movement_of(this);
 
 	earn_item(pos);
 
 	return true;
 }
-bool Client::move(DIRECTION dir, bool ignore_mov_cooldown)
+bool Player::move(DIRECTION dir, bool ignore_mov_cooldown)
 {
 	const clock_t now = clock();
 	
@@ -243,18 +243,18 @@ bool Client::move(DIRECTION dir, bool ignore_mov_cooldown)
 	}
 
 	// 고객님들께 반영
-	for (std::list<Client*>::iterator iter = background.clients.begin();
-		iter != background.clients.end(); iter++)
+	for (std::list<Player*>::iterator iter = background.players.begin();
+		iter != background.players.end(); iter++)
 		(*iter)->apply_movement_of(this);
 
 	earn_item(pos);
 
 	// 이동 공격 판정
 	if (mov_attack_damage)
-		for (std::list<Client*>::iterator iter = background.clients.begin();
-			iter != background.clients.end(); iter++)
+		for (std::list<Player*>::iterator iter = background.players.begin();
+			iter != background.players.end(); iter++)
 		{
-			Client* victim = *iter;
+			Player* victim = *iter;
 			COORD victim_pos = victim->get_pos();
 			if (abs((signed)victim_pos.X - pos.X) <= mov_attack_range &&
 				abs((signed)victim_pos.Y - pos.Y) <= mov_attack_range)
@@ -263,7 +263,7 @@ bool Client::move(DIRECTION dir, bool ignore_mov_cooldown)
 
 	return true;
 }
-bool Client::cast_skill(SKILL_TYPE skill_type, DIRECTION dir)
+bool Player::cast_skill(SKILL_TYPE skill_type, DIRECTION dir)
 {
 	const uint32_t now = clock();
 
@@ -290,8 +290,8 @@ bool Client::cast_skill(SKILL_TYPE skill_type, DIRECTION dir)
 					background.cast_skill(skill, dir);
 
 					// 고객님들께 반영
-					for (std::list<Client*>::iterator iter = background.clients.begin();
-						iter != background.clients.end(); iter++)
+					for (std::list<Player*>::iterator iter = background.players.begin();
+						iter != background.players.end(); iter++)
 						(*iter)->apply_cast_skill_of(this, skill_type, dir);
 				}
 				break;
@@ -300,7 +300,7 @@ bool Client::cast_skill(SKILL_TYPE skill_type, DIRECTION dir)
 
 	return true;
 }
-void Client::earn_item(COORD pos)
+void Player::earn_item(COORD pos)
 {
 	// pos 위치 아이템들에서 얻은 총 에너지 량
 	int energy_gain = 0;
@@ -318,8 +318,8 @@ void Client::earn_item(COORD pos)
 			background.items.erase(iter++);
 
 			// 플레이어들에게 반영
-			for (std::list<Client*>::iterator c_iter = background.clients.begin();
-				c_iter != background.clients.end(); c_iter++)
+			for (std::list<Player*>::iterator c_iter = background.players.begin();
+				c_iter != background.players.end(); c_iter++)
 				(*c_iter)->apply_earn_item_of(this, item);
 
 			switch (item->get_type())
@@ -352,7 +352,7 @@ void Client::earn_item(COORD pos)
 	earn_energy(energy_gain);
 	
 }
-void Client::upgrade_skill(SKILL_TYPE skill_type, SKILL_TYPE upgraded_skill_type)
+void Player::upgrade_skill(SKILL_TYPE skill_type, SKILL_TYPE upgraded_skill_type)
 {
 	if (skill_is_upgradable)
 		skill_is_upgradable = false;
@@ -397,15 +397,15 @@ void Client::upgrade_skill(SKILL_TYPE skill_type, SKILL_TYPE upgraded_skill_type
 		if (skill->level_up())
 		{
 			// 클라이언트들에게 반영
-			for (list<Client*>::iterator iter = background.clients.begin();
-				iter != background.clients.end(); iter++)
+			for (list<Player*>::iterator iter = background.players.begin();
+				iter != background.players.end(); iter++)
 				(*iter)->apply_upgrade_skill_of(this, skill_type, upgraded_skill_type);
 		}
 		else if (skill->upgradable_to(upgraded_skill_type))
 		{
 			// 클라이언트들에게 반영
-			for (list<Client*>::iterator iter = background.clients.begin();
-				iter != background.clients.end(); iter++)
+			for (list<Player*>::iterator iter = background.players.begin();
+				iter != background.players.end(); iter++)
 				(*iter)->apply_upgrade_skill_of(this, skill_type, upgraded_skill_type);
 
 			delete skill;
@@ -419,8 +419,8 @@ void Client::upgrade_skill(SKILL_TYPE skill_type, SKILL_TYPE upgraded_skill_type
 		skills[len_skills++] = skill = Skill::create_object_by_type(skill_type, this);
 
 		// 클라이언트들에게 반영
-		for (list<Client*>::iterator iter = background.clients.begin();
-			iter != background.clients.end(); iter++)
+		for (list<Player*>::iterator iter = background.players.begin();
+			iter != background.players.end(); iter++)
 			(*iter)->apply_upgrade_skill_of(this, skill_type, upgraded_skill_type);
 	}
 
@@ -438,7 +438,7 @@ void Client::upgrade_skill(SKILL_TYPE skill_type, SKILL_TYPE upgraded_skill_type
 		mov_attack_range += passive_skill->get_mov_attack_range();
 	}
 }
-void Client::earn_energy(int amount)
+void Player::earn_energy(int amount)
 {
 	m_energy.lock();
 	// 스킬 강화 대기중이라면 에너지 획득 불가능
@@ -448,7 +448,7 @@ void Client::earn_energy(int amount)
 
 	level_up();
 }
-void Client::hit(const ActiveSkill* skill)
+void Player::hit(const ActiveSkill* skill)
 {
 	// NULL ptr check
 	if (!skill)
@@ -476,14 +476,14 @@ void Client::hit(const ActiveSkill* skill)
 		m_HP.unlock();
 	}
 
-	for (std::list<Client*>::iterator iter = background.clients.begin();
-		iter != background.clients.end(); iter++)
+	for (std::list<Player*>::iterator iter = background.players.begin();
+		iter != background.players.end(); iter++)
 		(*iter)->apply_hit_of(this, skill, evaded);
 
 	if (HP <= 0)
 		skill->get_owner()->kill(this);
 }
-void Client::hit_mov_attack(Client* attacker)
+void Player::hit_mov_attack(Player* attacker)
 {
 	// nullptr check
 	if (!attacker)
@@ -506,17 +506,17 @@ void Client::hit_mov_attack(Client* attacker)
 		HP -= damage; // 맞아서 체력 감소
 		m_HP.unlock();
 	}
-	for (std::list<Client*>::iterator iter = background.clients.begin();
-		iter != background.clients.end(); iter++)
+	for (std::list<Player*>::iterator iter = background.players.begin();
+		iter != background.players.end(); iter++)
 		(*iter)->apply_hit_mov_attack_of(this, attacker, evaded);
 
 	if (HP <= 0)
 		attacker->kill(this);
 }
-int Client::die(const Client* attacker)
+int Player::die(const Player* attacker)
 {
-	for (std::list<Client*>::iterator iter = background.clients.begin();
-		iter != background.clients.end(); iter++)
+	for (std::list<Player*>::iterator iter = background.players.begin();
+		iter != background.players.end(); iter++)
 		(*iter)->apply_die_of(this, attacker);
 
 	// 연결 끊기
@@ -525,12 +525,12 @@ int Client::die(const Client* attacker)
 	return HUNTING_ENERGY[level];
 }
 
-void Client::kill(Client* client)
+void Player::kill(Player* player)
 {
-	earn_energy(client->die(this));
+	earn_energy(player->die(this));
 }
 
-void Client::level_up()
+void Player::level_up()
 {
 	m_energy.lock();
 	// 레벨업 조건 충족
@@ -619,7 +619,7 @@ void Client::level_up()
 	else
 		m_energy.unlock();
 }
-Client::~Client()
+Player::~Player()
 {
 	// 체력이 남아있으면 자의적으로 죽은것임(attacker가 없음)
 	if (HP > 0)

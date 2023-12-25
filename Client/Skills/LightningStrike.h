@@ -2,7 +2,6 @@
 
 #include "ActiveSkill.h"
 
-
 class LightningStrike : public ActiveSkill
 {
 public:

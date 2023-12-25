@@ -25,12 +25,15 @@
     <Filter Include="소스 파일\Items">
       <UniqueIdentifier>{38edb78b-356f-43e6-9a76-9605ae5316c3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Values">
+      <UniqueIdentifier>{2d913904-1407-4789-9d2d-dd6027da0326}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Values">
+      <UniqueIdentifier>{8532385b-994a-4957-b658-f262735dc144}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Server.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Client.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Background.cpp">
@@ -66,12 +69,6 @@
     <ClCompile Include="Items\Heart.cpp">
       <Filter>소스 파일\Items</Filter>
     </ClCompile>
-    <ClCompile Include="..\Shared\Items\item_balance.cpp">
-      <Filter>소스 파일\Items</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Shared\Skills\skill_balance.cpp">
-      <Filter>소스 파일\Skills</Filter>
-    </ClCompile>
     <ClCompile Include="Skills\Snipe.cpp">
       <Filter>소스 파일\Skills</Filter>
     </ClCompile>
@@ -96,14 +93,17 @@
     <ClCompile Include="Skills\WindShield.cpp">
       <Filter>소스 파일\Skills</Filter>
     </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Shared\Values\item_values.cpp">
+      <Filter>소스 파일\Values</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Shared\Values\skill_values.cpp">
+      <Filter>소스 파일\Values</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Client.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Shared\interface.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="..\Shared\protocol.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -163,6 +163,18 @@
     </ClInclude>
     <ClInclude Include="Skills\WindShield.h">
       <Filter>헤더 파일\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shared\Values\player_values.h">
+      <Filter>헤더 파일\Values</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shared\Values\interface.h">
+      <Filter>헤더 파일\Values</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shared\Direction.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

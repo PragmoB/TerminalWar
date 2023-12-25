@@ -4,20 +4,16 @@
 #include <windef.h>
 #include <ctime>
 
-#include <iostream>
 #include <list>
 #include <vector>
 #include <mutex>
 
-#include "protocol.h"
 #include "Items/Item.h"
 #include "Skills/ActiveSkill.h"
 
-#include "interface.h"
+#include "Values/player_values.h"
 
 using namespace std;
-
-class Client;
 
 // IOCP 데이터 구조체
 typedef struct {
@@ -27,12 +23,13 @@ typedef struct {
 	char buffer[1024];
 } ClientContext;
 
-class Client
+class Player
 {
 public:
 	ClientContext context;
 	static SOCKET udp_socket;
 	sockaddr_in addr;
+
 // 캐릭터 능력치
 private:
 	// 이동 쿨타임 기본값
@@ -85,7 +82,7 @@ private:
 	SKILL_TYPE skill_options[NUM_UPGRADE_SKILL_OPTIONS];
 	bool skill_option_is_active[NUM_UPGRADE_SKILL_OPTIONS];
 public:
-	Client(ClientContext context, sockaddr_in IP, COORD pos);
+	Player(ClientContext context, sockaddr_in IP, COORD pos);
 
 	int get_level() const;
 	int get_HP() const;
@@ -96,24 +93,24 @@ public:
 	int get_damage_increase_rate() const;
 	int get_mov_attack_damage() const;
 	
-	// client가 접속했음을 반영함
-	void apply_hello_of(const Client* client);
+	// player가 접속했음을 반영함
+	void apply_hello_of(const Player* player);
 	// item 정보 반영
 	void apply_item_info_of(const Item* item);
-	// client의 item 획득 반영
-	void apply_earn_item_of(const Client* client, const Item* item);
-	// client가 움직였음을 반영함
-	void apply_movement_of(const Client* client);
-	// client가 dir방향으로 스킬 사용을 반영함
-	void apply_cast_skill_of(const Client* client, SKILL_TYPE skill_type, DIRECTION dir);
-	// client의 skill_type이 레벨업 또는 upgraded_skill_type으로 진화했음을 반영함
-	void apply_upgrade_skill_of(const Client* client, SKILL_TYPE skill_type, SKILL_TYPE upgraded_skill_type = SKILL_TYPE::UNKNOWN);
-	// client가 skill에 처맞았음을 반영함
-	void apply_hit_of(const Client* client, const Skill* skill, bool evaded);
-	// client가 attacker의 mov attack에 맞았음을 반영함
-	void apply_hit_mov_attack_of(const Client* client, const Client* attacker, bool evaded);
-	// client가 attacker에게 죽었음을 반영함
-	void apply_die_of(const Client* client, const Client* attacker = NULL);
+	// player의 item 획득 반영
+	void apply_earn_item_of(const Player* player, const Item* item);
+	// player가 움직였음을 반영함
+	void apply_movement_of(const Player* player);
+	// player가 dir방향으로 스킬 사용을 반영함
+	void apply_cast_skill_of(const Player* player, SKILL_TYPE skill_type, DIRECTION dir);
+	// player의 skill_type이 레벨업 또는 upgraded_skill_type으로 진화했음을 반영함
+	void apply_upgrade_skill_of(const Player* player, SKILL_TYPE skill_type, SKILL_TYPE upgraded_skill_type = SKILL_TYPE::UNKNOWN);
+	// player가 skill에 처맞았음을 반영함
+	void apply_hit_of(const Player* player, const Skill* skill, bool evaded);
+	// player가 attacker의 mov attack에 맞았음을 반영함
+	void apply_hit_mov_attack_of(const Player* player, const Player* attacker, bool evaded);
+	// player가 attacker에게 죽었음을 반영함
+	void apply_die_of(const Player* player, const Player* attacker = NULL);
 
 	// time밀리초만큼 발이 묶임(못움직임)
 	void bind(clock_t time);
@@ -134,13 +131,13 @@ public:
 	// skill에 맞음
 	void hit(const ActiveSkill* skill);
 	// attacker의 이동 공격에 맞음
-	void hit_mov_attack(Client* attacker);
+	void hit_mov_attack(Player* attacker);
 	// attacker에게 죽음, 사냥 경험치를 리턴값으로 뱉음
-	int die(const Client* attacker = NULL);
-	// client를 죽임
-	void kill(Client* client);
+	int die(const Player* attacker = NULL);
+	// player를 죽임
+	void kill(Player* player);
 	// 레벨업
 	void level_up();
 
-	~Client();
+	~Player();
 };

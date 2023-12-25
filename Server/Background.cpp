@@ -11,7 +11,7 @@
 #include "Items/Energy.h"
 
 #include "protocol.h"
-#include "interface.h"
+#include "Values/interface.h"
 
 Background background;
 
@@ -61,20 +61,20 @@ void Background::generate_item()
 			}
 
 			// 전송
-			for (list<Client*>::iterator iter = clients.begin();
-				iter != clients.end(); iter++)
+			for (list<Player*>::iterator iter = players.begin();
+				iter != players.end(); iter++)
 			{
-				Client* client = *iter;
-				send(client->context.socket, (const char*)&pdu, sizeof(PDUItemInfo), NULL);
+				Player* player = *iter;
+				send(player->context.socket, (const char*)&pdu, sizeof(PDUItemInfo), NULL);
 			}
 			
 			items.push_back(item);
 		}
 		// 클라이언트 수에 따라 생성 속도 조절
-		int num_clients = clients.size();
+		size_t num_players = players.size();
 
-		if (num_clients)
-			Sleep(4000 / num_clients);
+		if (num_players)
+			Sleep(4000 / num_players);
 		else
 			Sleep(20);
 	}

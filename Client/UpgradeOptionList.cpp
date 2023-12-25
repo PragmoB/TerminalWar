@@ -38,10 +38,10 @@ void UpgradeOptionList::appear()
 void UpgradeOptionList::disappear()
 {
 	// 가장 긴 콘텐츠의 길이 구하기
-	int max_content_len = strlen(title);
+	size_t max_content_len = strlen(title);
 	for (int i = 0; i < contents_list.size(); i++)
 	{
-		int content_len = strlen(contents_list[i]);
+		size_t content_len = strlen(contents_list[i]);
 		if (max_content_len < content_len)
 			max_content_len = content_len;
 	}
@@ -64,8 +64,8 @@ void UpgradeOptionList::clear()
 {
 	disappear();
 
-	int size = contents_list.size();
-	for (int i = size; 0 < i; i--)
+	size_t size = contents_list.size();
+	for (size_t i = size; 0 < i; i--)
 		delete contents_list[i - 1];
 
 	contents_list.clear();

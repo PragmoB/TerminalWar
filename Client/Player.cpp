@@ -1,9 +1,7 @@
 #include <cstdio>
 #include <map>
 #include <windows.h>
-#include <mmsystem.h>
 
-#include "interface.h"
 #include "Graphic.h"
 #include "Sound.h"
 #include "Player.h"
@@ -13,6 +11,8 @@
 #include "Items/Energy.h"
 
 #include "Skills/WindSlash.h"
+
+#include "Values/interface.h"
 
 extern Graphic graphic;
 extern Sound sound;

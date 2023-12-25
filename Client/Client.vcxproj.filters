@@ -25,6 +25,12 @@
     <Filter Include="소스 파일\Items">
       <UniqueIdentifier>{2c7c57ef-835a-4011-aa4a-aa07add47ea3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Values">
+      <UniqueIdentifier>{f7d4a225-00c9-424e-80aa-6792bfcf1a3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Values">
+      <UniqueIdentifier>{a9ca400f-2f61-4613-946e-29ad5b5268a5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -66,12 +72,6 @@
     <ClCompile Include="Items\Energy.cpp">
       <Filter>소스 파일\Items</Filter>
     </ClCompile>
-    <ClCompile Include="..\Shared\Items\item_balance.cpp">
-      <Filter>소스 파일\Items</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Shared\Skills\skill_balance.cpp">
-      <Filter>소스 파일\Skills</Filter>
-    </ClCompile>
     <ClCompile Include="EnergyBar.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -108,11 +108,14 @@
     <ClCompile Include="Skills\WindShield.cpp">
       <Filter>소스 파일\Skills</Filter>
     </ClCompile>
+    <ClCompile Include="..\Shared\Values\item_values.cpp">
+      <Filter>소스 파일\Values</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Shared\Values\skill_values.cpp">
+      <Filter>소스 파일\Values</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Shared\interface.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="..\Shared\protocol.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -187,6 +190,15 @@
     </ClInclude>
     <ClInclude Include="Skills\WindShield.h">
       <Filter>헤더 파일\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shared\Values\player_values.h">
+      <Filter>헤더 파일\Values</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shared\Values\interface.h">
+      <Filter>헤더 파일\Values</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shared\Direction.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

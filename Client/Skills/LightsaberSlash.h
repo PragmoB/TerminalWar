@@ -1,9 +1,6 @@
 #pragma once
 
-#include <windows.h>
-
-#include "protocol.h"
-#include "Skills/Slash.h"
+#include "Slash.h"
 
 class LightsaberSlash : public Slash
 {

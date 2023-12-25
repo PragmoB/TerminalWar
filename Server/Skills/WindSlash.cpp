@@ -1,12 +1,9 @@
-#include <list>
-
-#include "Client.h"
 #include "Background.h"
-#include "Skills/WindSlash.h"
+#include "WindSlash.h"
 
 extern Background background;
 
-WindSlash::WindSlash(Client* owner, int level)
+WindSlash::WindSlash(Player* owner, int level)
 	: Slash(owner, level), wind(owner, level)
 {
 }

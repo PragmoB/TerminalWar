@@ -1,12 +1,11 @@
 #include <list>
 
-#include "Client.h"
 #include "Background.h"
-#include "Skills/Wind.h"
+#include "Wind.h"
 
 extern Background background;
 
-Wind::Wind(Client* owner, int level)
+Wind::Wind(Player* owner, int level)
 	: ActiveSkill(owner, level)
 {
 }
@@ -16,7 +15,7 @@ bool Wind::cast(DIRECTION dir)
 	if (!ActiveSkill::cast(dir))
 		return false;
 
-	Client* owner = get_owner();
+	Player* owner = get_owner();
 	const COORD pos = owner->get_pos();
 
 	static const COORD up_hitting_box[] = {
@@ -57,11 +56,11 @@ bool Wind::cast(DIRECTION dir)
 	for (int i = 0; i < distance; i++)
 	{
 		// 플레이어를 하나씩 선택
-		for (std::list<Client*>::iterator iter = background.clients.begin();
-			iter != background.clients.end(); iter++)
+		for (std::list<Player*>::iterator iter = background.players.begin();
+			iter != background.players.end(); iter++)
 		{
-			Client* client = (*iter);
-			COORD client_pos = client->get_pos();
+			Player* player = (*iter);
+			COORD player_pos = player->get_pos();
 
 			// hitting_box에 나온 피격지점들을 하나씩 선택하며 플레이어의 위치좌표값을 비교
 			for (int j = 0; hitting_box[j].X | hitting_box[j].Y; j++)
@@ -76,9 +75,9 @@ bool Wind::cast(DIRECTION dir)
 				case RIGHT: hitting_pos.X += i; break;
 				}
 
-				if (client_pos.X == hitting_pos.X &&
-					client_pos.Y == hitting_pos.Y)
-					client->hit(this);
+				if (player_pos.X == hitting_pos.X &&
+					player_pos.Y == hitting_pos.Y)
+					player->hit(this);
 			}
 		}
 

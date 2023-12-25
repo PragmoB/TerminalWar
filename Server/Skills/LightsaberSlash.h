@@ -9,7 +9,7 @@ public:
 	static const int DAMAGE[];
 	static const int COOLDOWN[];
 public:
-	LightsaberSlash(Client* owner, int level = 1);
+	LightsaberSlash(Player* owner, int level = 1);
 	virtual bool cast(DIRECTION dir);
 
 	virtual int get_damage() const;
