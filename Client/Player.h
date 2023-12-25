@@ -14,6 +14,8 @@ private:
 	int defense_rate = 0;
 	int damage_increase_rate = 0;
 	int evasion_rate = 0;
+	int mov_attack_damage = 0;
+	int mov_attack_range = 0;
 private:
 	COORD pos;
 	int HP;
@@ -39,6 +41,7 @@ public:
 	void attack(Player* player, SKILL_TYPE skill_type, bool evaded = false);
 	// skill¿¡ ¸Â´Â µ¿ÀÛ
 	void hit(const ActiveSkill* skill, bool evaded = false);
+	void hit_mov_attack(const Player* attacker, bool evaded = false);
 	// itemÀ» È¹µæÇÏ¿© Èí¼öÇÔ
 	void earn_item(Item* item);
 
@@ -48,5 +51,6 @@ public:
 	int get_damage_increase_rate() const;
 	Skill* get_skill(SKILL_TYPE skill_type);
 	COORD get_pos() const;
+	int get_mov_attack_damage() const;
 	~Player();
 };

@@ -9,7 +9,10 @@
 #include "Skills/Wind.h"
 #include "Skills/WindSlash.h"
 #include "Skills/LightningStrike.h"
-#include "Skills/Shoes.h"
+#include "Skills/WindStep.h"
+#include "Skills/CelestialArrowStep.h"
+#include "Skills/HermesStep.h"
+#include "Skills/WindShield.h"
 
 #include <ctime>
 
@@ -27,15 +30,18 @@ Skill* Skill::create_object_by_type(SKILL_TYPE type, Client* owner)
 
 	switch (type)
 	{
-	case SHOOT:			   skill = new Shoot(owner);		   break;
-	case SNIPE:			   skill = new Snipe(owner);		   break;
-	case SLASH:			   skill = new Slash(owner);		   break;
-	case LIGHTSABER_SLASH: skill = new LightsaberSlash(owner); break;
-	case ZWEIHANDER_SLASH: skill = new ZweihanderSlash(owner); break;
-	case WIND:			   skill = new Wind(owner);			   break;
-	case WIND_SLASH:	   skill = new WindSlash(owner);	   break;
-	case LIGHTNING_STRIKE: skill = new LightningStrike(owner); break;
-	case SHOES:			   skill = new Shoes(owner);		   break;
+	case SHOOT:				   skill = new Shoot(owner);		      break;
+	case SNIPE:				   skill = new Snipe(owner);		      break;
+	case SLASH:				   skill = new Slash(owner);		      break;
+	case LIGHTSABER_SLASH:	   skill = new LightsaberSlash(owner);    break;
+	case ZWEIHANDER_SLASH:	   skill = new ZweihanderSlash(owner);    break;
+	case WIND:				   skill = new Wind(owner);			      break;
+	case WIND_SLASH:		   skill = new WindSlash(owner);	      break;
+	case LIGHTNING_STRIKE:	   skill = new LightningStrike(owner);    break;
+	case WIND_STEP:			   skill = new WindStep(owner);		      break;
+	case CELESTIAL_ARROW_STEP: skill = new CelestialArrowStep(owner); break;
+	case HERMES_STEP:		   skill = new HermesStep(owner);		  break;
+	case WIND_SHIELD:		   skill = new WindShield(owner);		  break;
 	}
 
 	return skill;

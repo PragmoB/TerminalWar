@@ -74,6 +74,10 @@ int Client::get_damage_increase_rate() const
 {
 	return damage_increase_rate;
 }
+int Client::get_mov_attack_damage() const
+{
+	return mov_attack_damage;
+}
 
 void Client::apply_hello_of(const Client* client)
 {
@@ -147,6 +151,16 @@ void Client::apply_hit_of(const Client* client, const Skill* skill, bool evaded)
 	pdu.evaded = evaded;
 	
 	send(context.socket, reinterpret_cast<const char*>(&pdu), sizeof(PDUHit), NULL);
+}
+void Client::apply_hit_mov_attack_of(const Client* client, const Client* attacker, bool evaded)
+{
+	PDUHitMovAttack pdu;
+	pdu.attacker_id = (DWORD)attacker->context.socket;
+	pdu.victim_id = (DWORD)client->context.socket;
+	pdu.evaded = evaded;
+	
+	send(context.socket, reinterpret_cast<const char*>(&pdu), sizeof(PDUHitMovAttack), NULL);
+	
 }
 void Client::apply_die_of(const Client* client, const Client* attacker)
 {
@@ -235,6 +249,18 @@ bool Client::move(DIRECTION dir, bool ignore_mov_cooldown)
 
 	earn_item(pos);
 
+	// 이동 공격 판정
+	if (mov_attack_damage)
+		for (std::list<Client*>::iterator iter = background.clients.begin();
+			iter != background.clients.end(); iter++)
+		{
+			Client* victim = *iter;
+			COORD victim_pos = victim->get_pos();
+			if (abs((signed)victim_pos.X - pos.X) <= mov_attack_range &&
+				abs((signed)victim_pos.Y - pos.Y) <= mov_attack_range)
+				victim->hit_mov_attack(this);
+		}
+
 	return true;
 }
 bool Client::cast_skill(SKILL_TYPE skill_type, DIRECTION dir)
@@ -285,7 +311,6 @@ void Client::earn_item(COORD pos)
 	{
 		Item* item = *iter;
 		COORD item_pos = item->get_pos();
-		
 
 		// 아이템 획득
 		if (item_pos.X == pos.X && item_pos.Y == pos.Y)
@@ -362,6 +387,11 @@ void Client::upgrade_skill(SKILL_TYPE skill_type, SKILL_TYPE upgraded_skill_type
 		{
 			// 플레이어에게 적용되어 있던 해당 레벨의 패시브 스킬 능력치 초기화
 			speed_increase_rate = 100 * (speed_increase_rate + 100) / (passive_skill->get_speed_rate() + 100) - 100;
+			defense_rate = 100 * (defense_rate + 100) / (passive_skill->get_defense_rate() + 100) - 100;
+			damage_increase_rate = 100 * (damage_increase_rate + 100) / (passive_skill->get_damage_rate() + 100) - 100;
+			evasion_rate = 100 * (evasion_rate + 100) / (passive_skill->get_evasion_rate() + 100) - 100;
+			mov_attack_damage -= passive_skill->get_mov_attack_damage();
+			mov_attack_range -= passive_skill->get_mov_attack_range();
 		}
 
 		if (skill->level_up())
@@ -401,6 +431,11 @@ void Client::upgrade_skill(SKILL_TYPE skill_type, SKILL_TYPE upgraded_skill_type
 		// 플레이어에게 해당 레벨의 패시브 스킬 능력치 적용
 		speed_increase_rate = (speed_increase_rate + 100) * (passive_skill->get_speed_rate() + 100) / 100 - 100;
 		mov_delay = MOV_DELAY * 100 / (speed_increase_rate + 100);
+		defense_rate = (defense_rate + 100) * (passive_skill->get_defense_rate() + 100) / 100 - 100;
+		damage_increase_rate = (damage_increase_rate + 100) * (passive_skill->get_damage_rate() + 100) / 100 - 100;
+		evasion_rate = (evasion_rate + 100) * (passive_skill->get_evasion_rate() + 100) / 100 - 100;
+		mov_attack_damage += passive_skill->get_mov_attack_damage();
+		mov_attack_range += passive_skill->get_mov_attack_range();
 	}
 }
 void Client::earn_energy(int amount)
@@ -447,6 +482,36 @@ void Client::hit(const ActiveSkill* skill)
 
 	if (HP <= 0)
 		skill->get_owner()->kill(this);
+}
+void Client::hit_mov_attack(Client* attacker)
+{
+	// nullptr check
+	if (!attacker)
+		return;
+	// 자기자신에게 맞는건 말이 안됨
+	if (attacker == this)
+		return;
+
+	bool evaded = false;
+	if (rand() % 100 < evasion_rate)
+		evaded = true;
+	else
+	{
+		// 피해입을 데미지 값을 능력치에 따라 연산
+		int damage = attacker->get_mov_attack_damage();
+		damage = damage * (attacker->get_damage_increase_rate() + 100) * (100 - defense_rate) / 10000;
+		if (damage < 0)
+			damage = 0;
+		m_HP.lock();
+		HP -= damage; // 맞아서 체력 감소
+		m_HP.unlock();
+	}
+	for (std::list<Client*>::iterator iter = background.clients.begin();
+		iter != background.clients.end(); iter++)
+		(*iter)->apply_hit_mov_attack_of(this, attacker, evaded);
+
+	if (HP <= 0)
+		attacker->kill(this);
 }
 int Client::die(const Client* attacker)
 {

@@ -1,15 +1,19 @@
 #pragma once
 
-#include "PassiveSkill.h"
+#include "Skills/WindStep.h"
 
-class Shoes : public PassiveSkill
+class WindShield : public WindStep
 {
 private:
 	static const int MAX_LEVEL;
 	static const int SPEED_RATE[];
+	static const int DEFENSE_RATE[];
+	static const int EVASION_RATE[];
 public:
-	Shoes(Player* owner, int level);
+	WindShield(Player* owner, int level);
 	virtual int get_speed_rate();
+	virtual int get_defense_rate();
+	virtual int get_evasion_rate();
 
 	virtual SKILL_TYPE get_type() const;
 	virtual int get_max_level() const;

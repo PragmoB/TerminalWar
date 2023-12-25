@@ -40,11 +40,11 @@ UpgradeOptionList* upgrade_option_list;
 UpgradeOptionList* evolution_option_list;
 
 SKILL_TYPE upgrade_skill_options[NUM_UPGRADE_SKILL_OPTIONS + 1];
+int len_upgrade_skill_options = 0;
 SKILL_TYPE evolution_skill_options[10];
+int len_evolution_skill_options = 0;
 
 SKILL_TYPE upgrade_skill_type;
-int len_upgrade_skill_options = 0;
-int len_evolution_skill_options = 0;
 bool upgradable = false;
 int focus_is_on_evolution_option_list = false;
 
@@ -90,6 +90,7 @@ void receive(SOCKET sock)
 			PDUEarnItem* pdu_earn_item;
 			PDUCastSkill* pdu_cast_skill;
 			PDUHit* pdu_hit;
+			PDUHitMovAttack* pdu_hit_mov_attack;
 			PDUUpgradeSkillOptionInfo* pdu_upgrade_skill_option_info;
 			PDUUpgradeSkill* pdu_upgrade_skill;
 			PDUDie* pdu_die;
@@ -205,6 +206,14 @@ void receive(SOCKET sock)
 				if (player)
 					player->attack(players[pdu_hit->victim_id], pdu_hit->skill_type, pdu_hit->evaded);
 				complete_len += sizeof(PDUHit);
+				break;
+
+			case HIT_MOV_ATTACK:
+				pdu_hit_mov_attack = reinterpret_cast<PDUHitMovAttack*>(buff + complete_len);
+				player = players[pdu_hit_mov_attack->victim_id];
+				if (player)
+					player->hit_mov_attack(players[pdu_hit_mov_attack->attacker_id], pdu_hit_mov_attack->evaded);
+				complete_len += sizeof(PDUHitMovAttack);
 				break;
 
 			case UPGRADE_SKILL_OPTION_INFO:

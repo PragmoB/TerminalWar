@@ -2,13 +2,13 @@
 
 #include "PassiveSkill.h"
 
-class Shoes : public PassiveSkill
+class WindStep : public PassiveSkill
 {
 private:
 	static const int MAX_LEVEL;
 	static const int SPEED_RATE[];
 public:
-	Shoes(Client* owner, int level = 1);
+	WindStep(Client* owner, int level = 1);
 	virtual int get_speed_rate();
 
 	virtual SKILL_TYPE get_type() const;

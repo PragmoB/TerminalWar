@@ -47,6 +47,10 @@ private:
 	int damage_increase_rate = 0;
 	// 회피율
 	int evasion_rate = 0;
+	// 이동 공격력
+	int mov_attack_damage = 0;
+	// 이동 공격 범위
+	int mov_attack_range = 0;
 private:
 	// 체력
 	int HP = 999;
@@ -90,6 +94,7 @@ public:
 	const Skill* get_skill(int idx) const;
 	int get_len_skills() const;
 	int get_damage_increase_rate() const;
+	int get_mov_attack_damage() const;
 	
 	// client가 접속했음을 반영함
 	void apply_hello_of(const Client* client);
@@ -105,6 +110,8 @@ public:
 	void apply_upgrade_skill_of(const Client* client, SKILL_TYPE skill_type, SKILL_TYPE upgraded_skill_type = SKILL_TYPE::UNKNOWN);
 	// client가 skill에 처맞았음을 반영함
 	void apply_hit_of(const Client* client, const Skill* skill, bool evaded);
+	// client가 attacker의 mov attack에 맞았음을 반영함
+	void apply_hit_mov_attack_of(const Client* client, const Client* attacker, bool evaded);
 	// client가 attacker에게 죽었음을 반영함
 	void apply_die_of(const Client* client, const Client* attacker = NULL);
 
@@ -126,6 +133,8 @@ public:
 	void hello(char chracter);
 	// skill에 맞음
 	void hit(const ActiveSkill* skill);
+	// attacker의 이동 공격에 맞음
+	void hit_mov_attack(Client* attacker);
 	// attacker에게 죽음, 사냥 경험치를 리턴값으로 뱉음
 	int die(const Client* attacker = NULL);
 	// client를 죽임

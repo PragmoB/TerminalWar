@@ -6,7 +6,10 @@
 #include "Skills/Wind.h"
 #include "Skills/WindSlash.h"
 #include "Skills/LightningStrike.h"
-#include "Skills//Shoes.h"
+#include "Skills/WindStep.h"
+#include "Skills/CelestialArrowStep.h"
+#include "Skills/HermesStep.h"
+#include "Skills/WindShield.h"
 
 const int Shoot::MAX_LEVEL = 5;
 const int Shoot::DAMAGE[] = { 100, 105, 110, 115, 120 };
@@ -46,5 +49,18 @@ const int LightningStrike::MAX_LEVEL = 7;
 const int LightningStrike::DAMAGE[] = { 400, 440, 484, 532, 585, 643, 707 };
 const int LightningStrike::COOLDOWN[] = { 30000, 27000, 24300, 21870, 19683, 17715, 15944 };
 
-const int Shoes::MAX_LEVEL = 4;
-const int Shoes::SPEED_RATE[] = { 7, 14, 21, 28 };
+const int WindStep::MAX_LEVEL = 4;
+const int WindStep::SPEED_RATE[] = { 7, 14, 21, 28 };
+
+const int CelestialArrowStep::MAX_LEVEL = 5;
+const int CelestialArrowStep::SPEED_RATE[] = { 28, 32, 36, 40, 44 };
+const int CelestialArrowStep::MOV_ATTACK_DAMAGE[] = { 5, 6, 7, 8, 9 };
+const int CelestialArrowStep::MOV_ATTACK_RANGE = 1;
+
+const int HermesStep::MAX_LEVEL = 5;
+const int HermesStep::SPEED_RATE[] = { 40, 48, 56, 64, 72 };
+
+const int WindShield::MAX_LEVEL = 5;
+const int WindShield::SPEED_RATE[] = { 28, 32, 36, 40, 44 };
+const int WindShield::DEFENSE_RATE[] = { 10, 12, 14, 16, 18 };
+const int WindShield::EVASION_RATE[] = { 10, 12, 14, 16, 18 };

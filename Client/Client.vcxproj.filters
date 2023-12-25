@@ -93,11 +93,20 @@
     <ClCompile Include="Skills\PassiveSkill.cpp">
       <Filter>소스 파일\Skills</Filter>
     </ClCompile>
-    <ClCompile Include="Skills\Shoes.cpp">
-      <Filter>소스 파일\Skills</Filter>
-    </ClCompile>
     <ClCompile Include="Menu.hpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Skills\WindStep.cpp">
+      <Filter>소스 파일\Skills</Filter>
+    </ClCompile>
+    <ClCompile Include="Skills\CelestialArrowStep.cpp">
+      <Filter>소스 파일\Skills</Filter>
+    </ClCompile>
+    <ClCompile Include="Skills\HermesStep.cpp">
+      <Filter>소스 파일\Skills</Filter>
+    </ClCompile>
+    <ClCompile Include="Skills\WindShield.cpp">
+      <Filter>소스 파일\Skills</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -167,7 +176,16 @@
     <ClInclude Include="Skills\PassiveSkill.h">
       <Filter>헤더 파일\Skills</Filter>
     </ClInclude>
-    <ClInclude Include="Skills\Shoes.h">
+    <ClInclude Include="Skills\WindStep.h">
+      <Filter>헤더 파일\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="Skills\CelestialArrowStep.h">
+      <Filter>헤더 파일\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="Skills\HermesStep.h">
+      <Filter>헤더 파일\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="Skills\WindShield.h">
       <Filter>헤더 파일\Skills</Filter>
     </ClInclude>
   </ItemGroup>

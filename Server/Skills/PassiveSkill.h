@@ -30,4 +30,6 @@ public:
 	virtual int get_defense_rate();
 	virtual int get_damage_rate();
 	virtual int get_evasion_rate();
+	virtual int get_mov_attack_damage();
+	virtual int get_mov_attack_range();
 };

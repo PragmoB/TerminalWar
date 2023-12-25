@@ -35,6 +35,11 @@ Player::Player(COORD pos, int HP, char chracter, bool me, int len_skills, SKILL_
 		if (passive_skill)
 		{
 			speed_increase_rate = (speed_increase_rate + 100) * (passive_skill->get_speed_rate() + 100) / 100 - 100;
+			defense_rate = (defense_rate + 100) * (passive_skill->get_defense_rate() + 100) / 100 - 100;
+			damage_increase_rate = (damage_increase_rate + 100) * (passive_skill->get_damage_rate() + 100) / 100 - 100;
+			evasion_rate = (evasion_rate + 100) * (passive_skill->get_evasion_rate() + 100) / 100 - 100;
+			mov_attack_damage += passive_skill->get_mov_attack_damage();
+			mov_attack_range += passive_skill->get_mov_attack_range();
 		}
 	}
 	// 화면에 캐릭터 첫 표시
@@ -141,30 +146,54 @@ void Player::cast_skill(SKILL_TYPE skill_type, DIRECTION dir)
 
 void Player::upgrade_skill(SKILL_TYPE before, SKILL_TYPE after)
 {
+	Skill* skill = NULL;
+
 	for (int i = 0; i < len_skills; i++)
 	{
 		if (skills[i]->get_type() == before)
 		{
+			skill = skills[i];
+			// 패시브 스킬이면
+			PassiveSkill* passive_skill = dynamic_cast<PassiveSkill*>(skill);
+			if (passive_skill)
+			{
+				// 플레이어에게 적용되어 있던 해당 레벨의 패시브 스킬 능력치 초기화
+				speed_increase_rate = 100 * (speed_increase_rate + 100) / (passive_skill->get_speed_rate() + 100) - 100;
+				defense_rate = 100 * (defense_rate + 100) / (passive_skill->get_defense_rate() + 100) - 100;
+				damage_increase_rate = 100 * (damage_increase_rate + 100) / (passive_skill->get_damage_rate() + 100) - 100;
+				evasion_rate = 100 * (evasion_rate + 100) / (passive_skill->get_evasion_rate() + 100) - 100;
+				mov_attack_damage -= passive_skill->get_mov_attack_damage();
+				mov_attack_range -= passive_skill->get_mov_attack_range();
+			}
+
 			// 진화
 			if (skills[i]->get_level() >= skills[i]->get_max_level())
 			{
 				delete skills[i];
-				skills[i] = Skill::create_object_by_type(after, this);
+				skill = skills[i] = Skill::create_object_by_type(after, this);
 			}
 			else
 				skills[i]->level_up();
 
-			PassiveSkill* passive_skill = dynamic_cast<PassiveSkill*>(skills[i]);
-			if (passive_skill)
-			{
-				speed_increase_rate = (speed_increase_rate + 100) * (passive_skill->get_speed_rate() + 100) / 100 - 100;
-			}
-			return;
+			break;
 		}
 	}
-	
 	// 새로운 스킬
-	skills[len_skills++] = Skill::create_object_by_type(before, this);
+	if (!skill)
+		skill = skills[len_skills++] = Skill::create_object_by_type(before, this);
+
+	// 패시브 스킬이면
+	PassiveSkill* passive_skill = dynamic_cast<PassiveSkill*>(skill);
+	if (passive_skill)
+	{
+		// 플레이어에게 해당 레벨의 패시브 스킬 능력치 적용
+		speed_increase_rate = (speed_increase_rate + 100) * (passive_skill->get_speed_rate() + 100) / 100 - 100;
+		defense_rate = (defense_rate + 100) * (passive_skill->get_defense_rate() + 100) / 100 - 100;
+		damage_increase_rate = (damage_increase_rate + 100) * (passive_skill->get_damage_rate() + 100) / 100 - 100;
+		evasion_rate = (evasion_rate + 100) * (passive_skill->get_evasion_rate() + 100) / 100 - 100;
+		mov_attack_damage += passive_skill->get_mov_attack_damage();
+		mov_attack_range += passive_skill->get_mov_attack_range();
+	}
 }
 
 void Player::attack(Player* player, SKILL_TYPE skill_type, bool evaded)
@@ -192,6 +221,21 @@ void Player::hit(const ActiveSkill* skill, bool evaded)
 	{
 		int damage = skill->get_damage();
 		damage = damage * (skill->get_owner()->get_damage_increase_rate() + 100) * (100 - defense_rate) / 10000;
+		HP -= damage;
+		graphic.draw(pos, '*', RED, graphic.FIELD_BACKGROUND_COLOR);
+	}
+}
+void Player::hit_mov_attack(const Player* attacker, bool evaded)
+{
+	if (!attacker)
+		return;
+
+	if (evaded)
+		graphic.draw(pos, '*', BLUE, graphic.FIELD_BACKGROUND_COLOR);
+	else
+	{
+		int damage = attacker->get_mov_attack_damage();
+		damage = damage * (attacker->get_damage_increase_rate() + 100) * (100 - defense_rate) / 10000;
 		HP -= damage;
 		graphic.draw(pos, '*', RED, graphic.FIELD_BACKGROUND_COLOR);
 	}
@@ -235,7 +279,10 @@ COORD Player::get_pos() const
 {
 	return pos;
 }
-
+int Player::get_mov_attack_damage() const
+{
+	return mov_attack_damage;
+}
 Player::~Player()
 {
 	this->disappear();

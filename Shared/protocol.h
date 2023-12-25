@@ -10,7 +10,8 @@
 const int PORT = 44400;
 
 enum PDU_TYPE
-{	UDP_HELLO = 1, HELLO, ITEM_INFO, EARN_ITEM, MOV, CAST_SKILL, HIT, UPGRADE_SKILL_OPTION_INFO, UPGRADE_SKILL, DIE	};
+{	UDP_HELLO = 1, HELLO, ITEM_INFO, EARN_ITEM, MOV, CAST_SKILL, HIT, HIT_MOV_ATTACK,
+	UPGRADE_SKILL_OPTION_INFO, UPGRADE_SKILL, DIE	};
 
 // 클라이언트 측 UDP 포트 알림, 클라 => 서버
 typedef struct
@@ -81,6 +82,13 @@ typedef struct
 	SKILL_TYPE skill_type;
 	bool evaded;
 } PDUHit;
+typedef struct
+{
+	const PDU_TYPE type = HIT_MOV_ATTACK;
+	DWORD attacker_id;
+	DWORD victim_id;
+	bool evaded;
+} PDUHitMovAttack;
 // 스킬 강화 선택지 정보 알림, 클라 <= 서버
 typedef struct
 {
