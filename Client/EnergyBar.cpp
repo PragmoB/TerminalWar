@@ -6,22 +6,25 @@
 
 extern Graphic graphic;
 
-EnergyBar::EnergyBar()
+EnergyBar::EnergyBar(int max_level) : max_level(max_level)
 {
 }
 void EnergyBar::earn_energy(int amount)
 {
-	// 에너지 흡수
-	energy += amount;
-
-	// 에너지가 넘치면 레벨업
-	if (REQUIRED_ENERGY[level] <= energy)
+	if (level < max_level)
 	{
-		energy = 0;
-		level++;
-	}
+		// 에너지 흡수
+		energy += amount;
 
-	appear();
+		// 에너지가 넘치면 레벨업
+		if (REQUIRED_ENERGY[level] <= energy)
+		{
+			energy = 0;
+			level++;
+		}
+
+		appear();
+	}
 }
 void EnergyBar::hunt_player(int player_level)
 {
@@ -60,7 +63,10 @@ void EnergyBar::appear()
 	sprintf_s(caption, "%4d/%4d", energy, REQUIRED_ENERGY[level]);
 	graphic.draw(COORD{ FIELD.Left + LEN_CAPTION + 3 + TOTAL_WIDTH, FIELD.Bottom + 3 }, caption, WHITE);
 }
-
+void EnergyBar::clear()
+{
+	energy = level = 0;
+}
 int EnergyBar::get_level() const
 {
 	return level;

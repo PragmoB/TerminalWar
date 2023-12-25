@@ -48,7 +48,7 @@ SKILL_TYPE upgrade_skill_type;
 bool upgradable = false;
 int focus_is_on_evolution_option_list = false;
 
-EnergyBar energy_bar;
+EnergyBar energy_bar(MAX_LEVEL);
 
 Menu<SKILL_TYPE> active_skill_menu(COORD{ FIELD.Left + 2 * FIELD_WIDTH + 7, FIELD.Top + 2 },
 	"액티브 스킬", true);
@@ -78,7 +78,7 @@ void receive(SOCKET sock)
 			}
 
 			my_id = NULL;
-			energy_bar = EnergyBar();
+			energy_bar.clear();
 			graphic.stop();
 			return;
 		}

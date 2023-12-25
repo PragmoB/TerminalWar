@@ -534,7 +534,7 @@ void Client::level_up()
 {
 	m_energy.lock();
 	// 레벨업 조건 충족
-	if (energy >= REQUIRED_ENERGY[level])
+	if (energy >= REQUIRED_ENERGY[level] && level < MAX_LEVEL)
 	{
 		skill_is_upgradable = true;
 		level++;
@@ -564,8 +564,8 @@ void Client::level_up()
 					continue;
 			}
 
-			// 안가지고 있는 스킬인 경우 : 1차 스킬이고, 거기서 진화된 스킬을 가지고 있지 않은 경우만 강화 가능
-			else if (Skill::get_object_by_type(skill_type_list[i])->get_ordinal() == 1)
+			// 안가지고 있는 스킬인 경우 : 1차 스킬이고, 거기서 진화된 스킬을 가지고 있지 않으며 보유하고 있는 스킬개수가 MAX_SKILL 미만일 경우만 습득 가능
+			else if (Skill::get_object_by_type(skill_type_list[i])->get_ordinal() == 1 && len_skills < MAX_SKILL)
 			{
 				int j;
 				for (j = 0; j < len_skills; j++)
