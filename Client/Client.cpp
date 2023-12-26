@@ -49,9 +49,9 @@ int focus_is_on_evolution_option_list = false;
 
 EnergyBar energy_bar(MAX_LEVEL);
 
-Menu<SKILL_TYPE> active_skill_menu(COORD{ FIELD.Left + 2 * FIELD_WIDTH + 7, FIELD.Top + 2 },
+Menu<SKILL_TYPE> active_skill_menu(COORD{ FIELD.Left + 2 * FIELD_WIDTH + 5, FIELD.Top + 2 },
 	"액티브 스킬", true);
-Menu<SKILL_TYPE> passive_skill_menu(COORD{ FIELD.Left + 2 * FIELD_WIDTH + 7, FIELD.Top + 11 },
+Menu<SKILL_TYPE> passive_skill_menu(COORD{ FIELD.Left + 2 * FIELD_WIDTH + 5, FIELD.Top + 12 },
 	"패시브 스킬", false);
 
 // 서버 응답 수신 후 반영
@@ -181,7 +181,17 @@ void receive(SOCKET sock)
 				pdu_cast_skill = reinterpret_cast<PDUCastSkill*>(buff + complete_len);
 				player = players[pdu_cast_skill->id];
 				if (player)
+				{
 					player->cast_skill(pdu_cast_skill->skill_type, pdu_cast_skill->dir);
+
+					// 내가 쓴 스킬이면 쿨타임 설정
+					if (pdu_cast_skill->id == my_id)
+					{
+						ActiveSkill* active_skill = dynamic_cast<ActiveSkill*>(player->get_skill(pdu_cast_skill->skill_type));
+						if (active_skill)
+							active_skill_menu.set_cooldown(active_skill->get_type(), active_skill->get_cooldown());
+					}
+				}
 				complete_len += sizeof(PDUCastSkill);
 				break;
 
@@ -290,37 +300,40 @@ void receive(SOCKET sock)
 						else
 						{
 							skill = player->get_skill(pdu_upgrade_skill->upgraded_skill_type);
-							PassiveSkill* passive_skill = dynamic_cast<PassiveSkill*>(skill);
-							if (passive_skill)
-								passive_skill_menu.update_menu(pdu_upgrade_skill->skill_type, skill->get_type());
-							else
-								active_skill_menu.update_menu(pdu_upgrade_skill->skill_type, skill->get_type());
 
 							if (skill)
 							{
+								PassiveSkill* passive_skill = dynamic_cast<PassiveSkill*>(skill);
+								if (passive_skill)
+									passive_skill_menu.update_menu(pdu_upgrade_skill->skill_type, skill->get_type());
+								else
+									active_skill_menu.update_menu(pdu_upgrade_skill->skill_type, skill->get_type());
+
+								// 기존 항목 지우기
+								int max_contents_len;
+								if (passive_skill)
+									max_contents_len = passive_skill_menu.get_max_contents_len();
+								else
+									max_contents_len = active_skill_menu.get_max_contents_len();
+								for (int i = 0; i < max_contents_len; i++)
+									buff[0] = ' ';
+								buff[max_contents_len] = NULL;
+								if (passive_skill)
+									passive_skill_menu.update_menu(skill->get_type(), 0, buff);
+								else
+									active_skill_menu.update_menu(skill->get_type(), 0, buff);
+								// 항목 새롭게 추가
 								sprintf_s(buff, "Lv.%2d %s", skill->get_level(), skill->get_skill_name());
 								if (passive_skill)
-								{
-									passive_skill_menu.disappear();
 									passive_skill_menu.update_menu(skill->get_type(), 0, buff);
-								}
 								else
-								{
-									active_skill_menu.disappear();
 									active_skill_menu.update_menu(skill->get_type(), 0, buff);
-								}
+								// 레벨 값 하이라이트
 								sprintf_s(buff, "Lv.%2d", skill->get_level());
 								if (passive_skill)
-								{
 									passive_skill_menu.update_menu(skill->get_type(), 0, buff, DARK_YELLOW);
-									passive_skill_menu.appear();
-								}
 								else
-								{
 									active_skill_menu.update_menu(skill->get_type(), 0, buff, DARK_YELLOW);
-									active_skill_menu.appear();
-								}
-
 							}
 						}
 					}
